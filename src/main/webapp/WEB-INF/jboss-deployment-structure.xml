@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jboss-deployment-structure xmlns="urn:jboss:deployment-structure:1.0">
+    <deployment>
+        <dependencies>
+            <module name="org.dom4j" export="true" />
+            <module name="org.apache.commons.collections" export="true" />
+            <module name="javax.faces.api" slot="1.2" export="true" />
+            <module name="javax.servlet.api" export="true"/>
+            <module name="javax.servlet.jsp.api" export="true"/>
+            <module name="javax.servlet.jstl.api" export="true"/>
+            <module name="javax.ws.rs.api" export="true"/>
+            <module name="org.jboss.resteasy.resteasy-jaxrs" export="true" />
+            <module name="org.jboss.resteasy.resteasy-atom-provider" export="true" />
+            <module name="org.slf4j.jcl-over-slf4j" export="true" />
+        </dependencies>
+    </deployment>
+</jboss-deployment-structure>

@@ -7,8 +7,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -61,6 +59,7 @@ import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.spi.BadRequestException;
 import org.jboss.resteasy.spi.Failure;
 import org.jboss.resteasy.spi.InternalServerErrorException;
+import org.jboss.seam.annotations.In;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +67,6 @@ import org.slf4j.LoggerFactory;
  * This class provides the functions that retrieve, update, create and delete entities. It is expected that other classes will
  * extend BaseRESTv1 to provide expose REST functions.
  */
-@RequestScoped
 public class BaseRESTv1 {
     private static final Logger log = LoggerFactory.getLogger(BaseRESTv1.class);
     /** The format for dates passed and returned by the REST Interface */
@@ -80,7 +78,7 @@ public class BaseRESTv1 {
     @Context
     private UriInfo uriInfo;
     /** The Java Bean used for logging information to Envers */
-    @Inject
+    @In
     private EnversLoggingBean enversLoggingBean;
 
     /**

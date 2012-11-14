@@ -1,0 +1,29 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:s="http://jboss.com/products/seam/taglib"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:rich="http://richfaces.org/rich"
+	xmlns:c="http://java.sun.com/jstl/core">
+
+	<h:panelGrid columns="12" columnClasses=",localeName,,localeName,,localeName,,localeName,,localeName,,localeName">
+
+		<!-- <c:set var="forStep" value="#{(selectedLocales.size() / 6) + (1 - ((selectedLocales.size() / 6) % 1)) % 1}"/>
+		<c:forEach items="#{selectedLocales}" varStatus="count" step="1" end="#{forStep - 1}">
+			<c:forEach begin="#{count.index}" items="#{selectedLocales}" varStatus="count2" var="locale" step="#{forStep}">
+
+				<h:selectBooleanCheckbox value="#{locale.selected}" />
+				<h:outputText value="#{count.index}-#{count2.index}-#{locale.name}" />
+
+			</c:forEach>
+		</c:forEach>-->
+		<c:forEach items="#{selectedLocales}" var="locale">
+	
+			<h:selectBooleanCheckbox value="#{locale.selected}" />
+			<h:outputText value="#{locale.name}" />
+			
+		</c:forEach>
+
+	</h:panelGrid>
+
+</ui:composition>

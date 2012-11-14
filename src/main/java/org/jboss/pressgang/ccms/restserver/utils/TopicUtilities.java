@@ -235,7 +235,7 @@ public class TopicUtilities {
      * @param entityManager An open EntityManager instance to lookup formatting constants.
      * @param topic The Topic to process the XML for.
      */
-    private static void processXML(final EntityManager entityManager, final Topic topic) {
+    protected static void processXML(final EntityManager entityManager, final Topic topic) {
         if (topic.isTaggedWith(Constants.CONTENT_SPEC_TAG_ID))
             return;
 

@@ -2,10 +2,10 @@ package org.jboss.pressgang.ccms.restserver.ejb;
 
 import java.io.Serializable;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Named;
-
 import org.jboss.pressgang.ccms.restserver.entity.base.LoggingRevisionEntity;
+import org.jboss.seam.ScopeType;
+import org.jboss.seam.annotations.Name;
+import org.jboss.seam.annotations.Scope;
 
 /**
  * This java bean provides a mechanism to provide information to a 
@@ -13,8 +13,8 @@ import org.jboss.pressgang.ccms.restserver.entity.base.LoggingRevisionEntity;
  * @author lnewson
  *
  */
-@RequestScoped
-@Named("enversLoggingBean")
+@Scope(ScopeType.EVENT)
+@Name("enversLoggingBean")
 public class EnversLoggingBean implements Serializable {
 
     private static final long serialVersionUID = 7455302626872967710L;

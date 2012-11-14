@@ -1,0 +1,151 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:s="http://jboss.com/products/seam/taglib"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:a="http://richfaces.org/a4j"
+	xmlns:rich="http://richfaces.org/rich"
+	xmlns:c="http://java.sun.com/jstl/core"
+	template="layout/cleantemplate.xhtml">
+
+	<ui:define name="body">
+
+		<h:form enctype="multipart/form-data" id="imageFile" styleClass="edit">
+
+			<div class="actionButtons">
+
+				<h:commandButton styleClass="button" id="save" value="Save"
+					action="#{imageFileHome.persist}"
+					disabled="#{!imageFileHome.wired}"
+					rendered="#{!imageFileHome.managed}" />
+
+				<h:commandButton styleClass="button" id="update" value="Save"
+					action="#{imageFileHome.update}"
+					rendered="#{imageFileHome.managed}" />
+
+				<h:commandButton styleClass="button" id="delete" value="Delete"
+					action="#{imageFileHome.remove}" immediate="true"
+					rendered="#{imageFileHome.managed}" />
+
+				<s:button styleClass="button" id="cancelEdit" value="Cancel"
+					propagation="end" view="/ImageFile.xhtml"
+					rendered="#{imageFileHome.managed}" />
+
+				<s:button styleClass="button" id="cancelAdd" value="Cancel"
+					propagation="end"
+					view="/#{empty imageFileFrom ? 'ImageFileList' : imageFileFrom}.xhtml"
+					rendered="#{!imageFileHome.managed}" />
+
+			</div>
+
+			<div style="clear: both" />
+			<br />
+
+			<rich:panel>
+				<f:facet name="header">#{imageFileHome.managed ? 'Edit' : 'Add'} Image file</f:facet>
+
+				<s:decorate id="imageFileId" template="layout/display.xhtml">
+					<ui:define name="label">Image File ID</ui:define>
+					<h:outputText value="#{imageFileHome.instance.imageFileId}" />
+				</s:decorate>
+
+				<s:decorate id="docbookFileName" template="layout/display.xhtml">
+					<ui:define name="label">Docbook File Name</ui:define>
+					<h:outputText value="#{imageFileHome.instance.docbookFileName}" />
+				</s:decorate>
+
+				<s:decorate id="description" template="layout/edit.xhtml">
+					<ui:define name="label">Description</ui:define>
+					<h:inputTextarea id="descriptionInput" cols="80" rows="6"
+						required="false" value="#{imageFileHome.instance.description}" />
+				</s:decorate>
+
+				<s:decorate id="newLanguage" template="layout/edit.xhtml">
+					<ui:define name="label">New Language</ui:define>
+					<h:selectOneMenu id="topicLocaleEdit"
+						value="#{imageFileHome.locale}">
+						<c:forEach var="locale" items="${constants.locales}">
+							<f:selectItem itemLabel="#{locale}" itemValue="#{locale}" />
+						</c:forEach>
+					</h:selectOneMenu>
+
+					<a:commandButton action="#{imageFileHome.saveNewLanguageImage}"
+						reRender="output,displayErrorMessage" type="submit" ajaxSingle="false" value="Add" oncomplete="" />
+
+				</s:decorate>
+
+				<!-- http://relation.to/11633.lace details how to create a dynamic table. Also 
+				need to note that the items being passed to c:forEach need to have a fixed order 
+				(i.e. don't use a set, which is the default collection in Hibernate) -->
+
+				<a:outputPanel id="output">
+					<rich:tabPanel switchType="client"
+						rendered="#{not empty imageFileHome.instance.languageImagesArray}">
+						<c:forEach items="#{imageFileHome.instance.languageImagesArray}"
+							var="image">
+							<rich:tab name="#{image.locale}">
+
+								<f:facet name="label">
+									<h:outputText value="#{image.locale}" />
+								</f:facet>
+
+								<s:decorate template="layout/display.xhtml">
+									<ui:define name="label">Upload An Image</ui:define>
+									<s:fileUpload data="#{image.uiImageData}"
+										fileName="#{image.uiOriginalFileName}" />
+								</s:decorate>
+
+								<s:decorate template="layout/display.xhtml"
+									rendered="#{not empty image.originalFileName}">
+									<ui:define name="label">Current Original File Name</ui:define>
+									<h:outputText value="#{image.originalFileName}" />
+								</s:decorate>
+
+								<s:decorate template="layout/display.xhtml"
+									rendered="#{not empty image.imageDataBase64String}">
+									<ui:define name="label">Current Image</ui:define>
+									<h:outputText
+										value="Note: This is a lower quality sample of the uploaded image." />
+									<br />
+									<br />
+									<h:graphicImage
+										value="data:image/jpg;base64,#{image.imageDataBase64String}" />
+								</s:decorate>
+
+								<s:decorate template="layout/display.xhtml">
+									<ui:define name="label">Remove this locale</ui:define>
+									<!-- <h:outputLink onclick="removeLanguage('#{image.locale}'); Event.stop(event);">
+										<h:outputText value="Remove Locale"/>
+									</h:outputLink> -->
+
+									<a:commandButton
+										action="#{imageFileHome.removeLanguageImage(image.locale)}"
+										reRender="output" ajaxSingle="true" value="Remove Locale" />
+								</s:decorate>
+							</rich:tab>
+						</c:forEach>
+					</rich:tabPanel>
+				</a:outputPanel>
+
+				<div style="clear: both" />
+
+			</rich:panel>
+
+		</h:form>
+
+		<a:jsFunction
+			action="#{imageFileHome.removeLanguageImage(image.locale)}"
+			name="removeLanguage" ajaxSingle="true" reRender="output">
+			<a:actionparam name="removeLanguage" />
+		</a:jsFunction>
+
+		<ui:include src="/WEB-INF/templates/DisplayErrorMessage.xhtml">
+			<ui:param name="messageComponent" value="#{imageFileHome}" />
+		</ui:include>
+
+
+	</ui:define>
+
+</ui:composition>

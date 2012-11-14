@@ -1,0 +1,64 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:s="http://jboss.com/products/seam/taglib"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:rich="http://richfaces.org/rich"
+	xmlns:a4j="http://richfaces.org/a4j"
+	xmlns:c="http://java.sun.com/jstl/core">
+
+	<rich:modalPanel id="logSaveMsgBox" autosized="true">
+          <f:facet name="header">
+               <h:panelGroup>
+                    <h:outputText value="Save Log" />
+               </h:panelGroup>
+          </f:facet>
+          <s:div style="text-align: center; width: 725px;">
+              <h:form>
+              	   <h:panelGrid columns="2" columnClasses="name," >
+						<h:outputLabel value="Message:" />
+						<h:inputTextarea cols="80"
+								rows="10" value="#{enversLoggingBean.logMessage}" />
+
+						<h:outputLabel value="Minor Change:" />
+						<h:selectBooleanCheckbox id="minorChangeFlag" value="#{enversLoggingBean.minorChangeFlag}"
+								onclick="document.getElementById('#{rich:clientId('majorChangeFlag')}').checked = false"/>
+						
+						<h:outputLabel value="Major Change:" />
+						<h:selectBooleanCheckbox id="majorChangeFlag" value="#{enversLoggingBean.majorChangeFlag}"
+								onclick="document.getElementById('#{rich:clientId('minorChangeFlag')}').checked = false"/>
+					</h:panelGrid>
+              
+                   <h:commandButton styleClass="button"
+						value="Save And Continue" title="Save this topic, and add a new one"
+						action="#{topicHome.persistEx(true)}"
+						disabled="#{!topicHome.wired or !s:hasPermission('EditTopicSaveButton', 'Enabled', null)}"
+						rendered="#{!topicHome.managed}" />
+				
+					<h:commandButton styleClass="button"
+						value="Save And List Topics"
+						title="Save this topic, and return to the list of topics you have created"
+						action="#{topicHome.persistEx(false)}"
+						disabled="#{!topicHome.wired or !s:hasPermission('EditTopicSaveButton', 'Enabled', null)}"
+						rendered="#{!topicHome.managed}" />
+				
+					<h:commandButton styleClass="button"
+						value="Update"
+						title="Update this topic, and return to this screen"
+						action="#{topicHome.updateAndStay}" rendered="#{topicHome.managed}"
+						disabled="#{!s:hasPermission('EditTopicUpdateButton', 'Enabled', null)}" />
+					
+					<h:commandButton styleClass="button"
+						value="Update And List Topics"
+						title="Update this topic, and return to the list of topics"
+						action="#{topicHome.update}" rendered="#{topicHome.managed}"
+						disabled="#{!s:hasPermission('EditTopicUpdateButton', 'Enabled', null)}" />
+						
+					<a4j:commandButton value="Cancel" styleClass="button"
+						title="Cancel and go back to editting"
+						onclick="Richfaces.hideModalPanel('logSaveMsgBox');"/>
+               </h:form>
+          </s:div>
+     </rich:modalPanel>
+
+</ui:composition>

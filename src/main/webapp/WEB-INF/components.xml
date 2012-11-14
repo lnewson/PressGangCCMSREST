@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<components xmlns="http://jboss.org/schema/seam/components"
+    xmlns:core="http://jboss.org/schema/seam/core" xmlns:persistence="http://jboss.org/schema/seam/persistence"
+    xmlns:drools="http://jboss.org/schema/seam/drools" xmlns:bpm="http://jboss.org/schema/seam/bpm"
+    xmlns:security="http://jboss.org/schema/seam/security" xmlns:mail="http://jboss.org/schema/seam/mail"
+    xmlns:web="http://jboss.org/schema/seam/web" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:resteasy="http://jboss.org/schema/seam/resteasy"
+    xmlns:navigation="http://jboss.org/schema/seam/navigation"
+    xsi:schemaLocation="http://jboss.org/schema/seam/core http://jboss.org/schema/seam/core-2.3.xsd
+                 http://jboss.org/schema/seam/persistence http://jboss.org/schema/seam/persistence-2.3.xsd
+                 http://jboss.org/schema/seam/drools http://jboss.org/schema/seam/drools-2.3.xsd
+                 http://jboss.org/schema/seam/bpm http://jboss.org/schema/seam/bpm-2.3.xsd
+                 http://jboss.org/schema/seam/security http://jboss.org/schema/seam/security-2.3.xsd
+                 http://jboss.org/schema/seam/mail http://jboss.org/schema/seam/mail-2.3.xsd
+                 http://jboss.org/schema/seam/web http://jboss.org/schema/seam/web-2.3.xsd
+                 http://jboss.org/schema/seam/components http://jboss.org/schema/seam/components-2.3.xsd
+                 http://jboss.org/schema/seam/navigation http://jboss.org/schema/seam/navigation-2.3.xsd
+                 http://jboss.org/schema/seam/resteasy
+      			 http://jboss.org/schema/seam/resteasy-2.3.xsd">
+
+    <navigation:pages http-port="8080" https-port="8443" />
+
+    <core:init debug="true" jndi-pattern="@jndiPattern@" />
+
+    <core:manager concurrent-request-timeout="500"
+        conversation-timeout="120000" conversation-id-parameter="cid"
+        parent-conversation-id-parameter="pid" />
+
+    <!-- Make sure this URL pattern is the same as that used by the Faces 
+        Servlet -->
+    <web:hot-deploy-filter url-pattern="*.seam" />
+
+    <!-- Got to change: persistence-unit-jndi-name="java:/EntityManagerFactory" 
+        to: persistence-unit-jndi-name="java:jboss/EntityManagerFactory" See: http://209.132.182.49/message/621789#621789 -->
+
+    <persistence:managed-persistence-context
+        name="entityManager" auto-create="true"
+        persistence-unit-jndi-name="java:jboss/EntityManagerFactory" />
+
+    <drools:rule-base name="securityRules">
+        <drools:rule-files>
+            <value>/security.drl</value>
+        </drools:rule-files>
+    </drools:rule-base>
+
+    <drools:rule-base name="businessRules">
+        <drools:rule-files>
+            <value>/businessrules.drl</value>
+        </drools:rule-files>
+    </drools:rule-base>
+
+    <drools:managed-working-memory name="businessRulesWorkingMemory"
+        auto-create="true" rule-base="#{businessRules}" />
+
+    <security:rule-based-permission-resolver
+        security-rules="#{securityRules}" />
+
+    <security:identity authenticate-method="#{authenticator.authenticate}"
+        remember-me="true" />
+    <!-- <security:identity jaas-config-name="SPNEGO"/> <component name="org.jboss.seam.security.identity" 
+        class="com.redhat.topicindex.security.CustomIdentity"/> <web:identity-filter 
+        disabled="true"/> -->
+
+    <event type="org.jboss.seam.security.notLoggedIn">
+        <action execute="#{redirect.captureCurrentView}" />
+    </event>
+    <event type="org.jboss.seam.security.loginSuccessful">
+        <action execute="#{redirect.returnToCapturedView}" />
+    </event>
+
+    <mail:mail-session host="localhost" port="25" />
+
+    <resteasy:application>
+        <resteasy:provider-class-names>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.RESTLogDetailsV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.RESTBlobConstantV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.RESTCategoryV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.RESTFilterV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.RESTImageV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.RESTIntegerConstantV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.RESTProjectV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.RESTPropertyCategoryV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.RESTPropertyTagV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.RESTRoleV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.RESTStringConstantV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.RESTTagV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.RESTTopicV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.RESTTranslatedTopicV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.RESTUserV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTBlobConstantCollectionV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTCategoryCollectionV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTFilterCollectionV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTImageCollectionV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTIntegerConstantCollectionV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTProjectCollectionV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTPropertyCategoryCollectionV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTPropertyTagCollectionV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTRoleCollectionV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTStringConstantCollectionV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTTagCollectionV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTTopicCollectionV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTTranslatedTopicCollectionV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTUserCollectionV1JSONConverter</value>
+        </resteasy:provider-class-names>
+    </resteasy:application>
+
+    <!-- For use with jBPM pageflow or process management -->
+    <!-- <bpm:jbpm> <bpm:process-definitions></bpm:process-definitions> <bpm:pageflow-definitions></bpm:pageflow-definitions> 
+        </bpm:jbpm> -->
+
+</components>

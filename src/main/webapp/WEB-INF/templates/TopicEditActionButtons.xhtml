@@ -1,0 +1,57 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:s="http://jboss.com/products/seam/taglib"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:rich="http://richfaces.org/rich"
+	xmlns:a4j="http://richfaces.org/a4j"
+	xmlns:c="http://java.sun.com/jstl/core">
+
+	<div class="actionButtons">
+		<a4j:commandButton styleClass="button"
+			value="Save" title="Save this topic"
+			onclick="saveCodeMirror('#{rich:clientId('topicXMLEdit')}');"
+			oncomplete="Richfaces.showModalPanel('logSaveMsgBox');"
+			type="button"
+			disabled="#{!topicHome.wired or !s:hasPermission('EditTopicSaveButton', 'Enabled', null)}"
+			rendered="#{!topicHome.managed}" />
+
+		<a4j:commandButton styleClass="button"
+			value="Update"
+			title="Update this topic"
+			rendered="#{topicHome.managed}"
+			type="button"
+			onclick="saveCodeMirror('#{rich:clientId('topicXMLEdit')}');"
+			oncomplete="Richfaces.showModalPanel('logSaveMsgBox');"
+			disabled="#{!s:hasPermission('EditTopicUpdateButton', 'Enabled', null)}" />
+
+		<s:button styleClass="button"
+			value="View Topic"
+			view="/Topic.xhtml"
+			rendered="#{topicHome.managed and !topicHome.doingMultipleUpdates}">
+			<f:param name="topicTopicId" value="#{topicHome.id}" />
+		</s:button>
+
+		<!-- <h:commandButton styleClass="button" id="delete"
+	                          value="Delete"
+	                         action="#{topicHome.remove}"
+	                      immediate="true"
+	                       rendered="#{topicHome.managed}"/>  -->
+
+		<s:button styleClass="button"
+			value="List Topics"
+			title="Return to a list of the topics that were modifed in this operation."
+			view="#{topicHome.multipleUpdateUrl}"
+			rendered="#{topicHome.managed and topicHome.doingMultipleUpdates}" />
+
+		<s:button styleClass="button"
+			value="List Topics"
+			title="Return to a list of the topics that were modifed in this operation."
+			view="#{topicHome.multipleUpdateUrl}"
+			rendered="#{!topicHome.managed and topicHome.doingMultipleUpdates}" />
+			
+		<s:button styleClass="button" value="Cancel"
+			view="/CustomSearchTopicList.xhtml" />
+
+	</div>
+</ui:composition>
