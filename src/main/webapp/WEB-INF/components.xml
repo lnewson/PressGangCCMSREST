@@ -87,6 +87,9 @@
             <value>org.jboss.pressgang.ccms.rest.v1.converter.RESTTopicV1JSONConverter</value>
             <value>org.jboss.pressgang.ccms.rest.v1.converter.RESTTranslatedTopicV1JSONConverter</value>
             <value>org.jboss.pressgang.ccms.rest.v1.converter.RESTUserV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.RESTContentSpecV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.RESTCSNodeV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.RESTCSMetaDataV1JSONConverter</value>
             <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTBlobConstantCollectionV1JSONConverter</value>
             <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTCategoryCollectionV1JSONConverter</value>
             <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTFilterCollectionV1JSONConverter</value>
@@ -101,6 +104,9 @@
             <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTTopicCollectionV1JSONConverter</value>
             <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTTranslatedTopicCollectionV1JSONConverter</value>
             <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTUserCollectionV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTContentSpecCollectionV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTCSNodeCollectionV1JSONConverter</value>
+            <value>org.jboss.pressgang.ccms.rest.v1.converter.collection.RESTCSMetaDataCollectionV1JSONConverter</value>
         </resteasy:provider-class-names>
     </resteasy:application>
 
