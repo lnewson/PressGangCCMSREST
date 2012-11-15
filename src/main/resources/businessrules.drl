@@ -7,16 +7,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import org.jboss.seam.security.Role;
-import com.redhat.topicindex.entity.Topic;
-import com.redhat.topicindex.entity.Tag;
-import com.redhat.topicindex.entity.TopicToTag;
-import com.redhat.topicindex.utils.structures.DroolsEvent;
-import com.redhat.topicindex.utils.structures.tags.UITagData;
-import com.redhat.topicindex.utils.structures.UserPrefsData;
-import com.redhat.topicindex.reporting.ReportDataElement;
-import com.redhat.topicindex.reporting.ReportDataGroup;
-import com.redhat.topicindex.reporting.googlecharts.GooglePieChart;
-import com.redhat.topicindex.reporting.googlecharts.GoogleBarChart;
+import org.jboss.pressgang.ccms.restserver.entity.Topic;
+import org.jboss.pressgang.ccms.restserver.entity.Tag;
+import org.jboss.pressgang.ccms.restserver.entity.TopicToTag;
+import org.jboss.pressgang.ccms.seam.utils.EntityUtilities;
+import org.jboss.pressgang.ccms.seam.utils.structures.DroolsEvent;
+import org.jboss.pressgang.ccms.seam.utils.structures.tags.UITagData;
+import org.jboss.pressgang.ccms.seam.utils.structures.UserPrefsData;
+import org.jboss.pressgang.ccms.seam.reporting.ReportDataElement;
+import org.jboss.pressgang.ccms.seam.reporting.ReportDataGroup;
+import org.jboss.pressgang.ccms.seam.reporting.googlecharts.GooglePieChart;
+import org.jboss.pressgang.ccms.seam.reporting.googlecharts.GoogleBarChart;
 
 global Topic topic;
 global TreeMap guiInputData;
@@ -45,8 +46,10 @@ function void addDefaultTag(Topic topic, Integer category, Integer tag)
 		}
 	}
 	
-	if (!foundTopic)
-		topic.addTag(tag);
+	if (!foundTopic) {
+		Tag tagEntity = EntityUtilities.getTagFromId(tag);
+		topic.addTag(tagEntity);
+	}
 }
 
 function void addDefaultTopicTags(Topic topic)
@@ -618,14 +621,6 @@ rule "Set System Preferences"
 		configureGlobalPreferences();
 end
 
-# Calculate the relative priorty for a topic, based on its tags
-rule "Calculate Relative Priority"
-	when
-		DroolsEvent(eventName == "CalculateRelativePriority")
-	then 
-		topic.setTempRelativePriority(calculateRelativePriority(topic));
-end
-
 rule "Populate IA User Preferences"
 	when
 		DroolsEvent(eventName == "PopulateUserPrefs")
@@ -663,7 +658,7 @@ rule "Default IA Topic Tags"
 		Role(name == "iaRole")
 		DroolsEvent(eventName == "NewTopicHome")
 	then 
-		topic.addTag(30);	# IA Low Priority
+		topic.addTag(EntityUtilities.getTagFromId(30));	# IA Low Priority
 end
 
 rule "Default SME Topic Tags"
@@ -671,8 +666,8 @@ rule "Default SME Topic Tags"
 		Role(name == "smeRole")
 		DroolsEvent(eventName == "NewTopicHome")
 	then 
-		topic.addTag(15);	# SME Proposed
-		topic.addTag(35);	# SME Low Priority
+		topic.addTag(EntityUtilities.getTagFromId(15));	# SME Proposed
+		topic.addTag(EntityUtilities.getTagFromId(35));	# SME Low Priority
 end
 
 rule "Default PM Topic Tags"
@@ -680,8 +675,8 @@ rule "Default PM Topic Tags"
 		Role(name == "pmRole")
 		DroolsEvent(eventName == "NewTopicHome")
 	then 
-		topic.addTag(17);	# PM Proposed
-		topic.addTag(40);	# PM Low Priority
+		topic.addTag(EntityUtilities.getTagFromId(17));	# PM Proposed
+		topic.addTag(EntityUtilities.getTagFromId(40));	# PM Low Priority
 end
 
 rule "Default ENG Topic Tags"
@@ -689,8 +684,8 @@ rule "Default ENG Topic Tags"
 		Role(name == "engRole")
 		DroolsEvent(eventName == "NewTopicHome")
 	then 
-		topic.addTag(33);	# ENG Proposed
-		topic.addTag(27);	# ENG Low Priority
+		topic.addTag(EntityUtilities.getTagFromId(33));	# ENG Proposed
+		topic.addTag(EntityUtilities.getTagFromId(27));	# ENG Low Priority
 end
 
 #### Triggered by TopicHome.update ####

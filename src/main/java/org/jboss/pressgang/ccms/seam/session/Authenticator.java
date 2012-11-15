@@ -236,7 +236,7 @@ public class Authenticator
 	 */
 	public boolean authenticate()
 	{
-		log.info("authenticating {0}", credentials.getUsername());
+		log.info("authenticating {}", credentials.getUsername());
 
 		final String kerberosEnabled = System.getProperty(Constants.KERBEROS_ENABLED_SYSTEM_PROPERTY);
 		

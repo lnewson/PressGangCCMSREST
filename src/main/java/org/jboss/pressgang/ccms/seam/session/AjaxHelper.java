@@ -3,7 +3,7 @@ package org.jboss.pressgang.ccms.seam.session;
 import org.jboss.seam.annotations.Name;
 
 /**
- * A class to use in conjunction with a4j:actionparam in order to combine
+ * A class to use in conjunction with a4j:param in order to combine
  * variables used to build up URLs
  */
 @Name("ajaxHelper")
