@@ -94,11 +94,6 @@
 					</rich:menuItem>
 
 					<rich:menuItem
-						rendered="#{s:hasPermission('HelpListLink', 'Rendered', null)}">
-						<s:link view="/HelpList.xhtml" value="Help" />
-					</rich:menuItem>
-
-					<rich:menuItem
 						rendered="#{s:hasPermission('UserListLink', 'Rendered', null)}">
 						<s:link view="/UserList.xhtml" value="User List" />
 					</rich:menuItem>
@@ -106,11 +101,6 @@
 					<rich:menuItem
 						rendered="#{s:hasPermission('RoleListLink', 'Rendered', null)}">
 						<s:link view="/RoleList.xhtml" value="Role List" />
-					</rich:menuItem>
-
-					<rich:menuItem
-						rendered="#{s:hasPermission('ExceptionListLink', 'Rendered', null)}">
-						<s:link view="/ExceptionList.xhtml" value="Exception List" />
 					</rich:menuItem>
 
 					<rich:menuItem
