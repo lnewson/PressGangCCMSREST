@@ -35,6 +35,7 @@ import org.jboss.pressgang.ccms.restserver.zanata.ZanataPullTopicThread;
 import org.jboss.pressgang.ccms.restserver.zanata.ZanataPushTopicThread;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.structures.Pair;
+import org.jboss.seam.Component;
 
 /**
  * A TranslatedTopic represents a particular revision of a topic. This revision then holds the translated version of the
@@ -158,5 +159,20 @@ public class TranslatedTopic extends AuditedEntity<TranslatedTopic> implements j
         final ZanataPushTopicThread zanataPushTopicThread = new ZanataPushTopicThread(topicIdRevisionPairs, false);
         final Thread thread = new Thread(zanataPushTopicThread);
         thread.start();
+    }
+    
+    /*
+     * Any methods below this comment are only workarounds to work with the old seam gui
+     */
+    @Transient
+    public String getTopicTitle() {
+        final EntityManager entityManager = (EntityManager) Component.getInstance("entityManager");
+        return getEnversTopic(entityManager).getTopicTitle();
+    }
+    
+    @Transient
+    public String getTopicTags() {
+        final EntityManager entityManager = (EntityManager) Component.getInstance("entityManager");
+        return getEnversTopic(entityManager).getTagsList();
     }
 }

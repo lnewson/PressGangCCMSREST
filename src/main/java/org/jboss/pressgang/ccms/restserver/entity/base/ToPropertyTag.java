@@ -4,6 +4,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Transient;
 
 import org.jboss.pressgang.ccms.restserver.entity.PropertyTag;
+import org.jboss.seam.Component;
 
 /**
  * This class provides consistent access to the details of a property tag
@@ -29,7 +30,7 @@ public abstract class ToPropertyTag<T extends AuditedEntity<T>> extends AuditedE
 
         return this.value.matches(this.propertyTag.getPropertyTagRegex());
     }
-
+    
     protected abstract boolean testUnique(final EntityManager entityManager, final Number revision);
 
     public abstract PropertyTag getPropertyTag();
@@ -39,4 +40,14 @@ public abstract class ToPropertyTag<T extends AuditedEntity<T>> extends AuditedE
     public abstract String getValue();
 
     public abstract void setValue(final String value);
+    
+    public boolean isValid(final Number revision) {
+        final EntityManager entityManager = (EntityManager) Component.getInstance("entityManager");
+        return isValid(entityManager, revision);
+    }
+    
+    protected boolean testUnique(final Number revision) {
+        final EntityManager entityManager = (EntityManager) Component.getInstance("entityManager");
+        return testUnique(entityManager, revision);
+    }
 }

@@ -783,8 +783,17 @@ public class Topic extends ParentToPropertyTag<Topic> implements java.io.Seriali
         return translatedTopicDatas;
     }
     
+    /*
+     * Any methods below this comment are only workarounds to work with the old seam gui
+     */
+    
     @Transient
     public String getTagsList() {
         return TopicUtilities.getTagsList(this, true);
+    }
+    
+    @Transient
+    public String getCommaSeparatedTagList() {
+        return TopicUtilities.getCommaSeparatedTagList(this);
     }
 }

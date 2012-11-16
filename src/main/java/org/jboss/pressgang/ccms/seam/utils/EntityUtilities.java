@@ -32,7 +32,7 @@ import org.jboss.pressgang.ccms.seam.utils.structures.tags.UIProjectTagData;
 import org.jboss.pressgang.ccms.seam.utils.structures.tags.UIProjectsData;
 import org.jboss.pressgang.ccms.seam.utils.structures.tags.UITagData;
 import org.jboss.pressgang.ccms.seam.utils.structures.tags.UITagProjectData;
-import org.jboss.seam.annotations.In;
+import org.jboss.seam.Component;
 import org.jboss.seam.security.Identity;
 import org.jboss.seam.security.Role;
 import org.slf4j.Logger;
@@ -41,12 +41,13 @@ import org.slf4j.LoggerFactory;
 public class EntityUtilities extends org.jboss.pressgang.ccms.restserver.utils.EntityUtilities {
     private static final Logger log = LoggerFactory.getLogger(EntityUtilities.class);
     
-    @In
-    private static EntityManager entityManager;
+    private static EntityManager getEntityManager() {
+        return (EntityManager) Component.getInstance("entityManager");
+    }
     
     public static PropertyTag getPropertyTagFromId(final Integer tagId)
     {
-        final PropertyTag tag = entityManager.find(PropertyTag.class, tagId);
+        final PropertyTag tag = getEntityManager().find(PropertyTag.class, tagId);
         return tag;
     }
     
@@ -161,19 +162,19 @@ public class EntityUtilities extends org.jboss.pressgang.ccms.restserver.utils.E
     
     public static Tag getTagFromId(final Integer tagId)
     {
-        final Tag tag = entityManager.find(Tag.class, tagId);
+        final Tag tag = getEntityManager().find(Tag.class, tagId);
         return tag;
     }
 
     public static org.jboss.pressgang.ccms.restserver.entity.Role getRoleFromId(final Integer roleId)
     {
-        final org.jboss.pressgang.ccms.restserver.entity.Role role = entityManager.find(org.jboss.pressgang.ccms.restserver.entity.Role.class, roleId);
+        final org.jboss.pressgang.ccms.restserver.entity.Role role = getEntityManager().find(org.jboss.pressgang.ccms.restserver.entity.Role.class, roleId);
         return role;
     }
 
     public static User getUserFromId(final Integer userId)
     {
-        final User user = entityManager.find(User.class, userId);
+        final User user = getEntityManager().find(User.class, userId);
         return user;
     }
     
@@ -182,7 +183,7 @@ public class EntityUtilities extends org.jboss.pressgang.ccms.restserver.utils.E
     {
         if (username == null) return null;
         
-        final Query query = entityManager.createQuery(User.SELECT_ALL_QUERY + " where user.userName = '" + username + "'");
+        final Query query = getEntityManager().createQuery(User.SELECT_ALL_QUERY + " where user.userName = '" + username + "'");
         final List<User> users = query.getResultList();
         return users == null ? null : (users.size() == 1 ? users.get(0) : null);
     }
@@ -192,7 +193,7 @@ public class EntityUtilities extends org.jboss.pressgang.ccms.restserver.utils.E
         final List<UIRoleUserData> retValue = new ArrayList<UIRoleUserData>();
 
         @SuppressWarnings("unchecked")
-        final List<org.jboss.pressgang.ccms.restserver.entity.Role> roleList = entityManager.createQuery(org.jboss.pressgang.ccms.restserver.entity.Role.SELECT_ALL_QUERY).getResultList();
+        final List<org.jboss.pressgang.ccms.restserver.entity.Role> roleList = getEntityManager().createQuery(org.jboss.pressgang.ccms.restserver.entity.Role.SELECT_ALL_QUERY).getResultList();
 
         Collections.sort(roleList, new RoleNameComparator());
 
@@ -211,7 +212,7 @@ public class EntityUtilities extends org.jboss.pressgang.ccms.restserver.utils.E
         final List<UIRoleUserData> retValue = new ArrayList<UIRoleUserData>();
 
         @SuppressWarnings("unchecked")
-        final List<User> userList = entityManager.createQuery(User.SELECT_ALL_QUERY).getResultList();
+        final List<User> userList = getEntityManager().createQuery(User.SELECT_ALL_QUERY).getResultList();
 
         Collections.sort(userList, new UserNameComparator());
 
@@ -230,8 +231,8 @@ public class EntityUtilities extends org.jboss.pressgang.ccms.restserver.utils.E
     {
         categories.clear();
 
-        final List<PropertyTagCategory> categoryList = entityManager.createQuery(PropertyTagCategory.SELECT_ALL_QUERY).getResultList();
-        final List<PropertyTagToPropertyTagCategory> tagToCategoryList = entityManager.createQuery(PropertyTagToPropertyTagCategory.SELECT_ALL_QUERY).getResultList();
+        final List<PropertyTagCategory> categoryList = getEntityManager().createQuery(PropertyTagCategory.SELECT_ALL_QUERY).getResultList();
+        final List<PropertyTagToPropertyTagCategory> tagToCategoryList = getEntityManager().createQuery(PropertyTagToPropertyTagCategory.SELECT_ALL_QUERY).getResultList();
 
         // then loop through the categories
         for (final PropertyTagCategory category : categoryList)
@@ -270,7 +271,7 @@ public class EntityUtilities extends org.jboss.pressgang.ccms.restserver.utils.E
     @SuppressWarnings("unchecked")
     public static void populateMutuallyExclusiveCategories(final UIProjectsData guiData)
     {
-        final List<Category> categoryList = entityManager.createQuery(Category.SELECT_ALL_QUERY).getResultList();
+        final List<Category> categoryList = getEntityManager().createQuery(Category.SELECT_ALL_QUERY).getResultList();
         for (final Category category : categoryList)
         {
             for (final UIProjectData project : guiData.getProjectCategories())
@@ -306,8 +307,8 @@ public class EntityUtilities extends org.jboss.pressgang.ccms.restserver.utils.E
     {
         categories.clear();
 
-        final List<Category> categoryList = entityManager.createQuery(Category.SELECT_ALL_QUERY).getResultList();
-        final List<TagToCategory> tagToCategoryList = entityManager.createQuery(TagToCategory.SELECT_ALL_QUERY).getResultList();
+        final List<Category> categoryList = getEntityManager().createQuery(Category.SELECT_ALL_QUERY).getResultList();
+        final List<TagToCategory> tagToCategoryList = getEntityManager().createQuery(TagToCategory.SELECT_ALL_QUERY).getResultList();
 
         // then loop through the categories
         for (final Category category : categoryList)
@@ -350,7 +351,7 @@ public class EntityUtilities extends org.jboss.pressgang.ccms.restserver.utils.E
         {
             projects.clear();
 
-            final List<Project> projectList = entityManager.createQuery(Project.SELECT_ALL_QUERY).getResultList();
+            final List<Project> projectList = getEntityManager().createQuery(Project.SELECT_ALL_QUERY).getResultList();
 
             for (final Project project : projectList)
             {
@@ -386,7 +387,7 @@ public class EntityUtilities extends org.jboss.pressgang.ccms.restserver.utils.E
         {
             tags.clear();
 
-            final List<Tag> tagList = entityManager.createQuery(Tag.SELECT_ALL_QUERY).getResultList();
+            final List<Tag> tagList = getEntityManager().createQuery(Tag.SELECT_ALL_QUERY).getResultList();
 
             for (final Tag tag : tagList)
             {

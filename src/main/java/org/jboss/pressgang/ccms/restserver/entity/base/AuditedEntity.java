@@ -11,6 +11,7 @@ import javax.persistence.Transient;
 
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
+import org.jboss.seam.Component;
 
 /**
  * This base class is used to provide consistent access to previous versions of an audited entity
@@ -69,6 +70,15 @@ public abstract class AuditedEntity<T extends AuditedEntity<T>> {
             retValue.put(revision, getRevision(reader, revision));
 
         return retValue;
+    }
+    
+    /**
+     * @return Returns the list of revision numbers for this entity, as maintained by Envers
+     */
+    @Transient
+    public List<Number> getRevisions() {
+        final EntityManager entityManager = (EntityManager) Component.getInstance("entityManager");
+        return getRevisions(entityManager);
     }
 
     /**

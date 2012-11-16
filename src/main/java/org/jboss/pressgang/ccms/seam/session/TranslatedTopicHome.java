@@ -179,7 +179,7 @@ public class TranslatedTopicHome extends VersionedEntityHome<TranslatedTopic> im
     }
 
     public String getRenderedUrl() {
-        String url = "DownloadTranslatedTopicHTML.seam?translatedTopicDataId="
+        String url = "RenderTranslatedTopic.seam?translatedTopicDataId="
                 + translatedTopicDataHome.getInstance().getTranslatedTopicDataId();
         if (translatedTopicDataHome.getRevision() != null)
             url += "&amp;translatedTopicDataRevision=" + translatedTopicDataHome.getRevision();

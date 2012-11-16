@@ -2,7 +2,7 @@ package org.jboss.pressgang.ccms.restserver.entity.base;
 
 import org.hibernate.envers.RevisionListener;
 import org.jboss.pressgang.ccms.restserver.ejb.EnversLoggingBean;
-import org.jboss.seam.annotations.In;
+import org.jboss.seam.Component;
 
 /**
  * A Envers Revision Listener that will add content to a Envers Revision Entity when new data is persisted. It will pull the
@@ -12,8 +12,6 @@ import org.jboss.seam.annotations.In;
  * 
  */
 public class LoggingRevisionListener implements RevisionListener {
-    @In
-    private EnversLoggingBean enversLoggingBean;
 
     /**
      * Add content to a new Envers Revision Entity.
@@ -22,6 +20,8 @@ public class LoggingRevisionListener implements RevisionListener {
     public void newRevision(Object o) {
         final LoggingRevisionEntity revEntity = (LoggingRevisionEntity) o;
 
+        final EnversLoggingBean enversLoggingBean = (EnversLoggingBean) Component.getInstance("enversLoggingBean");
+        
         if (enversLoggingBean != null) {
             revEntity.setLogFlag(enversLoggingBean.getFlag());
             revEntity.setLogMessage(enversLoggingBean.getLogMessage());

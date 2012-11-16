@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.faces.context.FacesContext;
 import javax.persistence.EntityManager;
+import javax.persistence.criteria.Predicate;
 
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.restserver.entity.Filter;
@@ -39,6 +40,7 @@ public class GroupedTranslatedTopicDataLocaleList extends GroupedLocaleListBase<
 	private String orderDirection;
 	/** The query with the most results */
 	private TranslatedTopicDataList pagingEntityQuery;
+	protected Predicate filterConditions;
 	
 	@Create
 	public void create()
@@ -55,6 +57,8 @@ public class GroupedTranslatedTopicDataLocaleList extends GroupedLocaleListBase<
 
 		final TranslatedTopicDataFilterQueryBuilder filterQueryBuilder = new TranslatedTopicDataFilterQueryBuilder(entityManager);
 
+		filterConditions = FilterUtilities.buildQueryConditions(filter, filterQueryBuilder);
+		
 		// get a map of variable names to variable values
 		filterVars = FilterUtilities.getUrlVariables(filter);
 
@@ -70,9 +74,11 @@ public class GroupedTranslatedTopicDataLocaleList extends GroupedLocaleListBase<
 		/* Get the locales to be searched on */
 		locales = this.getGroupedLocales();
 		
+		final Integer expectedTotalTranslationCount = GroupedTranslatedTopicDataList.buildEstimatedTotalQuery(filter);
+		
 		for (String locale: locales)
 		{
-			final GroupedTranslatedTopicDataList translatedTopicDataList = new GroupedTranslatedTopicDataList(locale, filterQueryBuilder);
+			final GroupedTranslatedTopicDataList translatedTopicDataList = new GroupedTranslatedTopicDataList(locale, filterQueryBuilder, this, expectedTotalTranslationCount);
 			if (translatedTopicDataList.getResultCount() > 0)
 			{
 				groupedLocales.put(locale, translatedTopicDataList);

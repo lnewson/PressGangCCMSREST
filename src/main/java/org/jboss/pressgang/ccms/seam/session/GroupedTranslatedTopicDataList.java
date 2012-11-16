@@ -13,17 +13,19 @@ import javax.faces.context.FacesContext;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.restserver.entity.Filter;
 import org.jboss.pressgang.ccms.restserver.entity.FilterField;
 import org.jboss.pressgang.ccms.restserver.entity.FilterLocale;
 import org.jboss.pressgang.ccms.restserver.entity.Tag;
+import org.jboss.pressgang.ccms.restserver.entity.TranslatedTopic;
 import org.jboss.pressgang.ccms.restserver.entity.TranslatedTopicData;
 import org.jboss.pressgang.ccms.restserver.filter.TopicFieldFilter;
 import org.jboss.pressgang.ccms.restserver.filter.builder.TranslatedTopicDataFilterQueryBuilder;
+import org.jboss.pressgang.ccms.restserver.utils.JPAUtils;
 import org.jboss.pressgang.ccms.restserver.zanata.ZanataPullTopicThread;
 import org.jboss.pressgang.ccms.seam.session.base.GroupedListBase;
 import org.jboss.pressgang.ccms.seam.sort.GroupedTopicListNameComparator;
@@ -50,7 +52,7 @@ public class GroupedTranslatedTopicDataList extends GroupedListBase<TranslatedTo
 	 * The number of results from a normal topic query, that signifies 
 	 * the expected number of translated topics.
 	 */
-	private Long expectedTotalTranslationCount;
+	private Integer expectedTotalTranslationCount = null;
 	
 	/** The locale of this set of translated topic datas. */
 	private String locale;
@@ -58,17 +60,29 @@ public class GroupedTranslatedTopicDataList extends GroupedListBase<TranslatedTo
 	/** The Query Builder to be used to construct the SQL search query */
 	protected final TranslatedTopicDataFilterQueryBuilder filterQueryBuilder;
     protected Predicate filterConditions;
+    private final GroupedTranslatedTopicDataLocaleList parent;
 	
 	public GroupedTranslatedTopicDataList()
 	{
 		filterQueryBuilder = new TranslatedTopicDataFilterQueryBuilder(entityManager);
+		parent = null;
 	}
 	
 	public GroupedTranslatedTopicDataList(final String locale, final TranslatedTopicDataFilterQueryBuilder filterQueryBuilder)
 	{
-		this.locale = locale;
-		this.filterQueryBuilder = filterQueryBuilder;
-		create();
+		this(locale, filterQueryBuilder, null);
+	}
+	
+	public GroupedTranslatedTopicDataList(final String locale, final TranslatedTopicDataFilterQueryBuilder filterQueryBuilder, final GroupedTranslatedTopicDataLocaleList parent) {
+	    this(locale, filterQueryBuilder, parent, null);
+    }
+	
+	public GroupedTranslatedTopicDataList(final String locale, final TranslatedTopicDataFilterQueryBuilder filterQueryBuilder, final GroupedTranslatedTopicDataLocaleList parent, final Integer expectedTotalTranslationCount) {
+	    this.locale = locale;
+        this.filterQueryBuilder = filterQueryBuilder;
+        this.parent = parent;
+        this.expectedTotalTranslationCount = expectedTotalTranslationCount;
+        create();
 	}
 	
 	@Create
@@ -84,27 +98,38 @@ public class GroupedTranslatedTopicDataList extends GroupedListBase<TranslatedTo
 		        CommonFilterConstants.MATCH_LOCALE,
                 new TopicFieldFilter());
 
-		filterConditions = FilterUtilities.buildQueryConditions(filter, filterQueryBuilder);
-				
-		/* add this locale to the query */
-		final Predicate localeCondition = filterQueryBuilder.getMatchingLocaleString(locale);
-		if (filterConditions != null) {
-		    filterConditions = filterQueryBuilder.getCriteriaBuilder().and(filterConditions, localeCondition);
+		// If the parent is null then this is being used as a EJB, otherwise just pull this data from the parent
+		if (parent == null) {
+		    filterConditions = FilterUtilities.buildQueryConditions(filter, filterQueryBuilder);
+    
+    		// get a map of variable names to variable values
+    		filterVars = FilterUtilities.getUrlVariables(filter);
+    
+    		// get the heading to display over the list of topics
+    		searchTagHeading = FilterUtilities.getFilterTitle(filter);
+    
+    		/*
+    		 * get a string that can be appended to a url that contains the url
+    		 * variables
+    		 */
+    		urlVars = FilterUtilities.buildFilterUrlVars(filter);
 		} else {
-		    filterConditions = localeCondition;
+		    filterConditions = parent.filterConditions;
+		    
+		    filterVars = parent.getFilterVars();
+		    
+		    searchTagHeading = parent.getSearchTagHeading();
+		    
+		    urlVars = parent.getUrlVars();
 		}
-
-		// get a map of variable names to variable values
-		filterVars = FilterUtilities.getUrlVariables(filter);
-
-		// get the heading to display over the list of topics
-		searchTagHeading = FilterUtilities.getFilterTitle(filter);
-
-		/*
-		 * get a string that can be appended to a url that contains the url
-		 * variables
-		 */
-		urlVars = FilterUtilities.buildFilterUrlVars(filter);
+		
+		/* add this locale to the query */
+        final Predicate localeCondition = filterQueryBuilder.getMatchingLocaleString(locale);
+        if (filterConditions != null) {
+            filterConditions = filterQueryBuilder.getCriteriaBuilder().and(filterConditions, localeCondition);
+        } else {
+            filterConditions = localeCondition;
+        }
 
 		final List<Integer> groupedTags = buildTagGroups(filterQueryBuilder);
 
@@ -116,7 +141,9 @@ public class GroupedTranslatedTopicDataList extends GroupedListBase<TranslatedTo
 			this.tab = Constants.UNGROUPED_RESULTS_TAB_NAME;
 		
 		/* Create the basic query to find the total number of translations that should exist */
-		buildEstimatedTotalQuery(filter);
+		if (expectedTotalTranslationCount == null) {
+		    this.expectedTotalTranslationCount = buildEstimatedTotalQuery(filter);
+		}
 	}
 
 	public String getLocale()
@@ -320,12 +347,12 @@ public class GroupedTranslatedTopicDataList extends GroupedListBase<TranslatedTo
 		return "/TranslatedTopicSearch.seam?" + urlVars;
 	}
 
-	public Long getExpectedTotalTranslationCount()
+	public Integer getExpectedTotalTranslationCount()
 	{
 		return expectedTotalTranslationCount;
 	}
 
-	public void setExpectedTotalTranslationCount(final Long expectedTotalTranslationCount)
+	public void setExpectedTotalTranslationCount(final Integer expectedTotalTranslationCount)
 	{
 		this.expectedTotalTranslationCount = expectedTotalTranslationCount;
 	}
@@ -340,22 +367,13 @@ public class GroupedTranslatedTopicDataList extends GroupedListBase<TranslatedTo
 		return numResults;
 	}
 	
-	private void buildEstimatedTotalQuery(final Filter filter)
+	public static Integer buildEstimatedTotalQuery(final Filter filter)
 	{
 	    // Make sure no locales are selected
 	    filter.setFilterLocales(new HashSet<FilterLocale>());
 	    
 	    final EntityManager entityManager = (EntityManager) Component.getInstance("entityManager");
 	    final CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		//final String includeQuery = "SELECT translatedTopic.topicId FROM TranslatedTopic translatedTopic LEFT JOIN translatedTopic.translatedTopicDataEntities as translatedTopicData WHERE translatedTopic.topicId IN (" + filter.buildQueryConditions(new TopicFilterQueryBuilder()) + ") GROUP BY translatedTopic.topicId, translatedTopic.topicRevision";
-		
-		final TranslatedTopicDataFilterQueryBuilder includeQueryBuilder = new TranslatedTopicDataFilterQueryBuilder(entityManager);
-		final Predicate includeQueryCondtions = FilterUtilities.buildQueryConditions(filter, includeQueryBuilder);
-		final CriteriaQuery<TranslatedTopicData> includeQuery = includeQueryBuilder.getBaseCriteriaQuery();
-		final Root<TranslatedTopicData> includeFrom = includeQueryBuilder.getCriteriaRoot();
-		if (includeQueryCondtions != null)
-		    includeQuery.where(includeQueryCondtions);
-		includeQuery.groupBy(includeFrom.get("translatedTopic").get("topicId"), includeFrom.get("translatedTopic").get("topicRevision"));
 		
 		// Remove the translated search fields from the filter
 		final List<FilterField> excludeFields = new ArrayList<FilterField>();
@@ -384,84 +402,65 @@ public class GroupedTranslatedTopicDataList extends GroupedListBase<TranslatedTo
 			filter.getFilterFields().remove(field);
 		}
 		
+		final TranslatedTopicDataFilterQueryBuilder includeQueryBuilder = new TranslatedTopicDataFilterQueryBuilder(entityManager);
+        final Predicate includeQueryCondtions = FilterUtilities.buildQueryConditions(filter, includeQueryBuilder);
+        final CriteriaQuery<TranslatedTopicData> includeQuery = includeQueryBuilder.getBaseCriteriaQuery();
+        final Join<TranslatedTopicData, TranslatedTopic> translatedTopic = JPAUtils.findJoinedType(includeQuery, TranslatedTopicData.class, TranslatedTopic.class);
+        if (includeQueryCondtions != null)
+            includeQuery.where(includeQueryCondtions);
+        includeQuery.groupBy(translatedTopic.get("topicId"), translatedTopic.get("topicRevision"));
+		
 		/* 
          * Perform the search to get the number of translated topics
          * that match the normal Topic search and the topics that need
          * to be excluded based on the translated topic search.
          */
-        final Long totalTopicCount = new Long(entityManager.createQuery(includeQuery).getResultList().size());
-        Long totalExcludeTopicCount = new Long(0);
+		final CriteriaQuery<Long> includeCountQuery = JPAUtils.countCriteria(entityManager, includeQuery);
+        final Integer totalTopicCount = entityManager.createQuery(includeCountQuery).getResultList().size();
+        Integer totalExcludeTopicCount = 0;
         
 		if (!excludeFields.isEmpty()) {
+		    
+		    /* 
+             * Add the extra translated search fields not covered by the generic Topic search query.
+             * These fields should be negated from there normal operation so that we find the 
+             * topics that don't match the existing current search filter.
+             */
+            final List<Predicate> conditions = new ArrayList<Predicate>();
+            for (final FilterField field : excludeFields)
+            {
+                final String fieldName = field.getField();
+                
+                if (fieldName.equals(CommonFilterConstants.TOPIC_LATEST_TRANSLATIONS_FILTER_VAR))
+                {
+                    field.setField(CommonFilterConstants.TOPIC_NOT_LATEST_TRANSLATIONS_FILTER_VAR);
+                    filter.getFilterFields().add(field);
+                }
+                
+                else if (fieldName.equals(CommonFilterConstants.TOPIC_NOT_LATEST_TRANSLATIONS_FILTER_VAR))
+                {
+                    field.setField(CommonFilterConstants.TOPIC_LATEST_TRANSLATIONS_FILTER_VAR);
+                    filter.getFilterFields().add(field);
+                }
+                
+                else if (fieldName.equals(CommonFilterConstants.TOPIC_LATEST_COMPLETED_TRANSLATIONS_FILTER_VAR))
+                {
+                    field.setField(CommonFilterConstants.TOPIC_NOT_LATEST_COMPLETED_TRANSLATIONS_FILTER_VAR);
+                    filter.getFilterFields().add(field);
+                }
+                
+                else if (fieldName.equals(CommonFilterConstants.TOPIC_NOT_LATEST_COMPLETED_TRANSLATIONS_FILTER_VAR))
+                {
+                    field.setField(CommonFilterConstants.TOPIC_LATEST_COMPLETED_TRANSLATIONS_FILTER_VAR);
+                    filter.getFilterFields().add(field);
+                }
+            }
+		    
 		    final TranslatedTopicDataFilterQueryBuilder excludeQueryBuilder = new TranslatedTopicDataFilterQueryBuilder(entityManager);
             final Predicate excludeQueryConditions = FilterUtilities.buildQueryConditions(filter, excludeQueryBuilder);
             final CriteriaQuery<TranslatedTopicData> excludeQuery = excludeQueryBuilder.getBaseCriteriaQuery();
-            final Root<TranslatedTopicData> excludeFrom = excludeQueryBuilder.getCriteriaRoot();
-            excludeQuery.groupBy(excludeFrom.get("translatedTopic").get("topicId"), excludeFrom.get("translatedTopic").get("topicRevision"));
-    		
-    		/* 
-    		 * Add the extra translated search fields not covered by the generic Topic search query.
-    		 * These fields should be negated from there normal operation so that we find the 
-    		 * topics that don't match the existing current search filter.
-    		 */
-    		final List<Predicate> conditions = new ArrayList<Predicate>();
-    		for (final FilterField field : excludeFields)
-    		{
-    			final String fieldName = field.getField();
-    			final String fieldValue = field.getValue();
-    			
-    			if (fieldName.equals(CommonFilterConstants.TOPIC_LATEST_TRANSLATIONS_FILTER_VAR))
-    			{
-    				final Boolean fieldValueBoolean = Boolean.parseBoolean(fieldValue);
-    				if (fieldValueBoolean) {
-    					// Limit to fully translated topics
-    					final List<Integer> topicIds = EntityUtilities.getLatestTranslatedTopics(entityManager);
-    					if (topicIds != null && !topicIds.isEmpty()) {
-    					    conditions.add(criteriaBuilder.not(excludeFrom.get("translatedTopicDataId").in(topicIds)));
-    	                }
-    				}
-    			}
-    			
-    			else if (fieldName.equals(CommonFilterConstants.TOPIC_NOT_LATEST_TRANSLATIONS_FILTER_VAR))
-    			{
-    				final Boolean fieldValueBoolean = Boolean.parseBoolean(fieldValue);
-    				if (fieldValueBoolean) {
-    					// Limit to fully translated topics
-    					final List<Integer> topicIds = EntityUtilities.getLatestTranslatedTopics(entityManager);
-    					if (topicIds == null || topicIds.isEmpty()) {
-    	                    conditions.add(criteriaBuilder.equal(excludeFrom.get("translatedTopicDataId"), Constants.NULL_TOPIC_ID));
-    	                } else {
-    	                    conditions.add(excludeFrom.get("translatedTopicDataId").in(topicIds));
-    	                }
-    				}
-    			}
-    			
-    			else if (fieldName.equals(CommonFilterConstants.TOPIC_LATEST_COMPLETED_TRANSLATIONS_FILTER_VAR))
-    			{
-    				final Boolean fieldValueBoolean = Boolean.parseBoolean(fieldValue);
-    				if (fieldValueBoolean) {
-    					// Limit to the latest completed translated topics
-    					final List<Integer> topicIds = EntityUtilities.getLatestCompletedTranslatedTopics(entityManager);
-    					if (topicIds != null && !topicIds.isEmpty()) {
-                            conditions.add(criteriaBuilder.not(excludeFrom.get("translatedTopicDataId").in(topicIds)));
-                        }
-    				}
-    			}
-    			
-    			else if (fieldName.equals(CommonFilterConstants.TOPIC_NOT_LATEST_COMPLETED_TRANSLATIONS_FILTER_VAR))
-    			{
-    				final Boolean fieldValueBoolean = Boolean.parseBoolean(fieldValue);
-    				if (fieldValueBoolean) {
-    					// Limit to the latest completed translated topics
-    					final List<Integer> topicIds = EntityUtilities.getLatestCompletedTranslatedTopics(entityManager);
-    					if (topicIds == null || topicIds.isEmpty()) {
-                            conditions.add(criteriaBuilder.equal(excludeFrom.get("translatedTopicDataId"), Constants.NULL_TOPIC_ID));
-                        } else {
-                            conditions.add(excludeFrom.get("translatedTopicDataId").in(topicIds));
-                        }
-    				}
-    			}
-    		}
+            final Join<TranslatedTopicData, TranslatedTopic> exTranslatedTopic = JPAUtils.findJoinedType(excludeQuery, TranslatedTopicData.class, TranslatedTopic.class);
+            excludeQuery.groupBy(exTranslatedTopic.get("topicId"), exTranslatedTopic.get("topicRevision"));
     		
     		if (excludeQueryConditions != null) {
     		    conditions.add(excludeQueryConditions);
@@ -477,10 +476,11 @@ public class GroupedTranslatedTopicDataList extends GroupedListBase<TranslatedTo
             
             excludeQuery.where(condition);
             
-            totalExcludeTopicCount = new Long(entityManager.createQuery(excludeQuery).getResultList().size());
+            final CriteriaQuery<Long> excludeCountQuery = JPAUtils.countCriteria(entityManager, excludeQuery);
+            totalExcludeTopicCount = entityManager.createQuery(excludeCountQuery).getResultList().size();
 		}
 		
-		this.expectedTotalTranslationCount = totalTopicCount - totalExcludeTopicCount;
+		return totalTopicCount - totalExcludeTopicCount;
 	}
 	
 	protected CriteriaQuery<TranslatedTopicData> getSelectAllQuery() {

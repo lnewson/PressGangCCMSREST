@@ -5,10 +5,6 @@
     id="WebApp_ID" version="3.0">
     <display-name>TopicIndex</display-name>
     <context-param>
-        <param-name>resteasy.providers</param-name>
-        <param-value>org.jboss.pressgangccms.rest.v1.converter.RESTLogDetailsV1JSONConverter, com.redhat.topicindex.rest.RESTv1</param-value>
-    </context-param>
-    <context-param>
         <param-name>facelets.DEVELOPMENT</param-name>
         <param-value>true</param-value>
     </context-param>
@@ -27,6 +23,10 @@
     <context-param>
         <param-name>org.richfaces.SKIN</param-name>
         <param-value>blueSky</param-value>
+    </context-param>
+    <context-param>
+        <param-name>facelets.RECREATE_VALUE_EXPRESSION_ON_BUILD_BEFORE_RESTORE</param-name>
+        <param-value>false</param-value>
     </context-param>
     <filter>
         <filter-name>Seam Filter</filter-name>
