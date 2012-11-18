@@ -29,6 +29,7 @@
         <xalan.version>2.7.1</xalan.version>
         <xerces.version>2.9.1</xerces.version>
         <resteasy.version>2.3.2.Final</resteasy.version>
+        <hibernate.version>3.6.10.Final</hibernate.version>
         <jodatime.version>2.1</jodatime.version>
         <jdal.core.version>1.2.0</jdal.core.version>
         <log4j.version>1.2.16</log4j.version>
