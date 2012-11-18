@@ -1,6 +1,6 @@
 package org.jboss.pressgang.ccms.seam.utils.structures.tags;
 
-import org.jboss.pressgang.ccms.restserver.entity.Project;
+import org.jboss.pressgang.ccms.model.Project;
 
 public class UITagProjectData 
 {

@@ -6,9 +6,9 @@ import java.util.List;
 import javax.faces.model.SelectItem;
 import javax.persistence.EntityManager;
 
-import org.jboss.pressgang.ccms.restserver.entity.PropertyTag;
-import org.jboss.pressgang.ccms.restserver.entity.PropertyTagCategory;
-import org.jboss.pressgang.ccms.restserver.entity.PropertyTagToPropertyTagCategory;
+import org.jboss.pressgang.ccms.model.PropertyTag;
+import org.jboss.pressgang.ccms.model.PropertyTagCategory;
+import org.jboss.pressgang.ccms.model.PropertyTagToPropertyTagCategory;
 import org.jboss.pressgang.ccms.restserver.utils.Constants;
 
 public class PropertyTagUISelection

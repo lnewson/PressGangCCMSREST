@@ -2,7 +2,7 @@ package org.jboss.pressgang.ccms.seam.sort;
 
 import java.util.Comparator;
 
-import org.jboss.pressgang.ccms.restserver.entity.User;
+import org.jboss.pressgang.ccms.model.User;
 
 public class UserNameComparator implements Comparator<User>
 {

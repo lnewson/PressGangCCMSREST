@@ -18,20 +18,20 @@ import javax.persistence.PersistenceException;
 
 import org.drools.WorkingMemory;
 import org.hibernate.exception.ConstraintViolationException;
-import org.jboss.pressgang.ccms.restserver.ejb.EnversLoggingBean;
-import org.jboss.pressgang.ccms.restserver.entity.ImageFile;
-import org.jboss.pressgang.ccms.restserver.entity.PropertyTag;
-import org.jboss.pressgang.ccms.restserver.entity.PropertyTagCategory;
-import org.jboss.pressgang.ccms.restserver.entity.PropertyTagToPropertyTagCategory;
-import org.jboss.pressgang.ccms.restserver.entity.Tag;
-import org.jboss.pressgang.ccms.restserver.entity.TagToCategory;
-import org.jboss.pressgang.ccms.restserver.entity.Topic;
-import org.jboss.pressgang.ccms.restserver.entity.TopicSourceUrl;
-import org.jboss.pressgang.ccms.restserver.entity.TopicToPropertyTag;
-import org.jboss.pressgang.ccms.restserver.entity.TopicToTag;
-import org.jboss.pressgang.ccms.restserver.entity.TopicToTopicSourceUrl;
-import org.jboss.pressgang.ccms.restserver.entity.base.LoggingRevisionEntity;
-import org.jboss.pressgang.ccms.restserver.exceptions.CustomConstraintViolationException;
+import org.jboss.pressgang.ccms.model.ImageFile;
+import org.jboss.pressgang.ccms.model.PropertyTag;
+import org.jboss.pressgang.ccms.model.PropertyTagCategory;
+import org.jboss.pressgang.ccms.model.PropertyTagToPropertyTagCategory;
+import org.jboss.pressgang.ccms.model.Tag;
+import org.jboss.pressgang.ccms.model.TagToCategory;
+import org.jboss.pressgang.ccms.model.Topic;
+import org.jboss.pressgang.ccms.model.TopicSourceUrl;
+import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
+import org.jboss.pressgang.ccms.model.TopicToTag;
+import org.jboss.pressgang.ccms.model.TopicToTopicSourceUrl;
+import org.jboss.pressgang.ccms.model.exceptions.CustomConstraintViolationException;
+import org.jboss.pressgang.ccms.restserver.envers.EnversLoggingBean;
+import org.jboss.pressgang.ccms.restserver.envers.LoggingRevisionEntity;
 import org.jboss.pressgang.ccms.seam.utils.Constants;
 import org.jboss.pressgang.ccms.seam.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.seam.utils.structures.DroolsEvent;
@@ -41,6 +41,7 @@ import org.jboss.pressgang.ccms.seam.utils.structures.tags.UIProjectsData;
 import org.jboss.pressgang.ccms.seam.utils.structures.tags.UITagData;
 import org.jboss.pressgang.ccms.seam.utils.structures.tags.UIProjectData;
 import org.jboss.pressgang.ccms.seam.utils.TopicUtilities;
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.restserver.utils.topicrenderer.TopicQueueRenderer;
 import org.jboss.pressgang.ccms.restserver.zanata.ZanataPushTopicThread;
 import org.jboss.pressgang.ccms.docbook.constants.DocbookBuilderConstants;
@@ -596,8 +597,8 @@ public class TopicHome extends VersionedEntityHome<Topic> {
 
     public void pushToZanataConfirm() {
         final List<Pair<Integer, Integer>> topics = new ArrayList<Pair<Integer, Integer>>();
-        topics.add(new Pair<Integer, Integer>(this.getInstance().getTopicId(), this.getInstance()
-                .getLatestRevision(entityManager).intValue()));
+        topics.add(new Pair<Integer, Integer>(this.getInstance().getTopicId(), EnversUtilities
+                .getLatestRevision(entityManager, this.getInstance()).intValue()));
 
         final ZanataPushTopicThread zanataPushTopicThread = new ZanataPushTopicThread(topics, false);
         final Thread thread = new Thread(zanataPushTopicThread);
@@ -639,10 +640,10 @@ public class TopicHome extends VersionedEntityHome<Topic> {
 
     public String getLogMessage(final Integer revision) {
         if (this.getRevision() == null || this.getRevision().isEmpty()) {
-            return this.instance == null ? null : this.instance.getLogMessage(entityManager, revision);
+            return this.instance == null ? null : EnversUtilities.getLogMessage(entityManager, this.getInstance(), revision);
         } else {
             final Number rev = revision == null ? Integer.parseInt(this.getRevision()) : revision;
-            return this.revisionInstance == null ? null : this.revisionInstance.getLogMessage(entityManager, rev);
+            return this.revisionInstance == null ? null : EnversUtilities.getLogMessage(entityManager, this.getRevisionInstance(), rev);
         }
     }
 
@@ -653,10 +654,10 @@ public class TopicHome extends VersionedEntityHome<Topic> {
     public String getLogUsername(final Integer revision) {
         final String username;
         if (this.getRevision() == null || this.getRevision().isEmpty()) {
-            username = this.instance == null ? null : this.instance.getLogUsername(entityManager, revision);
+            username = this.instance == null ? null : EnversUtilities.getLogUsername(entityManager, getInstance(), revision);
         } else {
             final Number rev = revision == null ? Integer.parseInt(this.getRevision()) : revision;
-            username = this.revisionInstance == null ? null : this.revisionInstance.getLogUsername(entityManager, rev);
+            username = this.revisionInstance == null ? null : EnversUtilities.getLogUsername(entityManager, getRevisionInstance(), rev);
         }
 
         return username == null ? "Unknown" : username;
@@ -669,10 +670,10 @@ public class TopicHome extends VersionedEntityHome<Topic> {
     public List<String> getLogFlags(final Integer revision) {
         final Integer flag;
         if (this.getRevision() == null || this.getRevision().isEmpty()) {
-            flag = this.instance == null ? null : this.instance.getLogFlag(entityManager, revision);
+            flag = this.instance == null ? null : EnversUtilities.getLogFlag(entityManager, getInstance(), revision);
         } else {
             final Number rev = revision == null ? Integer.parseInt(this.getRevision()) : revision;
-            flag = this.revisionInstance == null ? null : this.revisionInstance.getLogFlag(entityManager, rev);
+            flag = this.revisionInstance == null ? null : EnversUtilities.getLogFlag(entityManager, getRevisionInstance(), rev);
         }
 
         return calcLogFlags(flag);

@@ -8,16 +8,16 @@ import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.Filter;
+import org.jboss.pressgang.ccms.model.FilterField;
+import org.jboss.pressgang.ccms.model.RelationshipTag;
+import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.seam.Component;
 import org.jboss.seam.annotations.Create;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
 
-import org.jboss.pressgang.ccms.restserver.entity.Filter;
-import org.jboss.pressgang.ccms.restserver.entity.FilterField;
-import org.jboss.pressgang.ccms.restserver.entity.RelationshipTag;
-import org.jboss.pressgang.ccms.restserver.entity.Topic;
 import org.jboss.pressgang.ccms.restserver.filter.TopicFieldFilter;
 import org.jboss.pressgang.ccms.restserver.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.seam.session.base.GroupedTopicListBase;

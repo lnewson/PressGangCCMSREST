@@ -10,15 +10,15 @@ import java.util.Collections;
 
 import javax.persistence.EntityManager;
 
-import org.jboss.pressgang.ccms.restserver.entity.StringConstants;
-import org.jboss.pressgang.ccms.restserver.entity.Tag;
-import org.jboss.pressgang.ccms.restserver.entity.Topic;
-import org.jboss.pressgang.ccms.restserver.entity.TopicSourceUrl;
-import org.jboss.pressgang.ccms.restserver.entity.TopicToTag;
-import org.jboss.pressgang.ccms.restserver.entity.TopicToTopic;
-import org.jboss.pressgang.ccms.restserver.entity.TopicToTopicSourceUrl;
-import org.jboss.pressgang.ccms.restserver.sort.TopicToTagTagIDSort;
-import org.jboss.pressgang.ccms.restserver.sort.TopicToTopicRelatedTopicIDSort;
+import org.jboss.pressgang.ccms.model.StringConstants;
+import org.jboss.pressgang.ccms.model.Tag;
+import org.jboss.pressgang.ccms.model.Topic;
+import org.jboss.pressgang.ccms.model.TopicSourceUrl;
+import org.jboss.pressgang.ccms.model.TopicToTag;
+import org.jboss.pressgang.ccms.model.TopicToTopic;
+import org.jboss.pressgang.ccms.model.TopicToTopicSourceUrl;
+import org.jboss.pressgang.ccms.model.sort.TopicToTagTagIDSort;
+import org.jboss.pressgang.ccms.model.sort.TopicToTopicRelatedTopicIDSort;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.seam.Component;

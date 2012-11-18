@@ -5,7 +5,7 @@ import java.util.Set;
 
 import javax.persistence.PersistenceException;
 
-import org.jboss.pressgang.ccms.restserver.entity.*;
+import org.jboss.pressgang.ccms.model.*;
 import org.jboss.pressgang.ccms.seam.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.seam.utils.structures.tags.UIProjectsData;
 import org.jboss.pressgang.ccms.seam.utils.structures.tags.UITagData;

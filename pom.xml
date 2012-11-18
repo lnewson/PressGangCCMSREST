@@ -28,15 +28,9 @@
         <jackson.version>1.9.8</jackson.version>
         <xalan.version>2.7.1</xalan.version>
         <xerces.version>2.9.1</xerces.version>
-        <hibernate.version>3.6.10.Final</hibernate.version>
-        <hibernate.search.version>3.4.1.Final</hibernate.search.version>
         <resteasy.version>2.3.2.Final</resteasy.version>
-        <batik.version>1.6-1</batik.version>
-        <htmlcleaner.version>2.2</htmlcleaner.version>
-        <jericho.version>3.2</jericho.version>
         <jodatime.version>2.1</jodatime.version>
         <jdal.core.version>1.2.0</jdal.core.version>
-        <lambdaj.version>2.3.3</lambdaj.version>
         <log4j.version>1.2.16</log4j.version>
         <slf4j.version>1.6.4</slf4j.version>
         <seam.version>2.2.2.Final</seam.version>
@@ -185,17 +179,13 @@
             <artifactId>hibernate-core</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-validator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-search</artifactId>
-            <version>${hibernate.search.version}</version>
-        </dependency>
 
         <!-- PressGangCCMS Libraries -->
+        <dependency>
+            <groupId>org.jboss.pressgang.ccms</groupId>
+            <artifactId>pressgang-ccms-model</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-utils</artifactId>
@@ -285,26 +275,6 @@
         </dependency>
 
         <!-- Other Library Dependencies -->
-        <dependency>
-            <groupId>batik</groupId>
-            <artifactId>batik-transcoder</artifactId>
-            <version>${batik.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.googlecode.lambdaj</groupId>
-            <artifactId>lambdaj</artifactId>
-            <version>${lambdaj.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.sourceforge.htmlcleaner</groupId>
-            <artifactId>htmlcleaner</artifactId>
-            <version>${htmlcleaner.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.htmlparser.jericho</groupId>
-            <artifactId>jericho-html</artifactId>
-            <version>${jericho.version}</version>
-        </dependency>
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>

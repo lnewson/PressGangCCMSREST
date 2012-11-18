@@ -1,6 +1,7 @@
 package org.jboss.pressgang.ccms.seam.session;
 
-import org.jboss.pressgang.ccms.restserver.entity.*;
+import org.jboss.pressgang.ccms.model.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.jboss.seam.annotations.Name;

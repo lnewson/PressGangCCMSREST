@@ -15,9 +15,9 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.security.Identity;
 
-import org.jboss.pressgang.ccms.restserver.entity.Category;
-import org.jboss.pressgang.ccms.restserver.entity.Tag;
-import org.jboss.pressgang.ccms.restserver.entity.TagToCategory;
+import org.jboss.pressgang.ccms.model.Category;
+import org.jboss.pressgang.ccms.model.Tag;
+import org.jboss.pressgang.ccms.model.TagToCategory;
 import org.jboss.pressgang.ccms.seam.reporting.HTMLChart;
 import org.jboss.pressgang.ccms.seam.utils.Constants;
 import org.jboss.pressgang.ccms.seam.utils.EntityUtilities;

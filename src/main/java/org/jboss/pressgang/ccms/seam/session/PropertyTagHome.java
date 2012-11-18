@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.jboss.pressgang.ccms.restserver.entity.*;
+import org.jboss.pressgang.ccms.model.*;
 import org.jboss.pressgang.ccms.seam.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.seam.utils.structures.tags.UICategoryData;
 

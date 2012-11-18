@@ -1,7 +1,7 @@
 package org.jboss.pressgang.ccms.seam.session;
 
-import org.jboss.pressgang.ccms.restserver.entity.User;
-import org.jboss.pressgang.ccms.restserver.entity.UserRole;
+import org.jboss.pressgang.ccms.model.User;
+import org.jboss.pressgang.ccms.model.UserRole;
 import org.jboss.pressgang.ccms.seam.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.seam.utils.structures.roles.UIRoleUserData;
 

@@ -8,19 +8,19 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
+import org.jboss.pressgang.ccms.model.Category;
+import org.jboss.pressgang.ccms.model.Filter;
+import org.jboss.pressgang.ccms.model.FilterCategory;
+import org.jboss.pressgang.ccms.model.FilterTag;
+import org.jboss.pressgang.ccms.model.Project;
+import org.jboss.pressgang.ccms.model.Tag;
+import org.jboss.pressgang.ccms.model.TagToCategory;
+import org.jboss.pressgang.ccms.model.TagToProject;
+import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.utils.structures.Pair;
 import org.jboss.seam.Component;
 
-import org.jboss.pressgang.ccms.restserver.entity.Category;
-import org.jboss.pressgang.ccms.restserver.entity.Filter;
-import org.jboss.pressgang.ccms.restserver.entity.FilterCategory;
-import org.jboss.pressgang.ccms.restserver.entity.FilterTag;
-import org.jboss.pressgang.ccms.restserver.entity.Project;
-import org.jboss.pressgang.ccms.restserver.entity.Tag;
-import org.jboss.pressgang.ccms.restserver.entity.TagToCategory;
-import org.jboss.pressgang.ccms.restserver.entity.TagToProject;
-import org.jboss.pressgang.ccms.restserver.entity.Topic;
 import org.jboss.pressgang.ccms.restserver.utils.Constants;
 import org.jboss.pressgang.ccms.seam.utils.EntityUtilities;
 import org.slf4j.Logger;

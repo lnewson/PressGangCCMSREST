@@ -5,9 +5,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import org.jboss.pressgang.ccms.model.Filter;
+import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
-import org.jboss.pressgang.ccms.restserver.entity.Filter;
-import org.jboss.pressgang.ccms.restserver.entity.Topic;
 import org.jboss.pressgang.ccms.restserver.filter.TopicFieldFilter;
 import org.jboss.pressgang.ccms.restserver.filter.builder.TopicFilterQueryBuilder;
 import org.jboss.pressgang.ccms.seam.utils.EntityUtilities;

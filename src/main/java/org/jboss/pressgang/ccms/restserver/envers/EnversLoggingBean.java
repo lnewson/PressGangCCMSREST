@@ -1,8 +1,7 @@
-package org.jboss.pressgang.ccms.restserver.ejb;
+package org.jboss.pressgang.ccms.restserver.envers;
 
 import java.io.Serializable;
 
-import org.jboss.pressgang.ccms.restserver.entity.base.LoggingRevisionEntity;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.annotations.Scope;

@@ -6,8 +6,8 @@ import java.util.List;
 import javax.persistence.PersistenceException;
 
 import org.hibernate.exception.ConstraintViolationException;
-import org.jboss.pressgang.ccms.restserver.entity.ImageFile;
-import org.jboss.pressgang.ccms.restserver.entity.LanguageImage;
+import org.jboss.pressgang.ccms.model.ImageFile;
+import org.jboss.pressgang.ccms.model.LanguageImage;
 import org.jboss.pressgang.ccms.restserver.utils.Constants;
 import org.jboss.pressgang.ccms.utils.common.StringUtilities;
 import org.jboss.seam.annotations.Name;

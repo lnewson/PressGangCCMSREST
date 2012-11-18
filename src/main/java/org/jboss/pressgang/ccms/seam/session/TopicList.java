@@ -1,6 +1,6 @@
 package org.jboss.pressgang.ccms.seam.session;
 
-import org.jboss.pressgang.ccms.restserver.entity.Topic;
+import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.restserver.filter.TopicFieldFilter;
 import org.jboss.pressgang.ccms.seam.session.base.EntityQuery;
 import org.jboss.pressgang.ccms.seam.utils.Constants;

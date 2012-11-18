@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
-import org.jboss.pressgang.ccms.restserver.entity.RelationshipTag;
+import org.jboss.pressgang.ccms.model.RelationshipTag;
 import org.jboss.pressgang.ccms.restserver.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.seam.annotations.In;

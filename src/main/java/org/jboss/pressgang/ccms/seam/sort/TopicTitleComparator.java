@@ -2,7 +2,7 @@ package org.jboss.pressgang.ccms.seam.sort;
 
 import java.util.Comparator;
 
-import org.jboss.pressgang.ccms.restserver.entity.Topic;
+import org.jboss.pressgang.ccms.model.Topic;
 
 public class TopicTitleComparator implements Comparator<Topic>
 {

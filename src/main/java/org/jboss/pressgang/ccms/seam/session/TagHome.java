@@ -13,8 +13,8 @@ import javax.faces.model.SelectItem;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 
+import org.jboss.pressgang.ccms.model.*;
 import org.jboss.pressgang.ccms.restserver.utils.Constants;
-import org.jboss.pressgang.ccms.restserver.entity.*;
 import org.jboss.pressgang.ccms.seam.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.seam.utils.structures.PropertyTagUISelection;
 import org.jboss.pressgang.ccms.seam.utils.structures.tags.UIProjectsData;

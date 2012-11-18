@@ -5,9 +5,9 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.Filter;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 
-import org.jboss.pressgang.ccms.restserver.entity.Filter;
 import org.jboss.pressgang.ccms.restserver.utils.EntityUtilities;
 import org.jboss.seam.Component;
 

@@ -3,7 +3,7 @@ package org.jboss.pressgang.ccms.seam.session;
 import java.util.List;
 import java.util.Set;
 
-import org.jboss.pressgang.ccms.restserver.entity.*;
+import org.jboss.pressgang.ccms.model.*;
 import org.jboss.pressgang.ccms.seam.utils.structures.tags.UICategoriesData;
 
 import org.jboss.seam.annotations.Name;

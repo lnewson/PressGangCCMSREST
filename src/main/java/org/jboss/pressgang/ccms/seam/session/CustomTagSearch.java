@@ -18,12 +18,13 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.jboss.pressgang.ccms.utils.common.HTTPUtilities;
 import org.jboss.pressgang.ccms.utils.common.MIMEUtilities;
 import org.jboss.pressgang.ccms.utils.common.ZipUtilities;
+import org.jboss.pressgang.ccms.model.Filter;
+import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.utils.structures.Pair;
-import org.jboss.pressgang.ccms.restserver.entity.Filter;
-import org.jboss.pressgang.ccms.restserver.entity.Topic;
 import org.jboss.pressgang.ccms.restserver.filter.TopicFieldFilter;
 import org.jboss.pressgang.ccms.restserver.filter.builder.TopicFilterQueryBuilder;
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.restserver.utils.TopicUtilities;
 import org.jboss.pressgang.ccms.restserver.zanata.ZanataPushTopicThread;
 import org.jboss.pressgang.ccms.seam.session.base.TopicSearchBase;
@@ -348,9 +349,9 @@ public class CustomTagSearch extends TopicSearchBase implements Serializable
 	public void pushToZanataConfirm()
 	{
 		final List<Pair<Integer, Integer>> topics = new ArrayList<Pair<Integer, Integer>>();
-		for (Topic topic: filterTopics)
+		for (final Topic topic: filterTopics)
 		{
-			topics.add(new Pair<Integer, Integer>(topic.getTopicId(), topic.getLatestRevision(entityManager).intValue()));
+			topics.add(new Pair<Integer, Integer>(topic.getTopicId(), EnversUtilities.getLatestRevision(entityManager, topic).intValue()));
 		}
 		
 		final ZanataPushTopicThread zanataPushTopicThread = new ZanataPushTopicThread(topics, false);

@@ -16,9 +16,11 @@ import org.jboss.pressgang.ccms.zanata.ZanataConstants;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
 
-import org.jboss.pressgang.ccms.restserver.entity.TranslatedTopic;
-import org.jboss.pressgang.ccms.restserver.entity.TranslatedTopicData;
+import org.jboss.pressgang.ccms.model.TranslatedTopic;
+import org.jboss.pressgang.ccms.model.TranslatedTopicData;
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.restserver.utils.TopicUtilities;
+import org.jboss.pressgang.ccms.restserver.utils.TranslatedTopicUtilities;
 import org.jboss.pressgang.ccms.restserver.utils.topicrenderer.TopicQueueRenderer;
 
 @Name("translatedTopicHome")
@@ -195,14 +197,14 @@ public class TranslatedTopicHome extends VersionedEntityHome<TranslatedTopic> im
     }
 
     public void syncWithZanata() {
-        this.getInstance().pullFromZanata();
+        TranslatedTopicUtilities.pullFromZanata(this.getInstance());
     }
 
     public List<Number> getTranslatedTopicDataRevisions() {
         if (translatedTopicDataHome.getInstance() == null)
             populate();
 
-        List<Number> revisions = new ArrayList<Number>(translatedTopicDataHome.getInstance().getRevisions(entityManager));
+        List<Number> revisions = new ArrayList<Number>(EnversUtilities.getRevisions(entityManager, translatedTopicDataHome.getInstance()));
         return revisions;
     }
 

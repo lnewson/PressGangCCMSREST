@@ -13,15 +13,15 @@ import javax.persistence.Query;
 
 import org.drools.ClassObjectFilter;
 import org.drools.WorkingMemory;
-import org.jboss.pressgang.ccms.restserver.entity.Category;
-import org.jboss.pressgang.ccms.restserver.entity.Project;
-import org.jboss.pressgang.ccms.restserver.entity.PropertyTag;
-import org.jboss.pressgang.ccms.restserver.entity.PropertyTagCategory;
-import org.jboss.pressgang.ccms.restserver.entity.PropertyTagToPropertyTagCategory;
-import org.jboss.pressgang.ccms.restserver.entity.Tag;
-import org.jboss.pressgang.ccms.restserver.entity.TagToCategory;
-import org.jboss.pressgang.ccms.restserver.entity.TagToProject;
-import org.jboss.pressgang.ccms.restserver.entity.User;
+import org.jboss.pressgang.ccms.model.Category;
+import org.jboss.pressgang.ccms.model.Project;
+import org.jboss.pressgang.ccms.model.PropertyTag;
+import org.jboss.pressgang.ccms.model.PropertyTagCategory;
+import org.jboss.pressgang.ccms.model.PropertyTagToPropertyTagCategory;
+import org.jboss.pressgang.ccms.model.Tag;
+import org.jboss.pressgang.ccms.model.TagToCategory;
+import org.jboss.pressgang.ccms.model.TagToProject;
+import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.seam.sort.RoleNameComparator;
 import org.jboss.pressgang.ccms.seam.sort.TopicTagCategoryDataNameSorter;
 import org.jboss.pressgang.ccms.seam.sort.UserNameComparator;
@@ -166,9 +166,9 @@ public class EntityUtilities extends org.jboss.pressgang.ccms.restserver.utils.E
         return tag;
     }
 
-    public static org.jboss.pressgang.ccms.restserver.entity.Role getRoleFromId(final Integer roleId)
+    public static org.jboss.pressgang.ccms.model.Role getRoleFromId(final Integer roleId)
     {
-        final org.jboss.pressgang.ccms.restserver.entity.Role role = getEntityManager().find(org.jboss.pressgang.ccms.restserver.entity.Role.class, roleId);
+        final org.jboss.pressgang.ccms.model.Role role = getEntityManager().find(org.jboss.pressgang.ccms.model.Role.class, roleId);
         return role;
     }
 
@@ -193,11 +193,11 @@ public class EntityUtilities extends org.jboss.pressgang.ccms.restserver.utils.E
         final List<UIRoleUserData> retValue = new ArrayList<UIRoleUserData>();
 
         @SuppressWarnings("unchecked")
-        final List<org.jboss.pressgang.ccms.restserver.entity.Role> roleList = getEntityManager().createQuery(org.jboss.pressgang.ccms.restserver.entity.Role.SELECT_ALL_QUERY).getResultList();
+        final List<org.jboss.pressgang.ccms.model.Role> roleList = getEntityManager().createQuery(org.jboss.pressgang.ccms.model.Role.SELECT_ALL_QUERY).getResultList();
 
         Collections.sort(roleList, new RoleNameComparator());
 
-        for (final org.jboss.pressgang.ccms.restserver.entity.Role role : roleList)
+        for (final org.jboss.pressgang.ccms.model.Role role : roleList)
         {
             final boolean selected = user.isInRole(role);
             final UIRoleUserData roleUserData = new UIRoleUserData(role.getRoleId(), role.getRoleName(), selected);
@@ -207,7 +207,7 @@ public class EntityUtilities extends org.jboss.pressgang.ccms.restserver.utils.E
         return retValue;
     }
 
-    static public List<UIRoleUserData> getRoleUsers(final org.jboss.pressgang.ccms.restserver.entity.Role role)
+    static public List<UIRoleUserData> getRoleUsers(final org.jboss.pressgang.ccms.model.Role role)
     {
         final List<UIRoleUserData> retValue = new ArrayList<UIRoleUserData>();
 

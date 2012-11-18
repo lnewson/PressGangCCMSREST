@@ -3,7 +3,7 @@ package org.jboss.pressgang.ccms.seam.session;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.framework.EntityQuery;
 
-import org.jboss.pressgang.ccms.restserver.entity.IntegerConstants;
+import org.jboss.pressgang.ccms.model.IntegerConstants;
 
 import java.util.Arrays;
 

@@ -19,10 +19,10 @@ import org.jboss.seam.annotations.Name;
 import org.jboss.seam.security.Credentials;
 import org.jboss.seam.security.Identity;
 
-import org.jboss.pressgang.ccms.restserver.entity.Role;
-import org.jboss.pressgang.ccms.restserver.entity.RoleToRole;
-import org.jboss.pressgang.ccms.restserver.entity.User;
-import org.jboss.pressgang.ccms.restserver.entity.UserRole;
+import org.jboss.pressgang.ccms.model.Role;
+import org.jboss.pressgang.ccms.model.RoleToRole;
+import org.jboss.pressgang.ccms.model.User;
+import org.jboss.pressgang.ccms.model.UserRole;
 import org.jboss.pressgang.ccms.restserver.utils.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

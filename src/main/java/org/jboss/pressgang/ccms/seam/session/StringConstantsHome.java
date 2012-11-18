@@ -3,7 +3,7 @@ package org.jboss.pressgang.ccms.seam.session;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.framework.EntityHome;
 
-import org.jboss.pressgang.ccms.restserver.entity.StringConstants;
+import org.jboss.pressgang.ccms.model.StringConstants;
 
 @Name("stringConstantsHome")
 public class StringConstantsHome extends EntityHome<StringConstants> 

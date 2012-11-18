@@ -13,10 +13,10 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import org.drools.WorkingMemory;
-import org.jboss.pressgang.ccms.restserver.entity.Tag;
-import org.jboss.pressgang.ccms.restserver.entity.Topic;
-import org.jboss.pressgang.ccms.restserver.entity.TopicToTag;
-import org.jboss.pressgang.ccms.restserver.exceptions.CustomConstraintViolationException;
+import org.jboss.pressgang.ccms.model.Tag;
+import org.jboss.pressgang.ccms.model.Topic;
+import org.jboss.pressgang.ccms.model.TopicToTag;
+import org.jboss.pressgang.ccms.model.exceptions.CustomConstraintViolationException;
 import org.jboss.pressgang.ccms.seam.session.base.GroupedTopicListBase;
 import org.jboss.pressgang.ccms.seam.utils.Constants;
 import org.jboss.pressgang.ccms.seam.utils.EntityUtilities;

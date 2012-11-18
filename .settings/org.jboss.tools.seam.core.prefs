@@ -1,7 +1,7 @@
 action.package=org.jboss.pressgang.ccms.seam.session
 action.sources=/PressGangCCMSREST-SEAM/src/main/java
 eclipse.preferences.version=1
-model.package=org.jboss.pressgang.ccms.restserver.entity
+model.package=org.jboss.pressgang.ccms.model
 model.sources=/PressGangCCMSREST-SEAM/src/main/java
 seam.ejb.project=PressGangCCMSREST-SEAM
 seam.project.connection.profile=DefaultDS

@@ -9,7 +9,7 @@ import javax.persistence.Query;
 import org.jboss.pressgang.ccms.docbook.compiling.DocbookBuildingOptions;
 import org.jboss.seam.Component;
 
-import org.jboss.pressgang.ccms.restserver.entity.Filter;
+import org.jboss.pressgang.ccms.model.Filter;
 import org.jboss.pressgang.ccms.restserver.filter.TopicFieldFilter;
 import org.jboss.pressgang.ccms.seam.session.DisplayMessageInterface;
 import org.jboss.pressgang.ccms.seam.utils.structures.tags.UIProjectsData;

@@ -2,7 +2,7 @@ package org.jboss.pressgang.ccms.seam.session;
 
 import org.jboss.seam.annotations.Name;
 
-import org.jboss.pressgang.ccms.restserver.entity.TranslatedTopicData;
+import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 
 @Name("translatedTopicDataHome")
 public class TranslatedTopicDataHome extends VersionedEntityHome<TranslatedTopicData> {

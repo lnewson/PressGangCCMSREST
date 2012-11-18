@@ -1,7 +1,6 @@
-package org.jboss.pressgang.ccms.restserver.entity.base;
+package org.jboss.pressgang.ccms.restserver.envers;
 
 import org.hibernate.envers.RevisionListener;
-import org.jboss.pressgang.ccms.restserver.ejb.EnversLoggingBean;
 import org.jboss.seam.Component;
 
 /**

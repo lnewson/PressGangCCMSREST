@@ -2,7 +2,7 @@ package org.jboss.pressgang.ccms.seam.sort;
 
 import java.util.Comparator;
 
-import org.jboss.pressgang.ccms.restserver.entity.Role;
+import org.jboss.pressgang.ccms.model.Role;
 
 public class RoleNameComparator implements Comparator<Role>
 {

@@ -2,8 +2,8 @@ package org.jboss.pressgang.ccms.seam.sort;
 
 import java.util.Comparator;
 
-import org.jboss.pressgang.ccms.restserver.entity.PropertyTag;
-import org.jboss.pressgang.ccms.restserver.entity.TagToPropertyTag;
+import org.jboss.pressgang.ccms.model.PropertyTag;
+import org.jboss.pressgang.ccms.model.TagToPropertyTag;
 
 public class TagToPropertyTagNameComparator implements Comparator<TagToPropertyTag>
 {

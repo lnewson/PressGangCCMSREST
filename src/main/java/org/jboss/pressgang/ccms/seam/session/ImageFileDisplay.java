@@ -7,8 +7,8 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
-import org.jboss.pressgang.ccms.restserver.entity.ImageFile;
-import org.jboss.pressgang.ccms.restserver.entity.LanguageImage;
+import org.jboss.pressgang.ccms.model.ImageFile;
+import org.jboss.pressgang.ccms.model.LanguageImage;
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
 import org.slf4j.Logger;

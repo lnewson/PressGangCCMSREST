@@ -7,8 +7,8 @@ import java.util.Map;
 
 import javax.faces.context.FacesContext;
 
+import org.jboss.pressgang.ccms.model.Tag;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
-import org.jboss.pressgang.ccms.restserver.entity.Tag;
 import org.jboss.pressgang.ccms.seam.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.seam.utils.structures.GroupedList;
 import org.slf4j.Logger;

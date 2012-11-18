@@ -8,7 +8,7 @@ import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;
 import org.jboss.seam.faces.Redirect;
 
-import org.jboss.pressgang.ccms.restserver.entity.Topic;
+import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.seam.utils.Constants;
 
 @Name("topBar")
