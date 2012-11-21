@@ -24,7 +24,7 @@ public class TranslatedTopicStringV1Factory
     }
 
     @Override
-    public RESTTranslatedTopicStringV1 createRESTEntityFromDBEntity(final TranslatedTopicString entity, final String baseUrl,
+    public RESTTranslatedTopicStringV1 createRESTEntityFromDBEntityInternal(final TranslatedTopicString entity, final String baseUrl,
             final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
         assert entity != null : "Parameter topic can not be null";

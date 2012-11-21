@@ -4,6 +4,24 @@
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/webapp"/>
+        <dependent-module archiveName="pressgang-ccms-model-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PressGangCCMSModel/PressGangCCMSModel">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="pressgang-ccms-utils-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PressGangCCMSCommonUtilities/PressGangCCMSCommonUtilities">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="pressgang-ccms-contentspec-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PressGangCCMSContentSpec/PressGangCCMSContentSpec">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="pressgang-ccms-zanata-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PressGangCCMSZanataInterface/PressGangCCMSZanataInterface">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="pressgang-ccms-rest-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PressGangCCMSRESTCommon/PressGangCCMSRESTCommon">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="pressgang-ccms-restv1-1.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/PressGangCCMSRESTv1Common/PressGangCCMSRESTv1Common">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
         <property name="java-output-path" value="/PressGangCCMSREST-SEAM/target/classes"/>
         <property name="context-root" value="pressgang-ccms-restserver"/>
     </wb-module>

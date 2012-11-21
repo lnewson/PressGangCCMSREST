@@ -72,7 +72,7 @@
 				<h:outputText
 					style="border: 0; background: transparent; color: green;"
 					value="This #{topicToTopic.relationshipTag.relationshipTagName} #{topicToTopic.relatedTopic.topicId}"
-					title="[#{topicToTopic.relatedTopic.topicTitle}] #{topicToTopic.relatedTopic.getCommaSeparatedTagList()}" />
+					title="[#{topicToTopic.relatedTopic.topicTitle}] #{entityHelper.getTopicCommaSeparatedTagList(topicToTopic.relatedTopic)}" />
 				<br />
 			</a4j:repeat>
 		</rich:column>
@@ -88,7 +88,7 @@
 				<h:outputText
 					style="border: 0; background: transparent; color: red;"
 					value="#{topicToTopic.mainTopic.topicId} #{topicToTopic.relationshipTag.relationshipTagName} This"
-					title="[#{topicToTopic.mainTopic.topicTitle}] #{topicToTopic.mainTopic.getCommaSeparatedTagList()}" />
+					title="[#{topicToTopic.mainTopic.topicTitle}] #{entityHelper.getTopicCommaSeparatedTagList(topicToTopic.mainTopic)}" />
 				<br />
 			</a4j:repeat>
 		</rich:column>
@@ -96,7 +96,7 @@
 		<rich:column
 			rendered="#{s:hasPermission('TopicListTagsColumn', 'Rendered', null)}">
 			<f:facet name="header">Topic Tags</f:facet>
-			<h:outputText escape="false" value="#{_topic.tagsList}" />
+			<h:outputText escape="false" value="#{entityHelper.getTopicTagsList(_topic)}" />
 		</rich:column>
 
 

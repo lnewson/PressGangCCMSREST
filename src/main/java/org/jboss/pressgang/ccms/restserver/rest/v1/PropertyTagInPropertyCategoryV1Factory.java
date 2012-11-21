@@ -23,14 +23,16 @@ import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 public class PropertyTagInPropertyCategoryV1Factory
         extends
         RESTDataObjectFactory<RESTPropertyTagInPropertyCategoryV1, PropertyTagToPropertyTagCategory, RESTPropertyTagInPropertyCategoryCollectionV1, RESTPropertyTagInPropertyCategoryCollectionItemV1> {
+
     public PropertyTagInPropertyCategoryV1Factory() {
         super(PropertyTagToPropertyTagCategory.class);
     }
 
     @Override
-    public RESTPropertyTagInPropertyCategoryV1 createRESTEntityFromDBEntity(final PropertyTagToPropertyTagCategory entity,
-            final String baseUrl, final String dataType, final ExpandDataTrunk expand, final Number revision,
-            final boolean expandParentReferences, final EntityManager entityManager) {
+    public RESTPropertyTagInPropertyCategoryV1 createRESTEntityFromDBEntityInternal(
+            final PropertyTagToPropertyTagCategory entity, final String baseUrl, final String dataType,
+            final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
+            final EntityManager entityManager) {
         assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
@@ -54,8 +56,8 @@ public class PropertyTagInPropertyCategoryV1Factory
         if (revision == null) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTPropertyTagInPropertyCategoryV1, PropertyTagToPropertyTagCategory, RESTPropertyTagInPropertyCategoryCollectionV1, RESTPropertyTagInPropertyCategoryCollectionItemV1>()
                     .create(RESTPropertyTagInPropertyCategoryCollectionV1.class, new PropertyTagInPropertyCategoryV1Factory(),
-                            entity, EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl,
-                            entityManager));
+                            entity, EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME,
+                            dataType, expand, baseUrl, entityManager));
         }
 
         // PROPERTY CATEGORIES
@@ -65,8 +67,6 @@ public class PropertyTagInPropertyCategoryV1Factory
                         RESTPropertyTagV1.PROPERTY_CATEGORIES_NAME, dataType, expand, baseUrl, revision, false, entityManager));
 
         retValue.setLinks(baseUrl, RESTv1Constants.PROPERTYTAG_URL_NAME, dataType, retValue.getId());
-        retValue.setLogDetails(new LogDetailsV1Factory().create(entity, revision, RESTBaseEntityV1.LOG_DETAILS_NAME, expand,
-                dataType, baseUrl, entityManager));
 
         return retValue;
     }

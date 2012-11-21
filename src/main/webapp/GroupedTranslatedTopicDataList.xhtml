@@ -176,7 +176,7 @@
 												rendered="#{s:hasPermission('TranslatedTopicDataTopicTitleColumn', 'Rendered', null)}">
 												<f:facet name="header">Topic Title</f:facet>
 				
-												<h:outputText value="#{translatedTopicData.translatedTopic.topicTitle}" />
+												<h:outputText value="#{entityHelper.getTranslatedTopicTitle(translatedTopicData.translatedTopic)}" />
 				
 											</rich:column>
 				
@@ -185,7 +185,7 @@
 												<f:facet name="header">Topic Tags</f:facet>
 				
 												<h:outputText escape="false"
-													value="#{translatedTopicData.translatedTopic.topicTags}" />
+													value="#{entityHelper.getTranslatedTopicTagsList(translatedTopicData.translatedTopic)}" />
 				
 											</rich:column>
 				

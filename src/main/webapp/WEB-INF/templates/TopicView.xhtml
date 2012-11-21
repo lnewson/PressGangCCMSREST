@@ -31,18 +31,6 @@
 		<h:outputText value="Topic XML Errors" />
 		<h:inputTextarea id="topicXMLErrors" cols="80" rows="10"
 			readonly="true" value="#{topic.topicSecondOrderData.topicXMLErrors}" />
-			
-		<!--<h:outputText value="Log Message" />
-		<h:outputText value="#{topicHome.logMessage}" />
-		
-		<h:outputText value="Log Message Flags" />
-		<rich:dataList value="#{topicHome.logFlags}" var="flagName">
-			<h:outputText value="#{flagName}" />
-		</rich:dataList>
-		
-		<h:outputText value="Last Updated By" rendered="#{empty topicHome.revision}"/>
-		<h:outputText value="Updated By" rendered="#{not empty topicHome.revision}"/>
-		<h:outputText value="#{topicHome.logUsername}"/>-->
 
 		<h:outputText value="Properties" />
 		<rich:dataList var="property"
@@ -69,7 +57,7 @@
 		</h:outputText>
 
 		<h:outputText value="Topic Tags" />
-		<h:outputText value="#{topic.tagsList}" escape="false" />
+		<h:outputText value="#{entityHelper.getTopicTagsList(topic)}" escape="false" />
 
 	</h:panelGrid>
 </ui:composition>

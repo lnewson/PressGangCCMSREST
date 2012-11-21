@@ -363,7 +363,7 @@
 								<h:column
 									rendered="#{s:hasPermission('RelatedTopicTagsListTagsColumn', 'Rendered', null)}">
 									<f:facet name="header">Topic Tags</f:facet>
-									<h:outputText value="#{_topic.tagsList}" escape="false" />
+									<h:outputText value="#{entityHelper.getTopicTagsList(_topic)}" escape="false" />
 								</h:column>
 
 							</rich:dataTable>

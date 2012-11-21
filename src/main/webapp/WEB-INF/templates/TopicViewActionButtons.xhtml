@@ -37,7 +37,7 @@
 		        <h:outputText value="View Revision: " />
 		        #{" "}
 		       	<h:selectOneMenu value="#{topicHome.revision}">
-				<c:forEach items="#{topicHome.instance.revisions}" var="revision">
+				<c:forEach items="#{topicHome.revisions}" var="revision">
 					<f:selectItem itemLabel="#{revision}" itemValue="#{revision}" />
 				</c:forEach>
 			</h:selectOneMenu>

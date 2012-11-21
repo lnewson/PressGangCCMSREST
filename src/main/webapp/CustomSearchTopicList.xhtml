@@ -388,7 +388,7 @@
 										<h:commandButton
 											style="border: 0; background: transparent; color: green;"
 											value="This #{topicToTopic.relationshipTag.relationshipTagName} #{topicToTopic.relatedTopic.topicId}"
-											title="#{topicToTopic.relatedTopic.topicTitle} &#13;#{topicToTopic.relatedTopic.commaSeparatedTagList}">
+											title="#{topicToTopic.relatedTopic.topicTitle} &#13;#{entityHelper.getTopicCommaSeparatedTagList(topicToTopic.relatedTopic)}">
 											<rich:componentControl event="onclick"
 												for="relatedContentMenu" operation="show">
 												<f:param value="#{topicToTopic.mainTopic.topicId}"
@@ -415,7 +415,7 @@
 										<h:commandButton
 											style="border: 0; background: transparent; color: red;"
 											value="#{topicToTopic.mainTopic.topicId} #{topicToTopic.relationshipTag.relationshipTagName} This"
-											title="#{topicToTopic.mainTopic.topicTitle} &#13;#{topicToTopic.mainTopic.commaSeparatedTagList}">
+											title="#{topicToTopic.mainTopic.topicTitle} &#13;#{entityHelper.getTopicCommaSeparatedTagList(topicToTopic.mainTopic)}">
 											<rich:componentControl event="onclick"
 												for="relatedContentMenu" operation="show">
 												<f:param value="#{topicToTopic.mainTopic.topicId}"
@@ -436,7 +436,7 @@
 									rendered="#{s:hasPermission('TopicListTagsColumn', 'Rendered', null)}">
 									<f:facet name="header">Topic Tags</f:facet>
 
-									<h:outputText escape="false" value="#{_topic.tagsList}" />
+									<h:outputText escape="false" value="#{entityHelper.getTopicTagsList(_topic)}" />
 
 								</rich:column>
 

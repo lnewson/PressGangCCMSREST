@@ -696,4 +696,8 @@ public class TopicHome extends VersionedEntityHome<Topic> {
 
     public void init() {
     }
+    
+    public List<Number> getRevisions() {
+        return EnversUtilities.getRevisions(entityManager, getInstance());
+    }
 }
