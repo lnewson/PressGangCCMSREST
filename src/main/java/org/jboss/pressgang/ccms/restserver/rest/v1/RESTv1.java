@@ -2870,7 +2870,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         /* If the specified locale can't be found then use the default */
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
             if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageImage.getLocale())) {
-                return languageImage.getImageData();
+                return languageImage.getThumbnailData();
             }
         }
 
