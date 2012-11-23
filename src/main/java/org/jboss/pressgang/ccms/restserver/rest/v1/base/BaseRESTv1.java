@@ -41,6 +41,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTLogDetailsV1;
 import org.jboss.pressgang.ccms.rest.v1.exceptions.InternalProcessingException;
 import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
+import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataDetails;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
@@ -53,13 +54,14 @@ import org.jboss.pressgang.ccms.restserver.utils.Constants;
 import org.jboss.pressgang.ccms.restserver.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.restserver.utils.FilterUtilities;
 import org.jboss.pressgang.ccms.restserver.utils.JNDIUtilities;
+import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.resteasy.plugins.providers.atom.Content;
 import org.jboss.resteasy.plugins.providers.atom.Entry;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.spi.BadRequestException;
 import org.jboss.resteasy.spi.Failure;
 import org.jboss.resteasy.spi.InternalServerErrorException;
-import org.jboss.seam.annotations.In;
+import org.jboss.seam.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,9 +79,6 @@ public class BaseRESTv1 {
     /** The Uri Information for the REST Request */
     @Context
     private UriInfo uriInfo;
-    /** The Java Bean used for logging information to Envers */
-    @In
-    private EnversLoggingBean enversLoggingBean;
 
     /**
      * Get the URL of the root REST endpoint using UriInfo from a request.
@@ -1015,6 +1014,8 @@ public class BaseRESTv1 {
         if (dataObject == null)
             return;
 
+        final EnversLoggingBean enversLoggingBean = (EnversLoggingBean) Component.getInstance("enversLoggingBean");
+        
         if (dataObject.hasParameterSet(RESTLogDetailsV1.MESSAGE_NAME))
             enversLoggingBean.addLogMessage(dataObject.getMessage());
         if (dataObject.hasParameterSet(RESTLogDetailsV1.FLAG_NAME))
@@ -1043,9 +1044,9 @@ public class BaseRESTv1 {
     protected RESTLogDetailsV1 generateLogDetails(final String message, final Integer flag, final Integer userId) {
         final RESTLogDetailsV1 logDetails = new RESTLogDetailsV1();
 
-        if (message != null)
-            logDetails.explicitSetFlag(flag);
         if (flag != null)
+            logDetails.explicitSetFlag(flag);
+        if (message != null)
             logDetails.explicitSetMessage(message);
         if (userId != null) {
             final RESTUserV1 user = new RESTUserV1();
@@ -1065,22 +1066,41 @@ public class BaseRESTv1 {
      *         class.
      */
     protected ExpandDataTrunk unmarshallExpand(final String expand) throws InvalidParameterException {
-        try {
-            /*
-             * convert the expand string from JSON to an instance of ExpandDataTrunk
-             */
-            ExpandDataTrunk expandDataTrunk = new ExpandDataTrunk();
-            if (expand != null && !expand.trim().isEmpty()) {
-                expandDataTrunk = mapper.readValue(expand, ExpandDataTrunk.class);
+        if (expand == null || expand.trim().isEmpty()) {
+            return new ExpandDataTrunk();
+        }
+        
+        // Find if the expand is a human readable or JSON encoded entity
+        if (expand.trim().startsWith("{")) {
+            // JSON Encoded Entity
+            try {
+                /*
+                 * convert the expand string from JSON to an instance of ExpandDataTrunk
+                 */    
+                return mapper.readValue(expand, ExpandDataTrunk.class);
+            } catch (final JsonParseException ex) {
+                throw new InvalidParameterException("Could not convert expand data from JSON to an instance of ExpandDataTrunk");
+            } catch (final JsonMappingException ex) {
+                throw new InvalidParameterException("Could not convert expand data from JSON to an instance of ExpandDataTrunk");
+            } catch (final IOException ex) {
+                throw new InvalidParameterException("Could not convert expand data from JSON to an instance of ExpandDataTrunk");
             }
-
-            return expandDataTrunk;
-        } catch (final JsonParseException ex) {
-            throw new InvalidParameterException("Could not convert expand data from JSON to an instance of ExpandDataTrunk");
-        } catch (final JsonMappingException ex) {
-            throw new InvalidParameterException("Could not convert expand data from JSON to an instance of ExpandDataTrunk");
-        } catch (final IOException ex) {
-            throw new InvalidParameterException("Could not convert expand data from JSON to an instance of ExpandDataTrunk");
+        } else {
+            // Human readable
+            final ExpandDataTrunk rootDataTrunk = new ExpandDataTrunk();
+            final String[] expands = expand.split("\\.");
+            
+            ExpandDataTrunk parentExpand = new ExpandDataTrunk(new ExpandDataDetails(expands[0]));
+            rootDataTrunk.setBranches(CollectionUtilities.toArrayList(parentExpand));
+            
+            for (int i = 1; i < expands.length; i++) {
+                ExpandDataTrunk childExpand = new ExpandDataTrunk(new ExpandDataDetails(expands[i]));
+                parentExpand.setBranches(CollectionUtilities.toArrayList(childExpand));
+                
+                parentExpand = childExpand;
+            }
+            
+            return rootDataTrunk;
         }
     }
 
