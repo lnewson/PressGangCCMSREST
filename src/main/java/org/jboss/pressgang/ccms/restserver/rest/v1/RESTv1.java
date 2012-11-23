@@ -1551,7 +1551,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         return updateJSONEntity(TranslatedTopicData.class, dataObject, factory, expand, logDetails);
     }
-    
+
     @Override
     public RESTTranslatedTopicCollectionV1 updateJSONTranslatedTopics(final String expand,
             final RESTTranslatedTopicCollectionV1 dataObjects, final String message, final Integer flag, final Integer userId)
@@ -2797,7 +2797,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         return createJSONEntities(RESTImageCollectionV1.class, ImageFile.class, dataObjects, factory,
                 RESTv1Constants.IMAGES_EXPANSION_NAME, expand, logDetails);
     }
-    
+
     @Override
     public RESTImageV1 deleteJSONImage(final Integer id, final String message, final Integer flag, final Integer userId,
             final String expand) throws InvalidParameterException, InternalProcessingException {
@@ -2823,36 +2823,57 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         return deleteJSONEntities(RESTImageCollectionV1.class, ImageFile.class, factory, dbEntityIds,
                 RESTv1Constants.IMAGES_EXPANSION_NAME, expand, logDetails);
     }
+
     /* RAW FUNCTIONS */
     @Override
-    public byte[] getRAWImage(final Integer id, final String locale) throws InvalidParameterException, InternalProcessingException {
+    public byte[] getRAWImage(final Integer id, final String locale) throws InvalidParameterException,
+            InternalProcessingException {
         if (id == null)
             throw new InvalidParameterException("The id parameter can not be null");
-        
+
         final ImageFile entity = getEntity(ImageFile.class, id);
         final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
+
+        /* Try and find the locale specified first */
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
             if (fixedLocale.equalsIgnoreCase(languageImage.getLocale())) {
                 return languageImage.getImageData();
             }
         }
-        
+
+        /* If the specified locale can't be found then use the default */
+        for (final LanguageImage languageImage : entity.getLanguageImages()) {
+            if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageImage.getLocale())) {
+                return languageImage.getImageData();
+            }
+        }
+
         throw new BadRequestException("No image exists for the " + fixedLocale + " locale.");
     }
-    
+
     @Override
-    public byte[] getRAWImageThumbnail(final Integer id, final String locale) throws InvalidParameterException, InternalProcessingException {
+    public byte[] getRAWImageThumbnail(final Integer id, final String locale) throws InvalidParameterException,
+            InternalProcessingException {
         if (id == null)
             throw new InvalidParameterException("The id parameter can not be null");
-        
+
         final ImageFile entity = getEntity(ImageFile.class, id);
         final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
+
+        /* Try and find the locale specified first */
         for (final LanguageImage languageImage : entity.getLanguageImages()) {
             if (fixedLocale.equalsIgnoreCase(languageImage.getLocale())) {
                 return languageImage.getThumbnailData();
             }
         }
-        
+
+        /* If the specified locale can't be found then use the default */
+        for (final LanguageImage languageImage : entity.getLanguageImages()) {
+            if (CommonConstants.DEFAULT_LOCALE.equalsIgnoreCase(languageImage.getLocale())) {
+                return languageImage.getImageData();
+            }
+        }
+
         throw new BadRequestException("No image exists for the " + fixedLocale + " locale.");
     }
 
