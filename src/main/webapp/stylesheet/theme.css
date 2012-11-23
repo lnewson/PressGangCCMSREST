@@ -322,6 +322,7 @@ td.localeName {
 
 td.logRevision {
 	width: 110px;
+	text-align: center;
 }
 
 td.logTimestamp {
