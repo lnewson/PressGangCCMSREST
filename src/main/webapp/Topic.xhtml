@@ -95,12 +95,20 @@
 			<rich:tab label="Logs" name="Logs">
 				<h:form>
 					<rich:datascroller for="logTable" maxPages="5"/>
-					<rich:dataTable id="logTable" value="#{topicHome.revisions}" var="revision" rows="15" columnClasses="logFlag,logMessage,logFlag,logUser">
+					<rich:dataTable id="logTable" value="#{topicHome.revisions}" var="revision" rows="15" columnClasses="logRevision,logTimestamp,logMessage,logFlag,logUser">
 						<rich:column>
 							<f:facet name="header">
 	                            <h:outputText value="Revision"/>
 	                        </f:facet>
 	                        <h:outputText value="#{revision}"/>
+						</rich:column>
+						<rich:column>
+							<f:facet name="header">
+	                            <h:outputText value="Timestamp"/>
+	                        </f:facet>
+	                        <h:outputText value="#{topicHome.getLogTimestamp(revision)}">
+								<s:convertDateTime type="both" dateStyle="full" />
+							</h:outputText>
 						</rich:column>
 						<rich:column>
 							<f:facet name="header">

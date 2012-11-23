@@ -4,6 +4,7 @@ import static ch.lambdaj.Lambda.*;
 import static org.hamcrest.Matchers.*;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -692,6 +693,19 @@ public class TopicHome extends VersionedEntityHome<Topic> {
         }
 
         return flagStrings;
+    }
+    
+    public String getLogTimestamp() {
+        return getLogMessage(null);
+    }
+
+    public Date getLogTimestamp(final Integer revision) {
+        if (this.getRevision() == null || this.getRevision().isEmpty()) {
+            return this.instance == null ? null : new Date(EnversUtilities.getRevisionEntity(entityManager, this.getInstance(), revision).getTimestamp());
+        } else {
+            final Number rev = revision == null ? Integer.parseInt(this.getRevision()) : revision;
+            return this.revisionInstance == null ? null : new Date(EnversUtilities.getRevisionEntity(entityManager, this.getRevisionInstance(), rev).getTimestamp());
+        }
     }
 
     public void init() {

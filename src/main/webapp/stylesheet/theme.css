@@ -320,8 +320,13 @@ td.localeName {
 	width: 75px;
 }
 
-td.logRevison {
+td.logRevision {
+	width: 110px;
+}
+
+td.logTimestamp {
 	width: 130px;
+	text-align: center;
 }
 
 td.logFlag {
