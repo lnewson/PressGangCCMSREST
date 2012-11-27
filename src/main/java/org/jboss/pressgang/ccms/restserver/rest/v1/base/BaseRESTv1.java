@@ -41,7 +41,6 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTLogDetailsV1;
 import org.jboss.pressgang.ccms.rest.v1.exceptions.InternalProcessingException;
 import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
-import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataDetails;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
@@ -54,7 +53,6 @@ import org.jboss.pressgang.ccms.restserver.utils.Constants;
 import org.jboss.pressgang.ccms.restserver.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.restserver.utils.FilterUtilities;
 import org.jboss.pressgang.ccms.restserver.utils.JNDIUtilities;
-import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.resteasy.plugins.providers.atom.Content;
 import org.jboss.resteasy.plugins.providers.atom.Entry;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
@@ -1112,41 +1110,22 @@ public class BaseRESTv1 {
      *         class.
      */
     protected ExpandDataTrunk unmarshallExpand(final String expand) throws InvalidParameterException {
-        if (expand == null || expand.trim().isEmpty()) {
-            return new ExpandDataTrunk();
-        }
-        
-        // Find if the expand is a human readable or JSON encoded entity
-        if (expand.trim().startsWith("{")) {
-            // JSON Encoded Entity
-            try {
-                /*
-                 * convert the expand string from JSON to an instance of ExpandDataTrunk
-                 */    
-                return mapper.readValue(expand, ExpandDataTrunk.class);
-            } catch (final JsonParseException ex) {
-                throw new InvalidParameterException("Could not convert expand data from JSON to an instance of ExpandDataTrunk");
-            } catch (final JsonMappingException ex) {
-                throw new InvalidParameterException("Could not convert expand data from JSON to an instance of ExpandDataTrunk");
-            } catch (final IOException ex) {
-                throw new InvalidParameterException("Could not convert expand data from JSON to an instance of ExpandDataTrunk");
+        try {
+            /*
+             * convert the expand string from JSON to an instance of ExpandDataTrunk
+             */
+            ExpandDataTrunk expandDataTrunk = new ExpandDataTrunk();
+            if (expand != null && !expand.trim().isEmpty()) {
+                expandDataTrunk = mapper.readValue(expand, ExpandDataTrunk.class);
             }
-        } else {
-            // Human readable
-            final ExpandDataTrunk rootDataTrunk = new ExpandDataTrunk();
-            final String[] expands = expand.split("\\.");
-            
-            ExpandDataTrunk parentExpand = new ExpandDataTrunk(new ExpandDataDetails(expands[0]));
-            rootDataTrunk.setBranches(CollectionUtilities.toArrayList(parentExpand));
-            
-            for (int i = 1; i < expands.length; i++) {
-                ExpandDataTrunk childExpand = new ExpandDataTrunk(new ExpandDataDetails(expands[i]));
-                parentExpand.setBranches(CollectionUtilities.toArrayList(childExpand));
-                
-                parentExpand = childExpand;
-            }
-            
-            return rootDataTrunk;
+
+            return expandDataTrunk;
+        } catch (final JsonParseException ex) {
+            throw new InvalidParameterException("Could not convert expand data from JSON to an instance of ExpandDataTrunk");
+        } catch (final JsonMappingException ex) {
+            throw new InvalidParameterException("Could not convert expand data from JSON to an instance of ExpandDataTrunk");
+        } catch (final IOException ex) {
+            throw new InvalidParameterException("Could not convert expand data from JSON to an instance of ExpandDataTrunk");
         }
     }
 
