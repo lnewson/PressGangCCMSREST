@@ -31,6 +31,9 @@
 		<h:outputText value="Topic XML Errors" />
 		<h:inputTextarea id="topicXMLErrors" cols="80" rows="10"
 			readonly="true" value="#{topic.topicSecondOrderData.topicXMLErrors}" />
+			
+		<h:outputText value="Topic XML Doctype" />
+		<h:outputText value="#{entityHelper.getTopicXMLDoctypeString(topic)}" />
 
 		<h:outputText value="Properties" />
 		<rich:dataList var="property"

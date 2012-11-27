@@ -29,4 +29,8 @@ public class EntityHelper {
     public String getTranslatedTopicTagsList(final TranslatedTopic translatedTopic) {
         return getTopicTagsList(translatedTopic.getEnversTopic(entityManager));
     }
+    
+    public String getTopicXMLDoctypeString(final Topic topic) {
+        return TopicUtilities.getXMLDoctypeString(topic);
+    }
 }
