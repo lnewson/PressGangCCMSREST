@@ -4,7 +4,7 @@ public class Constants extends org.jboss.pressgang.ccms.restserver.utils.Constan
     /**
      * The Skynet build number, displayed on the top bar of all Skynet pages. Is in the format yyyymmdd-hhmm
      */
-    public static final String BUILD = "20121127-1502";
+    public static final String BUILD = "20121128-1926";
 
     /** The initial name for a translated topic revision */
     public static final String INITIAL_TRANSLATED_TOPIC_REVISION_NAME = "Initial Untranslated Revision";
