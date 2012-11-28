@@ -18,7 +18,6 @@ import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollection
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 
-
 public class FilterLocaleV1Factory extends
         RESTDataObjectFactory<RESTFilterLocaleV1, FilterLocale, RESTFilterLocaleCollectionV1, RESTFilterLocaleCollectionItemV1> {
 
@@ -47,13 +46,16 @@ public class FilterLocaleV1Factory extends
         retValue.setLocale(entity.getLocaleName());
 
         // REVISIONS
-        if (revision == null) {
+        if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
             retValue.setRevisions(new RESTDataObjectCollectionFactory<RESTFilterLocaleV1, FilterLocale, RESTFilterLocaleCollectionV1, RESTFilterLocaleCollectionItemV1>()
-                    .create(RESTFilterLocaleCollectionV1.class, new FilterLocaleV1Factory(), entity, EnversUtilities.getRevisions(entityManager, entity),
-                            RESTBaseEntityV1.REVISIONS_NAME, dataType, expand, baseUrl, entityManager));
+                    .create(RESTFilterLocaleCollectionV1.class, new FilterLocaleV1Factory(), entity,
+                            EnversUtilities.getRevisions(entityManager, entity), RESTBaseEntityV1.REVISIONS_NAME, dataType,
+                            expand, baseUrl, entityManager));
         }
 
-        if (expandParentReferences && expand != null && entity.getFilter() != null) {
+        // PARENT
+        if (expandParentReferences && expand != null && expand.contains(RESTFilterLocaleV1.FILTER_NAME)
+                && entity.getFilter() != null) {
             retValue.setFilter(new FilterV1Factory().createRESTEntityFromDBEntity(entity.getFilter(), baseUrl, dataType,
                     expand.get(RESTFilterLocaleV1.FILTER_NAME), revision, expandParentReferences, entityManager));
         }
