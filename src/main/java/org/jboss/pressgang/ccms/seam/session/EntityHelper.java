@@ -2,7 +2,6 @@ package org.jboss.pressgang.ccms.seam.session;
 
 import javax.persistence.EntityManager;
 
-import org.jboss.pressgang.ccms.model.PropertyTag;
 import org.jboss.pressgang.ccms.model.TagToPropertyTag;
 import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.model.TopicToPropertyTag;

@@ -184,7 +184,7 @@ public class Authenticator
 			return true;
 		}
 
-		if ("ia".equals(credentials.getUsername()))
+		if ("ia".equals(credentials.getUsername()) && "pass".equals(credentials.getPassword()))
 		{
 			identity.addRole("basicRole");
 			identity.addRole("iaRole");

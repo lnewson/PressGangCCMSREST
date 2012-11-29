@@ -362,5 +362,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                 }
             }
         }
+        
+        TopicUtilities.render(entity);
     }
 }

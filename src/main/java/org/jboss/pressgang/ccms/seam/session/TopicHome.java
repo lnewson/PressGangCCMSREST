@@ -214,6 +214,9 @@ public class TopicHome extends VersionedEntityHome<Topic> {
 
             Contexts.getConversationContext().set("lasttopic", this.getInstance());
             final String retValue = super.persist();
+            
+            TopicUtilities.render(getInstance());
+            
             return retValue;
         } else {
             return "false";
@@ -379,7 +382,11 @@ public class TopicHome extends VersionedEntityHome<Topic> {
 
                 // See https://hibernate.onjira.com/browse/HHH-7329?focusedCommentId=46833#comment-46833
                 this.getEntityManager().setFlushMode(FlushModeType.AUTO);
-                return super.update();
+                final String result = super.update();
+                
+                TopicUtilities.render(getInstance());
+                
+                return result;
             }
         } catch (CustomConstraintViolationException ex) {
             log.warn("Probably an error with mutually exclusive tags", ex);
