@@ -2,7 +2,10 @@ package org.jboss.pressgang.ccms.seam.session;
 
 import javax.persistence.EntityManager;
 
+import org.jboss.pressgang.ccms.model.PropertyTag;
+import org.jboss.pressgang.ccms.model.TagToPropertyTag;
 import org.jboss.pressgang.ccms.model.Topic;
+import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
 import org.jboss.pressgang.ccms.model.TranslatedTopic;
 import org.jboss.pressgang.ccms.restserver.utils.TopicUtilities;
 import org.jboss.seam.annotations.In;
@@ -32,5 +35,13 @@ public class EntityHelper {
     
     public String getTopicXMLDoctypeString(final Topic topic) {
         return TopicUtilities.getXMLDoctypeString(topic);
+    }
+    
+    public boolean isTopicPropertyTagValid(final TopicToPropertyTag propertyTag, final Number revision) {
+        return propertyTag.isValid(entityManager, revision);
+    }
+    
+    public boolean isTagPropertyTagValid(final TagToPropertyTag propertyTag, final Number revision) {
+        return propertyTag.isValid(entityManager, revision);
     }
 }

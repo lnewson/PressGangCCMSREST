@@ -140,7 +140,7 @@
 							<f:facet name="header">
 								<h:outputText value="Is Valid" />
 							</f:facet>
-							<h:selectBooleanCheckbox value="#{property.isValid(topicHome.revision)}"
+							<h:selectBooleanCheckbox value="#{entityHelper.isTopicPropertyTagValid(property, topicHome.revision)}"
 								disabled="true" />
 						</rich:column>
 						<rich:column>
