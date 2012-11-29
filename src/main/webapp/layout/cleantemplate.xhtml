@@ -191,6 +191,13 @@
 
 
 				</rich:dropDownMenu>
+				
+				<h:outputLink id="monitoringLink"
+					value="/TopicIndex/monitoring"
+					target="_blank"
+					rendered="#{s:hasPermission('MonitoringLink', 'Rendered', null)}">
+					<h:outputText>Monitoring</h:outputText>
+				</h:outputLink>
 
 			</rich:toolBarGroup>
 			<rich:toolBarGroup location="right">

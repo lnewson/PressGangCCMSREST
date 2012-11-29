@@ -282,6 +282,13 @@
             <version>${jodatime.version}</version>
         </dependency>
 
+        <!-- Java Melody -->
+        <dependency>
+            <groupId>net.bull.javamelody</groupId>
+            <artifactId>javamelody-core</artifactId>
+            <version>1.41.0</version>
+        </dependency>
+
         <!-- We only need the jdal-core JAR itself so exclude all it's dependencies -->
         <dependency>
             <groupId>org.jdal</groupId>
