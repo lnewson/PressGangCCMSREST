@@ -75,11 +75,18 @@ public class GZIPResponseWrapper extends HttpServletResponseWrapper {
 
     @Override
     public PrintWriter getWriter() throws IOException {
-        if (this.outputStream != null)
-            throw new IllegalStateException("Print Writer already defined");
-        if (this.printWriter == null) {
-            initGZIPStream();
-            this.printWriter = new PrintWriter(new OutputStreamWriter(this.GZIPStream, getResponse().getCharacterEncoding()));
+        final String contentType = response.getContentType();
+
+        // Check if the response should be compressed based on the mime-type
+        if (isCompressible(contentType)) {
+            if (this.outputStream != null)
+                throw new IllegalStateException("Print Writer already defined");
+            if (this.printWriter == null) {
+                initGZIPStream();
+                this.printWriter = new PrintWriter(new OutputStreamWriter(this.GZIPStream, getResponse().getCharacterEncoding()));
+            }
+        } else {
+            this.printWriter = super.getWriter();
         }
         return this.printWriter;
     }
