@@ -43,6 +43,15 @@
     </listener>
     
     <filter>
+        <filter-name>compression</filter-name>
+        <filter-class>org.jboss.pressgang.ccms.restserver.servlet.filter.GZIPCompressionFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>compression</filter-name>
+        <url-pattern>/seam/resource/rest/*</url-pattern>
+    </filter-mapping>
+    
+    <filter>
         <filter-name>Seam Filter</filter-name>
         <filter-class>org.jboss.seam.servlet.SeamFilter</filter-class>
     </filter>
