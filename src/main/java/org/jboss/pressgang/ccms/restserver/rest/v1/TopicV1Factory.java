@@ -150,6 +150,10 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
     @Override
     public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final Topic entity, final RESTTopicV1 dataObject)
             throws InvalidParameterException {
+        
+        final String tempXML = entity.getTopicXML();
+        final String tempTitle = entity.getTopicTitle();
+        
         /* sync the basic properties */
         if (dataObject.hasParameterSet(RESTTopicV1.TITLE_NAME))
             entity.setTopicTitle(dataObject.getTitle());
@@ -363,6 +367,8 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
             }
         }
         
-        TopicUtilities.render(entity);
+        if (!tempXML.equals(entity.getTopicXML()) || !tempTitle.equals(entity.getTopicTitle())) {
+            TopicUtilities.render(entity);
+        }
     }
 }
