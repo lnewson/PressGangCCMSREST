@@ -47,12 +47,8 @@ public class MonitoringInterceptor extends MonitoringFilter
                }
             }
          }.run();
-         super.doFilter(request, response, chain);
       }
-      else
-      {
-         chain.doFilter(request, response);
-      }
+      super.doFilter(request, response, chain);
    }
 
 }

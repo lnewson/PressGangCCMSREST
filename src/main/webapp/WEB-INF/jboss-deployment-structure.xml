@@ -18,5 +18,8 @@
             <module name="org.jboss.logging" export="true" />
             <module name="org.apache.commons.logging" export="true" />
         </dependencies>
+        <exclusions>
+            <module name="org.jboss.resteasy.resteasy-jackson-provider" />
+        </exclusions>
     </deployment>
 </jboss-deployment-structure>
