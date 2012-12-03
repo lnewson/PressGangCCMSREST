@@ -92,8 +92,7 @@ public class GZIPCompressionFilter implements Filter {
          * determine if one has already been initialised. If it has then we leave this instance alone so it'll just continue
          * down the Filter Chain.
          */
-        if (!initialised.get()) {
-            initialised.set(true);
+        if (initialised.compareAndSet(false, true)) {
             log.debug("Initialising the GZIP Compression Filter");
             enabled = true;
 
