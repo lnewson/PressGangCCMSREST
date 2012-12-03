@@ -59,7 +59,7 @@ public class GZIPCompressionFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
             ServletException {
         // If the filter wasn't initialised then forward the request
-        if (!enabled || !(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse)) {
+        if (!enabled || !(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse) || isIncluded((HttpServletRequest) request)) {
             chain.doFilter(request, response);
             return;
         }
@@ -83,6 +83,16 @@ public class GZIPCompressionFilter implements Filter {
             chain.doFilter(request, responseWrapper);
             responseWrapper.finish();
         }
+    }
+    
+    /**
+     * Checks if the request uri is an include. These cannot be gzipped.
+     */
+    private boolean isIncluded(final HttpServletRequest request) {
+        final String uri = (String) request.getAttribute("javax.servlet.include.request_uri");
+        final boolean includeRequest = !(uri == null);
+
+        return includeRequest;
     }
 
     @Override
