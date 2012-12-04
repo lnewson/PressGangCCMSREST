@@ -367,7 +367,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
             }
         }
         
-        if (!tempXML.equals(entity.getTopicXML()) || !tempTitle.equals(entity.getTopicTitle())) {
+        if (tempXML == null || tempTitle == null || !tempXML.equals(entity.getTopicXML()) || !tempTitle.equals(entity.getTopicTitle())) {
             TopicUtilities.render(entity);
         }
     }
