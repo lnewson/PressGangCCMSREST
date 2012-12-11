@@ -1,7 +1,5 @@
 package org.jboss.pressgang.ccms.restserver.envers;
 
-import java.io.Serializable;
-
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.Name;
@@ -10,72 +8,61 @@ import org.jboss.seam.security.Credentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
+
 /**
- * This java bean provides a mechanism to provide information to a 
- * 
- * @author lnewson
+ * This java bean provides a mechanism to provide information to a
  *
+ * @author lnewson
  */
 @Scope(ScopeType.EVENT)
 @Name("enversLoggingBean")
 public class EnversLoggingBean implements Serializable {
     private static final Logger log = LoggerFactory.getLogger(EnversLoggingBean.class);
     private static final long serialVersionUID = 7455302626872967710L;
-    
+
     private String logMessage = null;
     private boolean minorChangeFlag = true;
     private boolean majorChangeFlag = false;
     private String username = null;
 
-    public String getLogMessage()
-    {
+    public String getLogMessage() {
         return logMessage;
     }
-    
-    public void setLogMessage(final String message)
-    {
-        this.logMessage = message;
+
+    public void setLogMessage(final String logMessage) {
+        this.logMessage = logMessage;
     }
-    
-    public void setLogMessage(final String message, final int flag)
-    {
+
+    public void setLogMessage(final String message, final int flag) {
         logMessage = message;
         setFlag(flag);
     }
-    
-    public void addLogMessage(final String message)
-    {
-        if (this.logMessage == null || logMessage.isEmpty())
-        {
+
+    public void addLogMessage(final String message) {
+        if (this.logMessage == null || logMessage.isEmpty()) {
             logMessage = message;
-        }
-        else
-        {
+        } else {
             logMessage = logMessage.trim() + (logMessage.matches("(!|\\.|\\?)$") ? "\n" : ".\n") + message;
         }
     }
-    
-    public Integer getFlag()
-    {
+
+    public Integer getFlag() {
         int flag = 0;
-        if (majorChangeFlag || minorChangeFlag)
-        {
-            if (minorChangeFlag)
-            {
+        if (majorChangeFlag || minorChangeFlag) {
+            if (minorChangeFlag) {
                 flag |= LoggingRevisionEntity.MINOR_CHANGE_FLAG_BIT;
             }
-            if (majorChangeFlag)
-            {
+            if (majorChangeFlag) {
                 flag |= LoggingRevisionEntity.MAJOR_CHANGE_FLAG_BIT;
             }
             return flag;
         }
-        
+
         return flag;
     }
-    
-    public void setFlag(final int flag)
-    {
+
+    public void setFlag(final int flag) {
         minorChangeFlag = (LoggingRevisionEntity.MINOR_CHANGE_FLAG_BIT & flag) == LoggingRevisionEntity.MINOR_CHANGE_FLAG_BIT;
         majorChangeFlag = (LoggingRevisionEntity.MAJOR_CHANGE_FLAG_BIT & flag) == LoggingRevisionEntity.MAJOR_CHANGE_FLAG_BIT;
     }
@@ -102,7 +89,7 @@ public class EnversLoggingBean implements Serializable {
                 final Credentials identity = (Credentials) Component.getInstance(Credentials.class, ScopeType.SESSION);
                 return identity.getUsername();
             } catch (Exception e) {
-                log.debug("Unable to lookup Indentity most likely because the thread isn't managed by seam", e);
+                log.debug("Unable to lookup Identity most likely because the thread isn't managed by seam", e);
             }
         }
         return username;

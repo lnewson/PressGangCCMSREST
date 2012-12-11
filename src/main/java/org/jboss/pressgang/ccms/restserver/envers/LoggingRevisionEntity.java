@@ -1,25 +1,19 @@
 package org.jboss.pressgang.ccms.restserver.envers;
 
-import static javax.persistence.GenerationType.IDENTITY;
-
-import java.io.Serializable;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
 import org.hibernate.envers.RevisionEntity;
 import org.hibernate.envers.RevisionNumber;
 import org.hibernate.envers.RevisionTimestamp;
 
+import javax.persistence.*;
+import java.io.Serializable;
+
+import static javax.persistence.GenerationType.IDENTITY;
+
 /**
  * A Custom Envers Revision Entity class to hold extra details about revision changes. The extra data for this class is: Log
  * Message, Username and Logging Flags.
- * 
+ *
  * @author lnewson
- * 
  */
 @Entity
 @RevisionEntity(LoggingRevisionListener.class)
@@ -94,15 +88,15 @@ public class LoggingRevisionEntity implements Serializable {
 
         LoggingRevisionEntity that = (LoggingRevisionEntity) o;
 
-        if (id != that.id)
+        if (!id.equals(that.id))
             return false;
-        if (timestamp != that.timestamp)
+        if (!timestamp.equals(that.timestamp))
             return false;
         if (logMessage != null ? !logMessage.equals(that.logMessage) : that.logMessage != null)
             return false;
         if (logFlag != null ? !logFlag.equals(that.logFlag) : that.logFlag != null)
             return false;
-        if (username != null ? !username.equals(that.username) : this.username != null)
+        if (username != null && !username.equals(that.username))
             return false;
 
         return true;

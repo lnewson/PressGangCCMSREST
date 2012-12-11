@@ -1,10 +1,5 @@
 package org.jboss.pressgang.ccms.seam.envers;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
 import org.hibernate.LockOptions;
 import org.hibernate.Session;
 import org.hibernate.engine.SessionImplementor;
@@ -21,31 +16,38 @@ import org.hibernate.envers.tools.query.Parameters;
 import org.hibernate.envers.tools.query.QueryBuilder;
 import org.hibernate.property.Getter;
 
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 /**
- *  Audit strategy which persists and retrieves audit information using a validity algorithm, based on the 
- *  start-revision and end-revision of a row in the audit tables. 
- *  <p>This algorithm works as follows:
- *  <ul>
- *  <li>For a <strong>new row</strong> that is persisted in an audit table, only the <strong>start-revision</strong> column of that row is set</li>
- *  <li>At the same time the <strong>end-revision</strong> field of the <strong>previous</strong> audit row is set to this revision</li>
- *  <li>Queries are retrieved using 'between start and end revision', instead of a subquery.</li>
- *  </ul>
- *  </p>
- *  
- *  <p>
- *  This has a few important consequences that need to be judged against against each other:
- *  <ul>
- *  <li>Persisting audit information is a bit slower, because an extra row is updated</li>
- *  <li>Retrieving audit information is a lot faster</li>
- *  </ul>
- *  </p>
- * 
+ * Audit strategy which persists and retrieves audit information using a validity algorithm, based on the
+ * start-revision and end-revision of a row in the audit tables.
+ * <p>This algorithm works as follows:
+ * <ul>
+ * <li>For a <strong>new row</strong> that is persisted in an audit table, only the <strong>start-revision</strong> column of that row is set</li>
+ * <li>At the same time the <strong>end-revision</strong> field of the <strong>previous</strong> audit row is set to this revision</li>
+ * <li>Queries are retrieved using 'between start and end revision', instead of a subquery.</li>
+ * </ul>
+ * </p>
+ * <p/>
+ * <p>
+ * This has a few important consequences that need to be judged against against each other:
+ * <ul>
+ * <li>Persisting audit information is a bit slower, because an extra row is updated</li>
+ * <li>Retrieving audit information is a lot faster</li>
+ * </ul>
+ * </p>
+ *
  * @author Stephanie Pau
  * @author Adam Warski (adam at warski dot org)
  */
 public class ValidityAuditStrategy extends org.hibernate.envers.strategy.ValidityAuditStrategy {
 
-    /** getter for the revision entity field annotated with @RevisionTimestamp */
+    /**
+     * getter for the revision entity field annotated with @RevisionTimestamp
+     */
     private Getter revisionTimestampGetter = null;
 
     private final SessionCacheCleaner sessionCacheCleaner;
@@ -77,7 +79,7 @@ public class ValidityAuditStrategy extends org.hibernate.envers.strategy.Validit
             // Create a temporary session so that this session doesn't get flushed
             final Session temporarySession = ((SessionImplementor) session).getFactory().openTemporarySession();
             @SuppressWarnings("unchecked")
-			List<Object> l = qb.toQuery(temporarySession).setLockOptions(LockOptions.UPGRADE).list();
+            List<Object> l = qb.toQuery(temporarySession).setLockOptions(LockOptions.UPGRADE).list();
 
             updateLastRevision(session, auditCfg, l, id, auditedEntityName, revision);
         }
@@ -90,7 +92,7 @@ public class ValidityAuditStrategy extends org.hibernate.envers.strategy.Validit
     @SuppressWarnings({"unchecked"})
     public void performCollectionChange(Session session, AuditConfiguration auditCfg,
                                         PersistentCollectionChangeData persistentCollectionChangeData, Object revision) {
-    	
+
         final QueryBuilder qb = new QueryBuilder(persistentCollectionChangeData.getEntityName(), "e");
 
         // Adding a parameter for each id component, except the rev number
@@ -128,34 +130,34 @@ public class ValidityAuditStrategy extends org.hibernate.envers.strategy.Validit
     }
 
     public void addEntityAtRevisionRestriction(GlobalConfiguration globalCfg, QueryBuilder rootQueryBuilder,
-			String revisionProperty,String revisionEndProperty, boolean addAlias,
-            MiddleIdData idData, String revisionPropertyPath, String originalIdPropertyName,
-            String alias1, String alias2) {
-		Parameters rootParameters = rootQueryBuilder.getRootParameters();
-		addRevisionRestriction(rootParameters, revisionProperty, revisionEndProperty, addAlias);
-	}
-	
-	public void addAssociationAtRevisionRestriction(QueryBuilder rootQueryBuilder,  String revisionProperty, 
-		    String revisionEndProperty, boolean addAlias, MiddleIdData referencingIdData, 
-		    String versionsMiddleEntityName, String eeOriginalIdPropertyPath, String revisionPropertyPath,
-		    String originalIdPropertyName, MiddleComponentData... componentDatas) {
-		Parameters rootParameters = rootQueryBuilder.getRootParameters();
-		addRevisionRestriction(rootParameters, revisionProperty, revisionEndProperty, addAlias);
-	}
-    
-	public void setRevisionTimestampGetter(Getter revisionTimestampGetter) {
-		this.revisionTimestampGetter = revisionTimestampGetter;
-	}
+                                               String revisionProperty, String revisionEndProperty, boolean addAlias,
+                                               MiddleIdData idData, String revisionPropertyPath, String originalIdPropertyName,
+                                               String alias1, String alias2) {
+        Parameters rootParameters = rootQueryBuilder.getRootParameters();
+        addRevisionRestriction(rootParameters, revisionProperty, revisionEndProperty, addAlias);
+    }
 
-    private void addRevisionRestriction(Parameters rootParameters,  
-			String revisionProperty, String revisionEndProperty, boolean addAlias) {
-    	
-		// e.revision <= _revision and (e.endRevision > _revision or e.endRevision is null)
-		Parameters subParm = rootParameters.addSubParameters("or");
-		rootParameters.addWhereWithNamedParam(revisionProperty, addAlias, "<=", "revision");
-		subParm.addWhereWithNamedParam(revisionEndProperty + ".id", addAlias, ">", "revision");
-		subParm.addWhere(revisionEndProperty, addAlias, "is", "null", false);
-	}
+    public void addAssociationAtRevisionRestriction(QueryBuilder rootQueryBuilder, String revisionProperty,
+                                                    String revisionEndProperty, boolean addAlias, MiddleIdData referencingIdData,
+                                                    String versionsMiddleEntityName, String eeOriginalIdPropertyPath, String revisionPropertyPath,
+                                                    String originalIdPropertyName, MiddleComponentData... componentDatas) {
+        Parameters rootParameters = rootQueryBuilder.getRootParameters();
+        addRevisionRestriction(rootParameters, revisionProperty, revisionEndProperty, addAlias);
+    }
+
+    public void setRevisionTimestampGetter(Getter revisionTimestampGetter) {
+        this.revisionTimestampGetter = revisionTimestampGetter;
+    }
+
+    private void addRevisionRestriction(Parameters rootParameters,
+                                        String revisionProperty, String revisionEndProperty, boolean addAlias) {
+
+        // e.revision <= _revision and (e.endRevision > _revision or e.endRevision is null)
+        Parameters subParm = rootParameters.addSubParameters("or");
+        rootParameters.addWhereWithNamedParam(revisionProperty, addAlias, "<=", "revision");
+        subParm.addWhereWithNamedParam(revisionEndProperty + ".id", addAlias, ">", "revision");
+        subParm.addWhere(revisionEndProperty, addAlias, "is", "null", false);
+    }
 
     @SuppressWarnings({"unchecked"})
     private RevisionType getRevisionType(AuditConfiguration auditCfg, Object data) {
@@ -175,21 +177,21 @@ public class ValidityAuditStrategy extends org.hibernate.envers.strategy.Validit
 
             if (auditCfg.getAuditEntCfg().isRevisionEndTimestampEnabled()) {
                 // Determine the value of the revision property annotated with @RevisionTimestamp
-            	Date revisionEndTimestamp;
-            	String revEndTimestampFieldName = auditCfg.getAuditEntCfg().getRevisionEndTimestampFieldName();
-            	Object revEndTimestampObj = this.revisionTimestampGetter.get(revision);
+                Date revisionEndTimestamp;
+                String revEndTimestampFieldName = auditCfg.getAuditEntCfg().getRevisionEndTimestampFieldName();
+                Object revEndTimestampObj = this.revisionTimestampGetter.get(revision);
 
-            	// convert to a java.util.Date
-            	if (revEndTimestampObj instanceof Date) {
-            		revisionEndTimestamp = (Date) revEndTimestampObj;
-            	} else {
-            		revisionEndTimestamp = new Date((Long) revEndTimestampObj);
-            	}
+                // convert to a java.util.Date
+                if (revEndTimestampObj instanceof Date) {
+                    revisionEndTimestamp = (Date) revEndTimestampObj;
+                } else {
+                    revisionEndTimestamp = new Date((Long) revEndTimestampObj);
+                }
 
-            	// Setting the end revision timestamp
-            	((Map<String, Object>) previousData).put(revEndTimestampFieldName, revisionEndTimestamp);
+                // Setting the end revision timestamp
+                ((Map<String, Object>) previousData).put(revEndTimestampFieldName, revisionEndTimestamp);
             }
-            
+
             // Saving the previous version
             session.saveOrUpdate(auditedEntityName, previousData);
             sessionCacheCleaner.scheduleAuditDataRemoval(session, previousData);
