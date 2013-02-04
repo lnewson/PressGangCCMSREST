@@ -1,28 +1,26 @@
 package org.jboss.pressgang.ccms.seam.session;
 
+import javax.faces.context.FacesContext;
+import javax.faces.model.SelectItem;
+import javax.persistence.EntityManager;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.faces.context.FacesContext;
-import javax.faces.model.SelectItem;
-import javax.persistence.EntityManager;
-
+import org.jboss.pressgang.ccms.filter.TopicFieldFilter;
 import org.jboss.pressgang.ccms.model.Filter;
 import org.jboss.pressgang.ccms.model.FilterField;
 import org.jboss.pressgang.ccms.model.RelationshipTag;
 import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
-import org.jboss.seam.Component;
-import org.jboss.seam.annotations.Create;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Name;
-
-import org.jboss.pressgang.ccms.restserver.filter.TopicFieldFilter;
 import org.jboss.pressgang.ccms.restserver.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.seam.session.base.GroupedTopicListBase;
 import org.jboss.pressgang.ccms.seam.utils.FilterUtilities;
 import org.jboss.pressgang.ccms.seam.utils.structures.tags.UIProjectsData;
+import org.jboss.seam.Component;
+import org.jboss.seam.annotations.Create;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,17 +29,29 @@ import org.slf4j.LoggerFactory;
 public class RelatedTopicTagsList extends GroupedTopicListBase implements DisplayMessageInterface, Serializable {
     private static final Logger log = LoggerFactory.getLogger(RelatedTopicTagsList.class);
     private static final long serialVersionUID = 1724809677704029918L;
-    /** The id of the main topic */
+    /**
+     * The id of the main topic
+     */
     private Integer topicTopicId;
-    /** The actual Topic object found with the topicTopicId */
+    /**
+     * The actual Topic object found with the topicTopicId
+     */
     private Topic instance;
-    /** The object that holds the filter field values */
+    /**
+     * The object that holds the filter field values
+     */
     private TopicFieldFilter topic = new TopicFieldFilter();
-    /** A list of the current relationships tags */
+    /**
+     * A list of the current relationships tags
+     */
     private List<SelectItem> relationshipTags = new ArrayList<SelectItem>();
-    /** The selected RelationshipTag ID */
+    /**
+     * The selected RelationshipTag ID
+     */
     private Integer selectedRelationshipTagID;
-    /** The message to be displayed to the user */
+    /**
+     * The message to be displayed to the user
+     */
     private String displayMessage;
     @In
     private EntityManager entityManager;
@@ -72,8 +82,8 @@ public class RelatedTopicTagsList extends GroupedTopicListBase implements Displa
         super.create();
 
         // build up a Filter object from the URL variables
-        final Filter filter = EntityUtilities.populateFilter(entityManager, FacesContext.getCurrentInstance()
-                .getExternalContext().getRequestParameterMap(), CommonFilterConstants.FILTER_ID,
+        final Filter filter = EntityUtilities.populateFilter(entityManager,
+                FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap(), CommonFilterConstants.FILTER_ID,
                 CommonFilterConstants.MATCH_TAG, CommonFilterConstants.GROUP_TAG, CommonFilterConstants.CATEORY_INTERNAL_LOGIC,
                 CommonFilterConstants.CATEORY_EXTERNAL_LOGIC, CommonFilterConstants.MATCH_LOCALE, new TopicFieldFilter());
 
@@ -91,22 +101,19 @@ public class RelatedTopicTagsList extends GroupedTopicListBase implements Displa
         final List<RelationshipTag> tags = entityManager.createQuery(RelationshipTag.SELECT_ALL_QUERY).getResultList();
         for (final RelationshipTag tag : tags) {
             this.relationshipTags.add(new SelectItem(tag.getRelationshipTagId(), tag.getRelationshipTagName()));
-            if (this.selectedRelationshipTagID == null)
-                this.selectedRelationshipTagID = tag.getRelationshipTagId();
+            if (this.selectedRelationshipTagID == null) this.selectedRelationshipTagID = tag.getRelationshipTagId();
         }
     }
 
     public void oneWayToAll() {
         try {
             final Topic mainTopic = entityManager.find(Topic.class, topicTopicId);
-            final RelationshipTag relationshipTag = entityManager.getReference(RelationshipTag.class,
-                    this.selectedRelationshipTagID);
+            final RelationshipTag relationshipTag = entityManager.getReference(RelationshipTag.class, this.selectedRelationshipTagID);
             final List<Topic> topics = entityManager.createQuery(getSelectAllQuery()).getResultList();
             for (final Topic topic : topics) {
                 final boolean isChild = mainTopic.isRelatedTo(topic, relationshipTag);
 
-                if (!isChild && !mainTopic.equals(topic))
-                    mainTopic.addRelationshipTo(topic, relationshipTag);
+                if (!isChild && !mainTopic.equals(topic)) mainTopic.addRelationshipTo(topic, relationshipTag);
             }
             entityManager.persist(mainTopic);
         } catch (final Exception ex) {
@@ -118,8 +125,7 @@ public class RelatedTopicTagsList extends GroupedTopicListBase implements Displa
         try {
             final EntityManager entityManager = (EntityManager) Component.getInstance("entityManager");
             final Topic mainTopic = entityManager.find(Topic.class, topicTopicId);
-            final RelationshipTag relationshipTag = entityManager.getReference(RelationshipTag.class,
-                    this.selectedRelationshipTagID);
+            final RelationshipTag relationshipTag = entityManager.getReference(RelationshipTag.class, this.selectedRelationshipTagID);
             final List<Topic> topics = entityManager.createQuery(getSelectAllQuery()).getResultList();
             for (final Topic topic : topics) {
                 final boolean isChild = topic.isRelatedTo(mainTopic, relationshipTag);
@@ -137,8 +143,7 @@ public class RelatedTopicTagsList extends GroupedTopicListBase implements Displa
     public void twoWayWithAll() {
         try {
             final Topic mainTopic = entityManager.find(Topic.class, topicTopicId);
-            final RelationshipTag relationshipTag = entityManager.getReference(RelationshipTag.class,
-                    this.selectedRelationshipTagID);
+            final RelationshipTag relationshipTag = entityManager.getReference(RelationshipTag.class, this.selectedRelationshipTagID);
             final List<Topic> topics = entityManager.createQuery(getSelectAllQuery()).getResultList();
             for (final Topic topic : topics) {
                 final boolean isMainTopicChild = topic.isRelatedTo(mainTopic, relationshipTag);
@@ -150,8 +155,7 @@ public class RelatedTopicTagsList extends GroupedTopicListBase implements Displa
 
                 final boolean isTopicChild = mainTopic.isRelatedTo(topic, relationshipTag);
 
-                if (!isTopicChild && !mainTopic.equals(topic))
-                    mainTopic.addRelationshipTo(topic, relationshipTag);
+                if (!isTopicChild && !mainTopic.equals(topic)) mainTopic.addRelationshipTo(topic, relationshipTag);
             }
             entityManager.persist(mainTopic);
         } catch (final Exception ex) {
@@ -179,8 +183,7 @@ public class RelatedTopicTagsList extends GroupedTopicListBase implements Displa
             final RelationshipTag relationshipTag = entityManager.find(RelationshipTag.class, this.selectedRelationshipTagID);
             final List<Topic> topics = entityManager.createQuery(getSelectAllQuery()).getResultList();
             for (final Topic topic : topics) {
-                if (topic.removeRelationshipTo(mainTopic, relationshipTag))
-                    entityManager.persist(topic);
+                if (topic.removeRelationshipTo(mainTopic, relationshipTag)) entityManager.persist(topic);
             }
         } catch (final Exception ex) {
             log.error("Probably an issue with the topic with id" + topicTopicId, ex);
@@ -223,8 +226,7 @@ public class RelatedTopicTagsList extends GroupedTopicListBase implements Displa
         return "topicTopicId=" + topicTopicId + "&" + params;
     }
 
-    public String removeRelationship(final Integer otherTopicId, final boolean to, final boolean from,
-            final boolean returnToSearch) {
+    public String removeRelationship(final Integer otherTopicId, final boolean to, final boolean from, final boolean returnToSearch) {
         try {
             final Topic thisTopic = entityManager.find(Topic.class, topicTopicId);
             final Topic otherTopic = entityManager.find(Topic.class, otherTopicId);
@@ -253,13 +255,11 @@ public class RelatedTopicTagsList extends GroupedTopicListBase implements Displa
         return retValue;
     }
 
-    public String createRelationship(final Integer otherTopicId, final boolean to, final boolean from,
-            final boolean returnToSearch) {
+    public String createRelationship(final Integer otherTopicId, final boolean to, final boolean from, final boolean returnToSearch) {
         try {
             final Topic thisTopic = entityManager.find(Topic.class, topicTopicId);
             final Topic otherTopic = entityManager.find(Topic.class, otherTopicId);
-            final RelationshipTag relationshipTag = entityManager.getReference(RelationshipTag.class,
-                    this.selectedRelationshipTagID);
+            final RelationshipTag relationshipTag = entityManager.getReference(RelationshipTag.class, this.selectedRelationshipTagID);
 
             if (from) {
                 if (!thisTopic.isRelatedTo(otherTopic, relationshipTag) && !thisTopic.equals(otherTopic)) {

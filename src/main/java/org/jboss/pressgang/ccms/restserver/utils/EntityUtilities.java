@@ -11,16 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.redhat.contentspec.processor.ContentSpecParser;
-import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.util.Version;
-import org.hibernate.Session;
-import org.hibernate.envers.AuditReader;
-import org.hibernate.envers.AuditReaderFactory;
-import org.hibernate.envers.query.AuditEntity;
-import org.hibernate.envers.query.AuditQuery;
-import org.hibernate.search.FullTextSession;
-import org.hibernate.search.Search;
+import org.jboss.pressgang.ccms.filter.base.IFieldFilter;
+import org.jboss.pressgang.ccms.filter.builder.TopicFilterQueryBuilder;
+import org.jboss.pressgang.ccms.filter.utils.FilterUtilities;
 import org.jboss.pressgang.ccms.model.BlobConstants;
 import org.jboss.pressgang.ccms.model.Category;
 import org.jboss.pressgang.ccms.model.Filter;
@@ -40,15 +33,13 @@ import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
-import org.jboss.pressgang.ccms.restserver.filter.base.IFieldFilter;
-import org.jboss.pressgang.ccms.restserver.filter.builder.TopicFilterQueryBuilder;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EntityUtilities {
+public class EntityUtilities extends org.jboss.pressgang.ccms.filter.utils.EntityUtilities {
     private static final Logger log = LoggerFactory.getLogger(EntityUtilities.class);
 
     public static byte[] loadBlobConstant(final EntityManager entityManager, final Integer id) {
@@ -196,10 +187,10 @@ public class EntityUtilities {
                     Integer dbState;
 
                     if (catIntVar) {
-                        if (state.equals(Constants.AND_LOGIC)) dbState = CommonFilterConstants.CATEGORY_INTERNAL_AND_STATE;
+                        if (state.equals(CommonFilterConstants.AND_LOGIC)) dbState = CommonFilterConstants.CATEGORY_INTERNAL_AND_STATE;
                         else dbState = CommonFilterConstants.CATEGORY_INTERNAL_OR_STATE;
                     } else {
-                        if (state.equals(Constants.AND_LOGIC)) dbState = CommonFilterConstants.CATEGORY_EXTERNAL_AND_STATE;
+                        if (state.equals(CommonFilterConstants.AND_LOGIC)) dbState = CommonFilterConstants.CATEGORY_EXTERNAL_AND_STATE;
                         else dbState = CommonFilterConstants.CATEGORY_EXTERNAL_OR_STATE;
                     }
 
@@ -229,7 +220,7 @@ public class EntityUtilities {
                             filter.getFilterTags().add(filterTag);
                         }
                     } catch (final Exception ex) {
-                        log.debug("Probably an invalid tag query pramater. Parameter: " + key + " Value: " + state, ex);
+                        log.debug("Probably an invalid tag query parameter. Parameter: " + key + " Value: " + state, ex);
                     }
                 } else if (groupTagVar) {
                     final Integer tagId = Integer.parseInt(key.replaceFirst(groupTagPrefix, ""));
@@ -256,7 +247,7 @@ public class EntityUtilities {
                         filterLocale.setFilter(filter);
                         filter.getFilterLocales().add(filterLocale);
                     } catch (final Exception ex) {
-                        log.debug("Probably an invalid locale query pramater. Parameter: " + key + " Value: " + state, ex);
+                        log.debug("Probably an invalid locale query parameter. Parameter: " + key + " Value: " + state, ex);
                     }
                 }
 
@@ -299,30 +290,6 @@ public class EntityUtilities {
         for (final TopicToBugzillaBug map : results)
             retValue.add(map.getTopic().getTopicId());
         return retValue;
-    }
-
-    /**
-     * @return A comma separated list of topic ids that have been included in a content spec
-     * @throws Exception
-     */
-    public static List<Integer> getTopicsInContentSpec(final EntityManager entityManager, final Integer contentSpecTopicID) {
-        try {
-            final Topic contentSpec = entityManager.find(Topic.class, contentSpecTopicID);
-
-            if (contentSpec == null) return null;
-
-            final ContentSpecParser csp = new ContentSpecParser("http://localhost:8080/TopicIndex/");
-            if (csp.parse(contentSpec.getTopicXML())) {
-                final List<Integer> topicIds = csp.getReferencedTopicIds();
-                if (topicIds.size() == 0) return CollectionUtilities.toArrayList(Constants.NULL_TOPIC_ID);
-
-                return topicIds;
-            }
-        } catch (final Exception ex) {
-            log.warn("An invalid Topic ID was stored for a Content Spec in the database, or the topic was not a valid content spec", ex);
-        }
-
-        return null;
     }
 
     public static String getTopicsInContentSpecString(final EntityManager entityManager,
@@ -419,80 +386,11 @@ public class EntityUtilities {
         return CollectionUtilities.toSeperatedString(topics);
     }
 
-    @SuppressWarnings("unchecked")
-    public static <E> List<Integer> getEditedEntities(final EntityManager entityManager, final Class<E> type, final String pkColumnName,
-            final DateTime startDate, final DateTime endDate) {
-        if (startDate == null && endDate == null) return null;
-
-        final AuditReader reader = AuditReaderFactory.get(entityManager);
-
-        final AuditQuery query = reader.createQuery().forRevisionsOfEntity(type, true, false).addOrder(
-                AuditEntity.revisionProperty("timestamp").asc()).addProjection(
-                AuditEntity.property("originalId." + pkColumnName).distinct());
-
-        if (startDate != null) query.add(AuditEntity.revisionProperty("timestamp").ge(startDate.toDate().getTime()));
-
-        if (endDate != null) query.add(AuditEntity.revisionProperty("timestamp").le(endDate.toDate().getTime()));
-
-        final List<Integer> entityIds = query.getResultList();
-
-        return entityIds;
-    }
-
     public static <E> String getEditedEntitiesString(final EntityManager entityManager, final Class<E> type, final String pkColumnName,
             final DateTime startDate, final DateTime endDate) {
         final List<Integer> ids = getEditedEntities(entityManager, type, pkColumnName, startDate, endDate);
         if (ids != null && ids.size() != 0) return CollectionUtilities.toSeperatedString(ids);
         return Constants.NULL_TOPIC_ID_STRING;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static List<Integer> getTextSearchTopicMatch(final EntityManager entityManager, final String phrase) {
-        final List<Integer> retValue = new ArrayList<Integer>();
-
-        try {
-            // get the Hibernate session from the EntityManager
-            final Session session = (Session) entityManager.getDelegate();
-            // get a Hibernate full text session. we use the Hibernate version,
-            // instead of the JPA version,
-            // because we can use the Hibernate versions to do projections
-            final FullTextSession fullTextSession = Search.getFullTextSession(session);
-            // create a query parser
-            final QueryParser parser = new QueryParser(Version.LUCENE_31, "TopicSearchText",
-                    fullTextSession.getSearchFactory().getAnalyzer(Topic.class));
-            // parse the query string
-            final org.apache.lucene.search.Query query = parser.parse(phrase);
-
-            // build a lucene query
-            /*
-             * final org.apache.lucene.search.Query query = qb .keyword() .onFields("TopicSearchText") .matching(phrase)
-             * .createQuery();
-             */
-
-            // build a hibernate query
-            final org.hibernate.search.FullTextQuery hibQuery = fullTextSession.createFullTextQuery(query, Topic.class);
-            // set the projection to return the id's of any topic's that match
-            // the query
-            hibQuery.setProjection("topicId");
-            // get the results. because we setup a projection, there is no trip
-            // to the database
-            final List<Object[]> results = hibQuery.list();
-            // extract the data into the List<Integer>
-            for (final Object[] projection : results) {
-                final Integer id = (Integer) projection[0];
-                retValue.add(id);
-            }
-        } catch (final Exception ex) {
-            log.error("Probably an error using Lucene", ex);
-        }
-
-        /*
-         * an empty list will be interpreted as no restriction as opposed to return none. so add a non existent topic id so no
-         * matches are made
-         */
-        if (retValue.size() == 0) retValue.add(-1);
-
-        return retValue;
     }
 
     @SuppressWarnings("unchecked")
@@ -560,32 +458,6 @@ public class EntityUtilities {
 
     public static String cleanStringForJavaScriptVariableName(final String input) {
         return input.replaceAll("[^a-zA-Z]", "");
-    }
-
-    public static List<Integer> getOutgoingRelatedTopicIDs(final EntityManager entityManager, final Integer topicRelatedTo) {
-        try {
-            if (topicRelatedTo != null) {
-                final Topic topic = entityManager.find(Topic.class, topicRelatedTo);
-                return topic.getRelatedTopicIDs();
-            }
-        } catch (final Exception ex) {
-            log.error(topicRelatedTo + " is probably not a valid Topic ID", ex);
-        }
-
-        return null;
-    }
-
-    public static List<Integer> getIncomingRelatedTopicIDs(final EntityManager entityManager, final Integer topicRelatedFrom) {
-        try {
-            if (topicRelatedFrom != null) {
-                final Topic topic = entityManager.find(Topic.class, topicRelatedFrom);
-                return topic.getIncomingRelatedTopicIDs();
-            }
-        } catch (final Exception ex) {
-            log.error(topicRelatedFrom + " is probably not a valid Topic ID", ex);
-        }
-
-        return null;
     }
 
     public static String getIncomingRelationshipsTo(final EntityManager entityManager, final Integer topicId) {

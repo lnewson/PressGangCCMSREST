@@ -1,5 +1,8 @@
 package org.jboss.pressgang.ccms.restserver.zanata;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.transaction.TransactionManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -7,10 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.transaction.TransactionManager;
-
+import com.redhat.contentspec.processor.ContentSpecParser;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
 import org.jboss.pressgang.ccms.contentspec.ContentSpec;
@@ -39,8 +39,6 @@ import org.zanata.rest.dto.resource.Resource;
 import org.zanata.rest.dto.resource.TextFlow;
 import org.zanata.rest.dto.resource.TextFlowTarget;
 import org.zanata.rest.dto.resource.TranslationsResource;
-
-import com.redhat.contentspec.processor.ContentSpecParser;
 
 /**
  * A class that provides a Runnable interface to allow pulling translations from Zanata for specified topics in a background
@@ -94,8 +92,7 @@ public class ZanataPullTopicThread implements Runnable {
                 for (final Integer topicId : this.translatedTopics) {
                     ++current;
                     final int progress = (int) ((float) current / (float) total * 100.0f);
-                    log.info("Pull from Zanata Progress - Topic ID {}: {} of {} ({}%)", new Integer[] { topicId, current,
-                            total, progress });
+                    log.info("Pull from Zanata Progress - Topic ID {}: {} of {} ({}%)", new Integer[]{topicId, current, total, progress});
 
                     /* ... and each locale */
                     final List<LocaleId> locales = zanataInterface.getZanataLocales();
@@ -113,8 +110,7 @@ public class ZanataPullTopicThread implements Runnable {
 
                 // Render all the updated translated topics
                 for (final Integer id : processedIds) {
-                    WorkQueue.getInstance()
-                            .execute(TopicQueueRenderer.createNewInstance(id, TopicRendererType.TRANSLATEDTOPIC));
+                    WorkQueue.getInstance().execute(TopicQueueRenderer.createNewInstance(id, TopicRendererType.TRANSLATEDTOPIC));
                 }
             } catch (final Exception ex) {
                 log.error("Probably an error looking up the EntityManagerFactory or the TransactionManager", ex);
@@ -127,8 +123,7 @@ public class ZanataPullTopicThread implements Runnable {
                     }
                 }
             } finally {
-                if (entityManager != null)
-                    entityManager.close();
+                if (entityManager != null) entityManager.close();
             }
 
         }
@@ -136,10 +131,10 @@ public class ZanataPullTopicThread implements Runnable {
 
     /**
      * Process a translated topic and pull all the translation strings from Zanata.
-     * 
-     * @param entityManager The EntityManager instance to be used to lookup information about the stored translated topic.
+     *
+     * @param entityManager     The EntityManager instance to be used to lookup information about the stored translated topic.
      * @param translatedTopicId The ID of the Translated Topic to be processed.
-     * @param locale The locale of the translated topic to be processed.
+     * @param locale            The locale of the translated topic to be processed.
      * @return The ID of the TranslatedTopicData that was created or updated.
      */
     @SuppressWarnings("deprecation")
@@ -215,8 +210,7 @@ public class ZanataPullTopicThread implements Runnable {
 
                 try {
                     if (historicalTopic.isTaggedWith(CommonConstants.CONTENT_SPEC_TAG_ID)) {
-                        processContentSpec(entityManager, historicalTopic, translatedTopicData, translationDetails,
-                                translations);
+                        processContentSpec(entityManager, historicalTopic, translatedTopicData, translationDetails, translations);
                     } else {
                         processTopic(entityManager, historicalTopic, translatedTopicData, translationDetails, translations);
                     }
@@ -237,11 +231,11 @@ public class ZanataPullTopicThread implements Runnable {
     /**
      * Processes a Translated Topic and updates or removes the translation strings in that topic to match the new values pulled
      * down from Zanata. It also updates the XML using the strings pulled from Zanata.
-     * 
-     * @param historicalTopic The historical topic the translation was built from.
-     * @param translatedTopic The Translated Topic to update.
+     *
+     * @param historicalTopic    The historical topic the translation was built from.
+     * @param translatedTopic    The Translated Topic to update.
      * @param translationDetails The mapping of Original Translation strings to Zanata Translation information.
-     * @param translations A direct mapping of Original strings to Translation strings.
+     * @param translations       A direct mapping of Original strings to Translation strings.
      * @return True if anything in the translated topic changed, otherwise false.
      * @throws SAXException Thrown if the XML in the historical topic has invalid XML and can't be parsed.
      */
@@ -273,8 +267,8 @@ public class ZanataPullTopicThread implements Runnable {
             // Add any StringToNode's that match original translations for the bugged v1 method
             for (final StringToNodeCollection stringToNodeCollectionV1 : stringToNodeCollectionsV1) {
                 for (final String originalString : translations.keySet()) {
-                    if (originalString.equals(stringToNodeCollectionV1.getTranslationString())
-                            && !stringToNodeCollections.contains(stringToNodeCollectionV1)) {
+                    if (originalString.equals(stringToNodeCollectionV1.getTranslationString()) && !stringToNodeCollections.contains(
+                            stringToNodeCollectionV1)) {
                         stringToNodeCollections.add(stringToNodeCollectionV1);
                         tempStringToNodeCollection.add(stringToNodeCollectionV1);
                     }
@@ -357,11 +351,11 @@ public class ZanataPullTopicThread implements Runnable {
     /**
      * Processes a Translated Topic and updates or removes the translation strings in that topic to match the new values pulled
      * down from Zanata. It also updates the Content Spec using the strings pulled from Zanata.
-     * 
-     * @param historicalTopic The historical topic the translation was built from.
-     * @param translatedTopic The Translated Topic to update.
+     *
+     * @param historicalTopic    The historical topic the translation was built from.
+     * @param translatedTopic    The Translated Topic to update.
      * @param translationDetails The mapping of Original Translation strings to Zanata Translation information.
-     * @param translations A direct mapping of Original strings to Translation strings.
+     * @param translations       A direct mapping of Original strings to Translation strings.
      * @return True if anything in the translated topic changed, otherwise false.
      * @throws Exception Thrown if there is an error in the Content Specification syntax.
      */
@@ -372,15 +366,14 @@ public class ZanataPullTopicThread implements Runnable {
 
         // Parse the Content Spec stored in the XML Field
         // TODO The URL shouldn't be hardcoded
-        final ContentSpecParser parser = new ContentSpecParser("http://localhost:8080/TopicIndex/");
+        final ContentSpecParser parser = new ContentSpecParser("http://localhost:8080/TopicIndex/", loggerManager);
 
         // Replace the translated strings, and save the result into the TranslatedTopicData entity
         if (parser.parse(historicalTopic.getTopicXML())) {
             final ContentSpec spec = parser.getContentSpec();
 
             if (spec != null) {
-                final List<StringToCSNodeCollection> stringToNodeCollections = ContentSpecUtilities.getTranslatableStrings(
-                        spec, false);
+                final List<StringToCSNodeCollection> stringToNodeCollections = ContentSpecUtilities.getTranslatableStrings(spec, false);
 
                 // Create a temporary collection that we can freely remove items from
                 final List<StringToCSNodeCollection> tempStringToNodeCollection = new ArrayList<StringToCSNodeCollection>();

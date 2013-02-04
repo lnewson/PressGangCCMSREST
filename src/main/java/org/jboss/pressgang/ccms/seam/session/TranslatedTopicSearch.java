@@ -1,28 +1,28 @@
 package org.jboss.pressgang.ccms.seam.session;
 
+import javax.faces.context.FacesContext;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
+import javax.persistence.criteria.CriteriaQuery;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import javax.faces.context.FacesContext;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
-import javax.persistence.criteria.CriteriaQuery;
 
 import org.hibernate.exception.ConstraintViolationException;
-import org.jboss.pressgang.ccms.utils.common.HTTPUtilities;
-import org.jboss.pressgang.ccms.utils.common.MIMEUtilities;
+import org.jboss.pressgang.ccms.filter.TopicFieldFilter;
+import org.jboss.pressgang.ccms.filter.builder.TranslatedTopicDataFilterQueryBuilder;
 import org.jboss.pressgang.ccms.model.Filter;
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
-import org.jboss.pressgang.ccms.restserver.filter.TopicFieldFilter;
-import org.jboss.pressgang.ccms.restserver.filter.builder.TranslatedTopicDataFilterQueryBuilder;
 import org.jboss.pressgang.ccms.restserver.utils.EntityUtilities;
+import org.jboss.pressgang.ccms.seam.session.base.TopicSearchBase;
 import org.jboss.pressgang.ccms.seam.utils.FilterUtilities;
 import org.jboss.pressgang.ccms.seam.utils.contentspec.ContentSpecGenerator;
 import org.jboss.pressgang.ccms.seam.utils.structures.locales.UILocales;
-import org.jboss.pressgang.ccms.seam.session.base.TopicSearchBase;
+import org.jboss.pressgang.ccms.utils.common.HTTPUtilities;
+import org.jboss.pressgang.ccms.utils.common.MIMEUtilities;
 import org.jboss.seam.Component;
 import org.jboss.seam.ScopeType;
 import org.jboss.seam.annotations.Create;
@@ -43,7 +43,9 @@ public class TranslatedTopicSearch extends TopicSearchBase implements Serializab
 
     @In
     private EntityManager entityManager;
-    /** A list of locales that can be selected */
+    /**
+     * A list of locales that can be selected
+     */
     private UILocales selectedLocales = new UILocales();
 
     public UILocales getSelectedLocales() {
@@ -100,10 +102,10 @@ public class TranslatedTopicSearch extends TopicSearchBase implements Serializab
 
     /**
      * This function takes the tag selections and uses these to populate a Filter
-     * 
-     * @param filter The filter to sync with the tag selection
+     *
+     * @param filter  The filter to sync with the tag selection
      * @param persist true if this filter is being saved to the db (i.e. the user is actually saving the filter), and false if
-     *        it is not (like when the user is building the docbook zip file)
+     *                it is not (like when the user is building the docbook zip file)
      */
     @Override
     protected void syncFilterWithUI(final Filter filter) {
@@ -123,10 +125,8 @@ public class TranslatedTopicSearch extends TopicSearchBase implements Serializab
 
         // load the filter from the database using the filter id
         Filter filter = null;
-        if (selectedFilter != null)
-            filter = entityManager.find(Filter.class, selectedFilter);
-        else
-            filter = new Filter();
+        if (selectedFilter != null) filter = entityManager.find(Filter.class, selectedFilter);
+        else filter = new Filter();
 
         this.setSelectedFilterName(filter.getFilterName());
 
@@ -154,8 +154,7 @@ public class TranslatedTopicSearch extends TopicSearchBase implements Serializab
             Filter filter;
 
             // load the filter object if it exists
-            if (this.selectedFilter != null)
-                filter = entityManager.find(Filter.class, selectedFilter);
+            if (this.selectedFilter != null) filter = entityManager.find(Filter.class, selectedFilter);
             else
                 // get a reference to the Filter object
                 filter = new Filter();

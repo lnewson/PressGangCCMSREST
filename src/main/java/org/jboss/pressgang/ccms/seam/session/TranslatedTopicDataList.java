@@ -5,17 +5,16 @@ import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import org.jboss.pressgang.ccms.filter.TopicFieldFilter;
+import org.jboss.pressgang.ccms.filter.builder.TranslatedTopicDataFilterQueryBuilder;
 import org.jboss.pressgang.ccms.model.Filter;
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Name;
-
-import org.jboss.pressgang.ccms.restserver.filter.TopicFieldFilter;
-import org.jboss.pressgang.ccms.restserver.filter.builder.TranslatedTopicDataFilterQueryBuilder;
 import org.jboss.pressgang.ccms.restserver.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.seam.session.base.EntityQuery;
 import org.jboss.pressgang.ccms.seam.utils.FilterUtilities;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
 
 @Name("translatedTopicDataList")
 public class TranslatedTopicDataList extends EntityQuery<TranslatedTopicData> {
@@ -42,11 +41,10 @@ public class TranslatedTopicDataList extends EntityQuery<TranslatedTopicData> {
             final TranslatedTopicDataFilterQueryBuilder filterQueryBuilder) {
         if (criteriaQuery == null) {
             // initialize filter home
-            final Filter filter = EntityUtilities.populateFilter(entityManager, FacesContext.getCurrentInstance()
-                    .getExternalContext().getRequestParameterMap(), CommonFilterConstants.FILTER_ID,
-                    CommonFilterConstants.MATCH_TAG, CommonFilterConstants.GROUP_TAG,
-                    CommonFilterConstants.CATEORY_INTERNAL_LOGIC, CommonFilterConstants.CATEORY_EXTERNAL_LOGIC,
-                    CommonFilterConstants.MATCH_LOCALE, new TopicFieldFilter());
+            final Filter filter = EntityUtilities.populateFilter(entityManager,
+                    FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap(), CommonFilterConstants.FILTER_ID,
+                    CommonFilterConstants.MATCH_TAG, CommonFilterConstants.GROUP_TAG, CommonFilterConstants.CATEORY_INTERNAL_LOGIC,
+                    CommonFilterConstants.CATEORY_EXTERNAL_LOGIC, CommonFilterConstants.MATCH_LOCALE, new TopicFieldFilter());
 
             /*
              * the filter may be null if an invalid variable was passed in the URL
@@ -65,8 +63,7 @@ public class TranslatedTopicDataList extends EntityQuery<TranslatedTopicData> {
             this.criteriaQuery = criteriaQuery;
         }
 
-        if (limit != null && limit != -1)
-            setMaxResults(limit);
+        if (limit != null && limit != -1) setMaxResults(limit);
 
         setCriteriaQuery(this.criteriaQuery);
     }

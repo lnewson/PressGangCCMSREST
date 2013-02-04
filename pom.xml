@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.jboss.pressgang</groupId>
@@ -30,8 +30,6 @@
         <xerces.version>2.9.1</xerces.version>
         <resteasy.version>2.3.2.Final</resteasy.version>
         <hibernate.version>3.6.10.Final</hibernate.version>
-        <jodatime.version>2.1</jodatime.version>
-        <jdal.core.version>1.2.0</jdal.core.version>
         <log4j.version>1.2.16</log4j.version>
         <slf4j.version>1.6.4</slf4j.version>
         <seam.version>2.2.2.Final</seam.version>
@@ -188,6 +186,11 @@
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
+            <artifactId>pressgang-ccms-query</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-utils</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
@@ -214,7 +217,12 @@
         <dependency>
             <groupId>org.jboss.pressgang.ccms.contentspec</groupId>
             <artifactId>csprocessor</artifactId>
-            <version>0.0.4-SNAPSHOT</version>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.pressgang.ccms.contentspec</groupId>
+            <artifactId>csprocessor-database-provider</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
@@ -274,167 +282,16 @@
             <version>${drools.version}</version>
         </dependency>
 
-        <!-- Other Library Dependencies -->
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>${jodatime.version}</version>
-        </dependency>
-
         <!-- Java Melody -->
         <dependency>
             <groupId>net.bull.javamelody</groupId>
             <artifactId>javamelody-core</artifactId>
             <version>1.41.0</version>
         </dependency>
-
-        <!-- We only need the jdal-core JAR itself so exclude all it's dependencies -->
         <dependency>
-            <groupId>org.jdal</groupId>
-            <artifactId>jdal-core</artifactId>
-            <version>${jdal.core.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>hibernate-jpa-2.0-api</artifactId>
-                    <groupId>org.hibernate.javax.persistence</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-context</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-aspects</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-logging</artifactId>
-                    <groupId>commons-logging</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>json-lib</artifactId>
-                    <groupId>net.sf.json-lib</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>ehcache-core</artifactId>
-                    <groupId>net.sf.ehcache</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jts</artifactId>
-                    <groupId>com.vividsolutions</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-tx</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>xercesImpl</artifactId>
-                    <groupId>xerces</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-io</artifactId>
-                    <groupId>commons-io</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jibx-bind</artifactId>
-                    <groupId>org.jibx</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>mybatis</artifactId>
-                    <groupId>org.mybatis</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>aspectjweaver</artifactId>
-                    <groupId>org.aspectj</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-web</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-beans</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jasperreports</artifactId>
-                    <groupId>net.sf.jasperreports</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>jsr250-api</artifactId>
-                    <groupId>javax.annotation</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>servlet-api</artifactId>
-                    <groupId>javax.servlet</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-context-support</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>log4j</artifactId>
-                    <groupId>log4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>poi-scratchpad</artifactId>
-                    <groupId>org.apache.poi</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-jdbc</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>groovy-all</artifactId>
-                    <groupId>org.codehaus.groovy</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>castor-xml</artifactId>
-                    <groupId>org.codehaus.castor</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>easymock</artifactId>
-                    <groupId>org.easymock</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-beanutils</artifactId>
-                    <groupId>commons-beanutils</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>hibernate-ehcache</artifactId>
-                    <groupId>org.hibernate</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-core</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>hibernate-core</artifactId>
-                    <groupId>org.hibernate</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>cglib-nodep</artifactId>
-                    <groupId>cglib</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-aop</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>hibernate-entitymanager</artifactId>
-                    <groupId>org.hibernate</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>javassist</artifactId>
-                    <groupId>javassist</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-beanutils-bean-collections</artifactId>
-                    <groupId>commons-beanutils</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>spring-orm</artifactId>
-                    <groupId>org.springframework</groupId>
-                </exclusion>
-            </exclusions>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.2</version>
         </dependency>
 
         <!-- Logging Libraries -->
