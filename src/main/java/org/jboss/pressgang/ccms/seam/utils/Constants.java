@@ -4,15 +4,22 @@ public class Constants extends org.jboss.pressgang.ccms.restserver.utils.Constan
     /**
      * The Skynet build number, displayed on the top bar of all Skynet pages. Is in the format yyyymmdd-hhmm
      */
-    public static final String BUILD = "20121128-1926";
+    public static final String BUILD = "20130204-1324";
 
-    /** The initial name for a translated topic revision */
+    /**
+     * The initial name for a translated topic revision
+     */
     public static final String INITIAL_TRANSLATED_TOPIC_REVISION_NAME = "Initial Untranslated Revision";
 
-    /** The HTML returned when a Topic's XML could not be transformed */
-    public static final String XSL_ERROR_TEMPLATE = "<html><head><title>ERROR</title></head><body>The topic could not be transformed into HTML</body></html>";
+    /**
+     * The HTML returned when a Topic's XML could not be transformed
+     */
+    public static final String XSL_ERROR_TEMPLATE = "<html><head><title>ERROR</title></head><body>The topic could not be transformed into" +
+            " HTML</body></html>";
 
-    /** The base URL from which the REST interface can be accessed */
+    /**
+     * The base URL from which the REST interface can be accessed
+     */
     public static final String BASE_REST_PATH = "/seam/resource/rest";
 
     /*
