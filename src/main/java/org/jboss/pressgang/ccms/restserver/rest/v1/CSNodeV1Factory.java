@@ -8,12 +8,12 @@ import org.jboss.pressgang.ccms.model.PropertyTag;
 import org.jboss.pressgang.ccms.model.contentspec.CSNode;
 import org.jboss.pressgang.ccms.model.contentspec.CSNodeToCSNode;
 import org.jboss.pressgang.ccms.model.contentspec.CSNodeToPropertyTag;
-import org.jboss.pressgang.ccms.model.contentspec.CSTranslatedString;
+import org.jboss.pressgang.ccms.model.contentspec.CSTranslatedNode;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSNodeCollectionV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSTranslatedStringCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSTranslatedNodeCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTCSNodeCollectionItemV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTCSTranslatedStringCollectionItemV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTCSTranslatedNodeCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.join.RESTCSRelatedNodeCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.join.RESTCSRelatedNodeCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTAssignedPropertyTagCollectionItemV1;
@@ -21,7 +21,7 @@ import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTag
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSTranslatedStringV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSTranslatedNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTContentSpecV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeTypeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.join.RESTCSRelatedNodeV1;
@@ -53,18 +53,18 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
         expandOptions.add(RESTCSNodeV1.PROPERTIES_NAME);
         expandOptions.add(RESTCSNodeV1.RELATED_FROM_NAME);
         expandOptions.add(RESTCSNodeV1.RELATED_TO_NAME);
-        expandOptions.add(RESTCSNodeV1.TRANSLATED_STRINGS_NAME);
+        expandOptions.add(RESTCSNodeV1.TRANSLATED_NODES_NAME);
         if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
         retValue.setExpand(expandOptions);
 
         retValue.setId(entity.getId());
         retValue.setTitle(entity.getCSNodeTitle());
-        retValue.setAlternateTitle(entity.getCSAlternativeNodeTitle());
+        retValue.setTargetId(entity.getCSNodeTargetId());
+        retValue.setAdditionalText(entity.getAdditionalText());
         retValue.setCondition(entity.getCondition());
-        retValue.setFlag(entity.getFlag());
         retValue.setNodeType(RESTCSNodeTypeV1.getNodeType(entity.getCSNodeType()));
-        retValue.setTopicId(entity.getTopicId());
-        retValue.setTopicRevision(entity.getTopicRevision());
+        retValue.setEntityId(entity.getEntityId());
+        retValue.setEntityRevision(entity.getEntityRevision());
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
@@ -118,13 +118,13 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
         }
 
         // TRANSLATED STRINGS
-        if (expand != null && expand.contains(RESTCSNodeV1.TRANSLATED_STRINGS_NAME)) {
-            retValue.setTranslatedStrings_OTM(
-                    new RESTDataObjectCollectionFactory<RESTCSTranslatedStringV1, CSTranslatedString, RESTCSTranslatedStringCollectionV1,
-                            RESTCSTranslatedStringCollectionItemV1>().create(
-                            RESTCSTranslatedStringCollectionV1.class, new CSTranslatedStringV1Factory(),
-                            entity.getCSTranslatedStringsList(), RESTCSNodeV1.TRANSLATED_STRINGS_NAME, dataType, expand, baseUrl, false,
-                            entityManager));
+        if (expand != null && expand.contains(RESTCSNodeV1.TRANSLATED_NODES_NAME)) {
+            retValue.setTranslatedNodes_OTM(
+                    new RESTDataObjectCollectionFactory<RESTCSTranslatedNodeV1, CSTranslatedNode, RESTCSTranslatedNodeCollectionV1,
+                            RESTCSTranslatedNodeCollectionItemV1>().create(
+                            RESTCSTranslatedNodeCollectionV1.class, new CSTranslatedNodeV1Factory(),
+                            entity.getTranslatedNodes(entityManager, revision), RESTCSNodeV1.TRANSLATED_NODES_NAME, dataType, expand,
+                            baseUrl, false, entityManager));
         }
 
         // PROPERTY TAGS
@@ -147,14 +147,18 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
             final RESTCSNodeV1 dataObject) throws InvalidParameterException {
         if (dataObject.hasParameterSet(RESTCSNodeV1.TITLE_NAME)) entity.setCSNodeTitle(dataObject.getTitle());
 
+        if (dataObject.hasParameterSet(RESTCSNodeV1.TARGET_ID_NAME)) entity.setCSNodeTargetId(dataObject.getTargetId());
+
+        if (dataObject.hasParameterSet(RESTCSNodeV1.ADDITIONAL_TEXT_NAME)) entity.setAdditionalText(dataObject.getAdditionalText());
+
         if (dataObject.hasParameterSet(RESTCSNodeV1.CONDITION_NAME)) entity.setCondition(dataObject.getCondition());
 
         if (dataObject.hasParameterSet(RESTCSNodeV1.NODE_TYPE_NAME))
             entity.setCSNodeType(RESTCSNodeTypeV1.getNodeTypeId(dataObject.getNodeType()));
 
-        if (dataObject.hasParameterSet(RESTCSNodeV1.TOPIC_ID_NAME)) entity.setTopicId(dataObject.getTopicId());
+        if (dataObject.hasParameterSet(RESTCSNodeV1.ENTITY_ID_NAME)) entity.setEntityId(dataObject.getEntityId());
 
-        if (dataObject.hasParameterSet(RESTCSNodeV1.TOPIC_REVISION_NAME)) entity.setTopicRevision(dataObject.getTopicRevision());
+        if (dataObject.hasParameterSet(RESTCSNodeV1.ENTITY_REVISION_NAME)) entity.setEntityRevision(dataObject.getEntityRevision());
 
         /* Set the ContentSpec for the Node */
         if (dataObject.hasParameterSet(RESTCSNodeV1.CONTENT_SPEC_NAME)) {
@@ -219,6 +223,7 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
                         throw new InvalidParameterException("No CSNode entity was found with the primary key " + restEntity.getId());
 
                     entity.removeChild(dbEntity);
+                    entityManager.remove(dbEntity);
                 } else if (restEntityItem.returnIsAddItem()) {
                     final CSNode dbEntity = new CSNodeV1Factory().createDBEntityFromRESTEntity(entityManager, restEntity);
                     entityManager.persist(dbEntity);
@@ -229,37 +234,6 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
                         throw new InvalidParameterException("No CSNode entity was found with the primary key " + restEntity.getId());
 
                     new CSNodeV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
-                }
-            }
-        }
-
-        /* One To Many - Add will create a child entity */
-        if (dataObject.hasParameterSet(
-                RESTCSNodeV1.TRANSLATED_STRINGS_NAME) && dataObject.getTranslatedStrings_OTM() != null && dataObject
-                .getTranslatedStrings_OTM().getItems() != null) {
-            dataObject.getTranslatedStrings_OTM().removeInvalidChangeItemRequests();
-
-            /* remove any items first */
-            for (final RESTCSTranslatedStringCollectionItemV1 restEntityItem : dataObject.getTranslatedStrings_OTM().getItems()) {
-                final RESTCSTranslatedStringV1 restEntity = restEntityItem.getItem();
-
-                if (restEntityItem.returnIsRemoveItem()) {
-                    final CSTranslatedString dbEntity = entityManager.find(CSTranslatedString.class, restEntity.getId());
-                    if (dbEntity == null) throw new InvalidParameterException(
-                            "No CSTranslatedString entity was found with the primary key " + restEntity.getId());
-
-                    entity.removeTranslatedString(dbEntity);
-                } else if (restEntityItem.returnIsAddItem()) {
-                    final CSTranslatedString dbEntity = new CSTranslatedStringV1Factory().createDBEntityFromRESTEntity(entityManager,
-                            restEntity);
-                    entityManager.persist(dbEntity);
-                    entity.addTranslatedString(dbEntity);
-                } else if (restEntityItem.returnIsUpdateItem()) {
-                    final CSTranslatedString dbEntity = entityManager.find(CSTranslatedString.class, restEntity.getId());
-                    if (dbEntity == null) throw new InvalidParameterException(
-                            "No CSTranslatedString entity was found with the primary key " + restEntity.getId());
-
-                    new CSTranslatedStringV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 }
             }
         }

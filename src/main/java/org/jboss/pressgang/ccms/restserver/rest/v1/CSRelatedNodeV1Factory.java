@@ -4,14 +4,8 @@ import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.pressgang.ccms.model.contentspec.CSNode;
 import org.jboss.pressgang.ccms.model.contentspec.CSNodeToCSNode;
 import org.jboss.pressgang.ccms.model.contentspec.CSNodeToPropertyTag;
-import org.jboss.pressgang.ccms.model.contentspec.CSTranslatedString;
-import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSNodeCollectionV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSTranslatedStringCollectionV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTCSNodeCollectionItemV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTCSTranslatedStringCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.join.RESTCSRelatedNodeCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.join.RESTCSRelatedNodeCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTAssignedPropertyTagCollectionItemV1;
@@ -19,8 +13,6 @@ import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTag
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSTranslatedStringV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTContentSpecV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeRelationshipTypeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTCSNodeTypeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.join.RESTCSRelatedNodeV1;
@@ -52,20 +44,19 @@ public class CSRelatedNodeV1Factory extends RESTDataObjectFactory<RESTCSRelatedN
         expandOptions.add(RESTCSRelatedNodeV1.PROPERTIES_NAME);
         expandOptions.add(RESTCSRelatedNodeV1.RELATED_FROM_NAME);
         expandOptions.add(RESTCSRelatedNodeV1.RELATED_TO_NAME);
-        expandOptions.add(RESTCSRelatedNodeV1.TRANSLATED_STRINGS_NAME);
         if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
         retValue.setExpand(expandOptions);
 
         retValue.setId(entity.getRelatedNode().getId());
         retValue.setRelationshipId(entity.getId());
         retValue.setTitle(entity.getRelatedNode().getCSNodeTitle());
-        retValue.setAlternateTitle(entity.getRelatedNode().getCSAlternativeNodeTitle());
+        retValue.setAdditionalText(entity.getRelatedNode().getAdditionalText());
+        retValue.setTargetId(entity.getRelatedNode().getCSNodeTargetId());
         retValue.setRelationshipType(RESTCSNodeRelationshipTypeV1.getRelationshipType(entity.getRelationshipType()));
         retValue.setCondition(entity.getRelatedNode().getCondition());
-        retValue.setFlag(entity.getRelatedNode().getFlag());
         retValue.setNodeType(RESTCSNodeTypeV1.getNodeType(entity.getRelatedNode().getCSNodeType()));
-        retValue.setTopicId(entity.getRelatedNode().getTopicId());
-        retValue.setTopicRevision(entity.getRelatedNode().getTopicRevision());
+        retValue.setEntityId(entity.getRelatedNode().getEntityId());
+        retValue.setEntityRevision(entity.getRelatedNode().getEntityRevision());
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {
@@ -94,44 +85,6 @@ public class CSRelatedNodeV1Factory extends RESTDataObjectFactory<RESTCSRelatedN
         if (entity.getRelatedNode().getNext() != null) retValue.setNextNodeId(entity.getRelatedNode().getNext().getId());
 
         if (entity.getRelatedNode().getPrevious() != null) retValue.setPreviousNodeId(entity.getRelatedNode().getPrevious().getId());
-
-        // CHILDREN NODES
-        if (expand != null && expand.contains(RESTContentSpecV1.NODES_NAME)) {
-            retValue.setChildren_OTM(
-                    new RESTDataObjectCollectionFactory<RESTCSNodeV1, CSNode, RESTCSNodeCollectionV1, RESTCSNodeCollectionItemV1>().create(
-                            RESTCSNodeCollectionV1.class, new CSNodeV1Factory(), entity.getRelatedNode().getChildrenList(),
-                            RESTCSNodeV1.CHILDREN_NAME, dataType, expand, baseUrl, expandParentReferences, entityManager));
-        }
-
-        // RELATED FROM
-        if (expand != null && expand.contains(RESTCSRelatedNodeV1.RELATED_FROM_NAME)) {
-            retValue.setRelatedFromNodes(
-                    new RESTDataObjectCollectionFactory<RESTCSRelatedNodeV1, CSNodeToCSNode, RESTCSRelatedNodeCollectionV1,
-                            RESTCSRelatedNodeCollectionItemV1>().create(
-                            RESTCSRelatedNodeCollectionV1.class, new CSRelatedNodeV1Factory(),
-                            entity.getRelatedNode().getRelatedFromNodesList(), RESTCSRelatedNodeV1.RELATED_FROM_NAME, dataType, expand,
-                            baseUrl, entityManager));
-        }
-
-        // RELATED TO
-        if (expand != null && expand.contains(RESTCSRelatedNodeV1.RELATED_TO_NAME)) {
-            retValue.setRelatedToNodes(
-                    new RESTDataObjectCollectionFactory<RESTCSRelatedNodeV1, CSNodeToCSNode, RESTCSRelatedNodeCollectionV1,
-                            RESTCSRelatedNodeCollectionItemV1>().create(
-                            RESTCSRelatedNodeCollectionV1.class, new CSRelatedNodeV1Factory(),
-                            entity.getRelatedNode().getRelatedToNodesList(), RESTCSRelatedNodeV1.RELATED_TO_NAME, dataType, expand, baseUrl,
-                            entityManager));
-        }
-
-        // TRANSLATED STRINGS
-        if (expand != null && expand.contains(RESTCSRelatedNodeV1.TRANSLATED_STRINGS_NAME)) {
-            retValue.setTranslatedStrings_OTM(
-                    new RESTDataObjectCollectionFactory<RESTCSTranslatedStringV1, CSTranslatedString, RESTCSTranslatedStringCollectionV1,
-                            RESTCSTranslatedStringCollectionItemV1>().create(
-                            RESTCSTranslatedStringCollectionV1.class, new CSTranslatedStringV1Factory(),
-                            entity.getRelatedNode().getCSTranslatedStringsList(), RESTCSRelatedNodeV1.TRANSLATED_STRINGS_NAME, dataType,
-                            expand, baseUrl, false, entityManager));
-        }
 
         // PROPERTY TAGS
         if (expand != null && expand.contains(RESTCSRelatedNodeV1.PROPERTIES_NAME)) {

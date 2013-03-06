@@ -17,8 +17,10 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -52,6 +54,7 @@ import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.common.StringUtilities;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.pressgang.ccms.utils.common.XMLValidator;
+import org.jboss.pressgang.ccms.utils.common.ZipUtilities;
 import org.jboss.pressgang.ccms.utils.concurrency.WorkQueue;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.pressgang.ccms.utils.structures.NameIDSortMap;
@@ -62,6 +65,48 @@ import org.xml.sax.SAXException;
 
 public class TopicUtilities {
     private static final Logger log = LoggerFactory.getLogger(TopicUtilities.class);
+
+    /**
+     * Creates a CSV string representation of all the topics in the provided list.
+     *
+     * @param entityManager
+     * @param topicList     The topics to create a CSV representation for.
+     * @return The CSV string representation of the topics.
+     */
+    public static String getCSVForTopics(final EntityManager entityManager, final List<Topic> topicList) {
+        // Build the csv
+        final StringBuilder csv = new StringBuilder(TopicUtilities.getCSVHeaderRow(entityManager));
+
+        // loop through each topic
+        for (final Topic topic : topicList)
+            csv.append("\n").append(TopicUtilities.getCSVRow(entityManager, topic));
+
+        return csv.toString();
+    }
+
+    public static byte[] getZIPTopicXMLDump(final List<Topic> topicList) {
+        // build up the files that will make up the zip file
+        final HashMap<String, byte[]> files = new HashMap<String, byte[]>();
+
+        for (final Topic topic : topicList) {
+            try {
+                files.put(topic.getTopicId() + ".xml",
+                        topic.getTopicXML() == null ? "".getBytes("UTF-8") : topic.getTopicXML().getBytes("UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                /* UTF-8 is a valid format so this should exception should never get thrown */
+            }
+        }
+
+        byte[] zipFile = null;
+        try {
+            zipFile = ZipUtilities.createZip(files);
+        } catch (final Exception ex) {
+            log.error("Probably a stream error", ex);
+            zipFile = null;
+        }
+
+        return zipFile;
+    }
 
     /**
      * Returns the headers for the CSV columns

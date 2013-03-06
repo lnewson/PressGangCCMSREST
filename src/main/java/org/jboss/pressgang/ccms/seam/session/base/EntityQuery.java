@@ -1,13 +1,12 @@
 package org.jboss.pressgang.ccms.seam.session.base;
 
+import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaQuery;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaQuery;
-
-import org.jboss.pressgang.ccms.restserver.utils.JPAUtils;
+import org.jboss.pressgang.ccms.filter.utils.JPAUtils;
 import org.jboss.seam.annotations.Transactional;
 
 public class EntityQuery<T> extends org.jboss.seam.framework.EntityQuery<T> {
@@ -28,8 +27,7 @@ public class EntityQuery<T> extends org.jboss.seam.framework.EntityQuery<T> {
     }
 
     public void setParameter(final String key, final Object value) {
-        if (key != null && value != null)
-            parameters.put(key, value);
+        if (key != null && value != null) parameters.put(key, value);
     }
 
     public void setParameters(final Map<String, Object> parameters) {
@@ -45,10 +43,8 @@ public class EntityQuery<T> extends org.jboss.seam.framework.EntityQuery<T> {
 
             setParameters(query, getParameters());
 
-            if (getFirstResult() != null)
-                query.setFirstResult(getFirstResult());
-            if (getMaxResults() != null)
-                query.setMaxResults(getMaxResults() + 1); // add one, so we can tell if there is another page
+            if (getFirstResult() != null) query.setFirstResult(getFirstResult());
+            if (getMaxResults() != null) query.setMaxResults(getMaxResults() + 1); // add one, so we can tell if there is another page
             if (getHints() != null) {
                 for (Map.Entry<String, String> me : getHints().entrySet()) {
                     query.setHint(me.getKey(), me.getValue());

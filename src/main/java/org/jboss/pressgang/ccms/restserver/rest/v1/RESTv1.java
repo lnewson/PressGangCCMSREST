@@ -1,22 +1,31 @@
 package org.jboss.pressgang.ccms.restserver.rest.v1;
 
+import javax.persistence.EntityManager;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.ext.Provider;
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
-import org.jboss.pressgang.ccms.contentspec.transformer.DatabaseTransformer;
+import org.hibernate.Session;
+import org.hibernate.search.FullTextSession;
+import org.hibernate.search.Search;
+import org.jboss.pressgang.ccms.contentspec.provider.ContentSpecProvider;
+import org.jboss.pressgang.ccms.contentspec.provider.DBProviderFactory;
+import org.jboss.pressgang.ccms.contentspec.utils.CSTransformer;
+import org.jboss.pressgang.ccms.contentspec.wrapper.ContentSpecWrapper;
 import org.jboss.pressgang.ccms.filter.BlobConstantFieldFilter;
 import org.jboss.pressgang.ccms.filter.CategoryFieldFilter;
 import org.jboss.pressgang.ccms.filter.ContentSpecFieldFilter;
-import org.jboss.pressgang.ccms.filter.ContentSpecMetaDataFieldFilter;
 import org.jboss.pressgang.ccms.filter.ContentSpecNodeFieldFilter;
+import org.jboss.pressgang.ccms.filter.ContentSpecTranslatedNodeFieldFilter;
 import org.jboss.pressgang.ccms.filter.FilterFieldFilter;
 import org.jboss.pressgang.ccms.filter.ImageFieldFilter;
 import org.jboss.pressgang.ccms.filter.IntegerConstantFieldFilter;
@@ -31,8 +40,8 @@ import org.jboss.pressgang.ccms.filter.UserFieldFilter;
 import org.jboss.pressgang.ccms.filter.builder.BlobConstantFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.CategoryFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.ContentSpecFilterQueryBuilder;
-import org.jboss.pressgang.ccms.filter.builder.ContentSpecMetaDataFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.ContentSpecNodeFilterQueryBuilder;
+import org.jboss.pressgang.ccms.filter.builder.ContentSpecTranslatedNodeFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.FilterFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.ImageFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.builder.IntegerConstantFilterQueryBuilder;
@@ -60,8 +69,8 @@ import org.jboss.pressgang.ccms.model.Tag;
 import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.model.User;
-import org.jboss.pressgang.ccms.model.contentspec.CSMetaData;
 import org.jboss.pressgang.ccms.model.contentspec.CSNode;
+import org.jboss.pressgang.ccms.model.contentspec.CSTranslatedNode;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTBlobConstantCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTCategoryCollectionV1;
@@ -77,8 +86,8 @@ import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTranslatedTopicCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTUserCollectionV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSMetaDataCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSNodeCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSTranslatedNodeCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTContentSpecCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.components.ComponentTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.constants.RESTv1Constants;
@@ -97,8 +106,8 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslatedTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTUserV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTLogDetailsV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSMetaDataV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSTranslatedNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTContentSpecV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLDoctype;
 import org.jboss.pressgang.ccms.rest.v1.exceptions.InternalProcessingException;
@@ -110,6 +119,7 @@ import org.jboss.pressgang.ccms.rest.v1.jaxrsinterfaces.RESTInterfaceAdvancedV1;
 import org.jboss.pressgang.ccms.restserver.rest.DatabaseOperation;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.BaseRESTv1;
 import org.jboss.pressgang.ccms.restserver.utils.Constants;
+import org.jboss.pressgang.ccms.restserver.utils.TopicUtilities;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
@@ -118,6 +128,8 @@ import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.spi.BadRequestException;
 import org.jboss.resteasy.spi.interception.MessageBodyWriterContext;
 import org.jboss.resteasy.spi.interception.MessageBodyWriterInterceptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Skynet REST interface implementation
@@ -126,6 +138,8 @@ import org.jboss.resteasy.spi.interception.MessageBodyWriterInterceptor;
 @ServerInterceptor
 @Path("/1")
 public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInterfaceAdvancedV1, MessageBodyWriterInterceptor {
+    private static final Logger log = LoggerFactory.getLogger(RESTv1.class);
+
     /**
      * This method is used to allow all remote clients to access the REST interface via CORS.
      */
@@ -165,6 +179,18 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     @Override
     public void setRerenderTopic(final Boolean enabled) {
         System.setProperty(Constants.ENABLE_RENDERING_PROPERTY, enabled == null ? null : enabled.toString());
+    }
+
+    @Override
+    public void reIndexLuceneDatabase() {
+        try {
+            final EntityManager entityManager = getEntityManager();
+            final Session session = (Session) entityManager.getDelegate();
+            final FullTextSession fullTextSession = Search.getFullTextSession(session);
+            fullTextSession.createIndexer(Topic.class).start();
+        } catch (final Exception ex) {
+            log.error("An error reindexing the Lucene database", ex);
+        }
     }
 
     @Override
@@ -2719,7 +2745,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public Response getRAWImage(final Integer id, final String locale) throws InvalidParameterException, InternalProcessingException {
         if (id == null) throw new InvalidParameterException("The id parameter can not be null");
 
-        final ImageFile entity = getEntity(ImageFile.class, id);
+        final EntityManager entityManager = getEntityManager();
+        final ImageFile entity = getEntity(entityManager, ImageFile.class, id);
         final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
 
         /* Try and find the locale specified first */
@@ -2745,7 +2772,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new InvalidParameterException("The id parameter can not be null");
         if (revision == null) throw new InvalidParameterException("The revision parameter can not be null");
 
-        final ImageFile entity = getEntity(ImageFile.class, id, revision);
+        final EntityManager entityManager = getEntityManager();
+        final ImageFile entity = getEntity(entityManager, ImageFile.class, id, revision);
         final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
 
         /* Try and find the locale specified first */
@@ -2770,7 +2798,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
             final String locale) throws InvalidParameterException, InternalProcessingException {
         if (id == null) throw new InvalidParameterException("The id parameter can not be null");
 
-        final ImageFile entity = getEntity(ImageFile.class, id);
+        final EntityManager entityManager = getEntityManager();
+        final ImageFile entity = getEntity(entityManager, ImageFile.class, id);
         final String fixedLocale = locale == null ? CommonConstants.DEFAULT_LOCALE : locale;
 
         /* Try and find the locale specified first */
@@ -3035,6 +3064,42 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         assert id != null : "The id parameter can not be null";
 
         return getXMLResource(Topic.class, new TopicV1Factory(), id, revision, null).getHtml();
+    }
+
+    @Override
+    public String getCSVTopics() throws InvalidParameterException, InternalProcessingException {
+        final EntityManager entityManager = getEntityManager();
+        final List<Topic> topicList = getEntities(entityManager, Topic.class);
+
+        return TopicUtilities.getCSVForTopics(entityManager, topicList);
+    }
+
+    @Override
+    public String getCSVTopicsWithQuery(
+            @PathParam("query") PathSegment query) throws InvalidParameterException, InternalProcessingException {
+        final EntityManager entityManager = getEntityManager();
+        final List<Topic> topicList = getEntitiesFromQuery(entityManager, query.getMatrixParameters(),
+                new TopicFilterQueryBuilder(entityManager), new TopicFieldFilter());
+
+        return TopicUtilities.getCSVForTopics(entityManager, topicList);
+    }
+
+    @Override
+    public byte[] getZIPTopics() throws InvalidParameterException, InternalProcessingException {
+        final EntityManager entityManager = getEntityManager();
+        final List<Topic> topicList = getEntities(entityManager, Topic.class);
+
+        return TopicUtilities.getZIPTopicXMLDump(topicList);
+    }
+
+    @Override
+    public byte[] getZIPTopicsWithQuery(
+            @PathParam("query") PathSegment query) throws InvalidParameterException, InternalProcessingException {
+        final EntityManager entityManager = getEntityManager();
+        final List<Topic> topicList = getEntitiesFromQuery(entityManager, query.getMatrixParameters(),
+                new TopicFilterQueryBuilder(entityManager), new TopicFieldFilter());
+
+        return TopicUtilities.getZIPTopicXMLDump(topicList);
     }
 
     @Override
@@ -3818,9 +3883,11 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public String getTEXTContentSpec(Integer id) throws InvalidParameterException, InternalProcessingException {
         if (id == null) throw new InvalidParameterException("The id parameter can not be null");
 
-        final ContentSpec entity = this.getEntity(ContentSpec.class, id);
-        final DatabaseTransformer transformer = new DatabaseTransformer();
-        final org.jboss.pressgang.ccms.contentspec.ContentSpec contentSpec = transformer.transform(entity);
+        final DBProviderFactory providerFactory = DBProviderFactory.create(getEntityManager());
+        final ContentSpecWrapper entity = providerFactory.getProvider(ContentSpecProvider.class).getContentSpec(id);
+        final CSTransformer transformer = new CSTransformer();
+
+        final org.jboss.pressgang.ccms.contentspec.ContentSpec contentSpec = transformer.transform(entity, providerFactory);
         return contentSpec.toString();
     }
 
@@ -3829,9 +3896,11 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (id == null) throw new InvalidParameterException("The id parameter can not be null");
         if (revision == null) throw new InvalidParameterException("The revision parameter can not be null");
 
-        final ContentSpec entity = this.getEntity(ContentSpec.class, id, revision);
-        final DatabaseTransformer transformer = new DatabaseTransformer();
-        final org.jboss.pressgang.ccms.contentspec.ContentSpec contentSpec = transformer.transform(entity);
+        final DBProviderFactory providerFactory = DBProviderFactory.create(getEntityManager());
+        final ContentSpecWrapper entity = providerFactory.getProvider(ContentSpecProvider.class).getContentSpec(id, revision);
+        final CSTransformer transformer = new CSTransformer();
+
+        final org.jboss.pressgang.ccms.contentspec.ContentSpec contentSpec = transformer.transform(entity, providerFactory);
         return contentSpec.toString();
     }
 
@@ -3841,7 +3910,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (contentSpec == null) throw new InvalidParameterException("The contentSpec parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        return this.createOrUpdateContentSpec(contentSpec, DatabaseOperation.CREATE, logDetails);
+        return this.createOrUpdateContentSpecFromString(contentSpec, DatabaseOperation.CREATE, logDetails);
     }
 
     @Override
@@ -3850,7 +3919,7 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         if (contentSpec == null) throw new InvalidParameterException("The contentSpec parameter can not be null");
 
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
-        return this.createOrUpdateContentSpec(contentSpec, DatabaseOperation.UPDATE, logDetails);
+        return this.createOrUpdateContentSpecFromString(contentSpec, DatabaseOperation.UPDATE, logDetails);
     }
 
     /* CONTENT SPEC NODE FUNCTIONS */
@@ -4084,127 +4153,130 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
                 RESTv1Constants.CONTENT_SPEC_NODE_EXPANSION_NAME, expand, logDetails);
     }
 
-    /* CONTENT SPEC NODE FUNCTIONS */
+    /* CONTENT SPEC TRANSLATED NODE FUNCTIONS */
     /* JSONP FUNCTIONS */
     @Override
-    public String getJSONPContentSpecMetaData(final Integer id, final String expand,
+    public String getJSONPContentSpecTranslatedNode(final Integer id, final String expand,
             final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null) throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONContentSpecMetaData(id, expand)));
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONContentSpecTranslatedNode(id, expand)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
     }
 
     @Override
-    public String getJSONPContentSpecMetaDataRevision(final Integer id, final Integer revision, final String expand,
+    public String getJSONPContentSpecTranslatedNodeRevision(final Integer id, final Integer revision, final String expand,
             final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null) throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONContentSpecMetaDataRevision(id, revision, expand)));
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONContentSpecTranslatedNodeRevision(id, revision, expand)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
     }
 
     @Override
-    public String getJSONPContentSpecMetaDatas(final String expand,
+    public String getJSONPContentSpecTranslatedNodes(final String expand,
             final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null) throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONContentSpecMetaDatas(expand)));
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONContentSpecTranslatedNodes(expand)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
     }
 
     @Override
-    public String getJSONPContentSpecMetaDatasWithQuery(final PathSegment query, final String expand,
+    public String getJSONPContentSpecTranslatedNodesWithQuery(final PathSegment query, final String expand,
             final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null) throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONContentSpecMetaDatasWithQuery(query, expand)));
+            return wrapJsonInPadding(callback, convertObjectToJSON(getJSONContentSpecTranslatedNodesWithQuery(query, expand)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
     }
 
     @Override
-    public String updateJSONPContentSpecMetaData(final String expand, final RESTCSMetaDataV1 dataObject, final String message,
+    public String updateJSONPContentSpecTranslatedNode(final String expand, final RESTCSTranslatedNodeV1 dataObject, final String message,
             final Integer flag, final String userId, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null) throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
             return wrapJsonInPadding(callback,
-                    convertObjectToJSON(updateJSONContentSpecMetaData(expand, dataObject, message, flag, userId)));
+                    convertObjectToJSON(updateJSONContentSpecTranslatedNode(expand, dataObject, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
     }
 
     @Override
-    public String updateJSONPContentSpecMetaDatas(final String expand, final RESTCSMetaDataCollectionV1 dataObjects, final String message,
+    public String updateJSONPContentSpecTranslatedNodes(final String expand, final RESTCSTranslatedNodeCollectionV1 dataObjects,
+            final String message, final Integer flag, final String userId,
+            final String callback) throws InvalidParameterException, InternalProcessingException {
+        if (callback == null) throw new InvalidParameterException("The callback parameter can not be null");
+
+        try {
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(updateJSONContentSpecTranslatedNodes(expand, dataObjects, message, flag, userId)));
+        } catch (final Exception ex) {
+            throw new InternalProcessingException("Could not marshall return value into JSON");
+        }
+    }
+
+    @Override
+    public String createJSONPContentSpecTranslatedNode(final String expand, final RESTCSTranslatedNodeV1 dataObject, final String message,
             final Integer flag, final String userId, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null) throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
             return wrapJsonInPadding(callback,
-                    convertObjectToJSON(updateJSONContentSpecMetaDatas(expand, dataObjects, message, flag, userId)));
+                    convertObjectToJSON(createJSONContentSpecTranslatedNode(expand, dataObject, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
     }
 
     @Override
-    public String createJSONPContentSpecMetaData(final String expand, final RESTCSMetaDataV1 dataObject, final String message,
-            final Integer flag, final String userId, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String createJSONPContentSpecTranslatedNodes(final String expand, final RESTCSTranslatedNodeCollectionV1 dataObjects,
+            final String message, final Integer flag, final String userId,
+            final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null) throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
             return wrapJsonInPadding(callback,
-                    convertObjectToJSON(createJSONContentSpecMetaData(expand, dataObject, message, flag, userId)));
+                    convertObjectToJSON(createJSONContentSpecTranslatedNodes(expand, dataObjects, message, flag, userId)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
     }
 
     @Override
-    public String createJSONPContentSpecMetaDatas(final String expand, final RESTCSMetaDataCollectionV1 dataObjects, final String message,
-            final Integer flag, final String userId, final String callback) throws InvalidParameterException, InternalProcessingException {
-        if (callback == null) throw new InvalidParameterException("The callback parameter can not be null");
-
-        try {
-            return wrapJsonInPadding(callback,
-                    convertObjectToJSON(createJSONContentSpecMetaDatas(expand, dataObjects, message, flag, userId)));
-        } catch (final Exception ex) {
-            throw new InternalProcessingException("Could not marshall return value into JSON");
-        }
-    }
-
-    @Override
-    public String deleteJSONPContentSpecMetaData(final Integer id, final String message, final Integer flag, final String userId,
+    public String deleteJSONPContentSpecTranslatedNode(final Integer id, final String message, final Integer flag, final String userId,
             final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null) throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONContentSpecMetaData(id, message, flag, userId, expand)));
+            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONContentSpecTranslatedNode(id, message, flag, userId, expand)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
     }
 
     @Override
-    public String deleteJSONPContentSpecMetaDatas(final PathSegment ids, final String message, final Integer flag, final String userId,
-            final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
+    public String deleteJSONPContentSpecTranslatedNodes(final PathSegment ids, final String message, final Integer flag,
+            final String userId, final String expand, final String callback) throws InvalidParameterException, InternalProcessingException {
         if (callback == null) throw new InvalidParameterException("The callback parameter can not be null");
 
         try {
-            return wrapJsonInPadding(callback, convertObjectToJSON(deleteJSONContentSpecMetaDatas(ids, message, flag, userId, expand)));
+            return wrapJsonInPadding(callback,
+                    convertObjectToJSON(deleteJSONContentSpecTranslatedNodes(ids, message, flag, userId, expand)));
         } catch (final Exception ex) {
             throw new InternalProcessingException("Could not marshall return value into JSON");
         }
@@ -4212,111 +4284,113 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     /* JSON FUNCTIONS */
     @Override
-    public RESTCSMetaDataV1 getJSONContentSpecMetaData(final Integer id,
+    public RESTCSTranslatedNodeV1 getJSONContentSpecTranslatedNode(final Integer id,
             final String expand) throws InvalidParameterException, InternalProcessingException {
         if (id == null) throw new InvalidParameterException("The id parameter can not be null");
 
-        return getJSONResource(CSMetaData.class, new CSMetaDataV1Factory(), id, expand);
+        return getJSONResource(CSTranslatedNode.class, new CSTranslatedNodeV1Factory(), id, expand);
     }
 
     @Override
-    public RESTCSMetaDataV1 getJSONContentSpecMetaDataRevision(final Integer id, final Integer revision,
+    public RESTCSTranslatedNodeV1 getJSONContentSpecTranslatedNodeRevision(final Integer id, final Integer revision,
             final String expand) throws InvalidParameterException, InternalProcessingException {
         if (id == null) throw new InvalidParameterException("The id parameter can not be null");
         if (revision == null) throw new InvalidParameterException("The revision parameter can not be null");
 
-        return getJSONResource(CSMetaData.class, new CSMetaDataV1Factory(), id, revision, expand);
+        return getJSONResource(CSTranslatedNode.class, new CSTranslatedNodeV1Factory(), id, revision, expand);
     }
 
     @Override
-    public RESTCSMetaDataCollectionV1 getJSONContentSpecMetaDatas(
+    public RESTCSTranslatedNodeCollectionV1 getJSONContentSpecTranslatedNodes(
             final String expand) throws InvalidParameterException, InternalProcessingException {
-        return getJSONResources(RESTCSMetaDataCollectionV1.class, CSMetaData.class, new CSMetaDataV1Factory(),
-                RESTv1Constants.CONTENT_SPEC_META_DATA_EXPANSION_NAME, expand);
+        return getJSONResources(RESTCSTranslatedNodeCollectionV1.class, CSTranslatedNode.class, new CSTranslatedNodeV1Factory(),
+                RESTv1Constants.CONTENT_SPEC_TRANSLATED_NODE_EXPANSION_NAME, expand);
     }
 
     @Override
-    public RESTCSMetaDataCollectionV1 getJSONContentSpecMetaDatasWithQuery(final PathSegment query,
+    public RESTCSTranslatedNodeCollectionV1 getJSONContentSpecTranslatedNodesWithQuery(final PathSegment query,
             final String expand) throws InvalidParameterException, InternalProcessingException {
-        return getJSONResourcesFromQuery(RESTCSMetaDataCollectionV1.class, query.getMatrixParameters(),
-                ContentSpecMetaDataFilterQueryBuilder.class, new ContentSpecMetaDataFieldFilter(), new CSMetaDataV1Factory(),
-                RESTv1Constants.CONTENT_SPEC_META_DATA_EXPANSION_NAME, expand);
+        return getJSONResourcesFromQuery(RESTCSTranslatedNodeCollectionV1.class, query.getMatrixParameters(),
+                ContentSpecTranslatedNodeFilterQueryBuilder.class, new ContentSpecTranslatedNodeFieldFilter(),
+                new CSTranslatedNodeV1Factory(), RESTv1Constants.CONTENT_SPEC_TRANSLATED_NODE_EXPANSION_NAME, expand);
     }
 
     @Override
-    public RESTCSMetaDataV1 updateJSONContentSpecMetaData(final String expand, final RESTCSMetaDataV1 dataObject, final String message,
-            final Integer flag, final String userId) throws InvalidParameterException, InternalProcessingException {
+    public RESTCSTranslatedNodeV1 updateJSONContentSpecTranslatedNode(final String expand, final RESTCSTranslatedNodeV1 dataObject,
+            final String message, final Integer flag, final String userId) throws InvalidParameterException, InternalProcessingException {
         if (dataObject == null) throw new InvalidParameterException("The dataObject parameter can not be null");
 
         if (dataObject.getId() == null) throw new InvalidParameterException("The dataObject.getId() parameter can not be null");
 
-        final CSMetaDataV1Factory factory = new CSMetaDataV1Factory();
+        final CSTranslatedNodeV1Factory factory = new CSTranslatedNodeV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateJSONEntity(CSMetaData.class, dataObject, factory, expand, logDetails);
+        return updateJSONEntity(CSTranslatedNode.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
-    public RESTCSMetaDataCollectionV1 updateJSONContentSpecMetaDatas(final String expand, final RESTCSMetaDataCollectionV1 dataObjects,
-            final String message, final Integer flag, final String userId) throws InvalidParameterException, InternalProcessingException {
+    public RESTCSTranslatedNodeCollectionV1 updateJSONContentSpecTranslatedNodes(final String expand,
+            final RESTCSTranslatedNodeCollectionV1 dataObjects, final String message, final Integer flag,
+            final String userId) throws InvalidParameterException, InternalProcessingException {
         if (dataObjects == null) throw new InvalidParameterException("The dataObjects parameter can not be null");
 
         if (dataObjects.getItems() == null) throw new InvalidParameterException("The dataObjects.getItems() parameter can not be null");
 
-        final CSMetaDataV1Factory factory = new CSMetaDataV1Factory();
+        final CSTranslatedNodeV1Factory factory = new CSTranslatedNodeV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return updateJSONEntities(RESTCSMetaDataCollectionV1.class, CSMetaData.class, dataObjects, factory,
-                RESTv1Constants.CONTENT_SPEC_META_DATA_EXPANSION_NAME, expand, logDetails);
+        return updateJSONEntities(RESTCSTranslatedNodeCollectionV1.class, CSTranslatedNode.class, dataObjects, factory,
+                RESTv1Constants.CONTENT_SPEC_TRANSLATED_NODE_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
-    public RESTCSMetaDataV1 createJSONContentSpecMetaData(final String expand, final RESTCSMetaDataV1 dataObject, final String message,
-            final Integer flag, final String userId) throws InvalidParameterException, InternalProcessingException {
+    public RESTCSTranslatedNodeV1 createJSONContentSpecTranslatedNode(final String expand, final RESTCSTranslatedNodeV1 dataObject,
+            final String message, final Integer flag, final String userId) throws InvalidParameterException, InternalProcessingException {
         if (dataObject == null) throw new InvalidParameterException("The dataObject parameter can not be null");
 
-        final CSMetaDataV1Factory factory = new CSMetaDataV1Factory();
+        final CSTranslatedNodeV1Factory factory = new CSTranslatedNodeV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createJSONEntity(CSMetaData.class, dataObject, factory, expand, logDetails);
+        return createJSONEntity(CSTranslatedNode.class, dataObject, factory, expand, logDetails);
     }
 
     @Override
-    public RESTCSMetaDataCollectionV1 createJSONContentSpecMetaDatas(final String expand, final RESTCSMetaDataCollectionV1 dataObjects,
-            final String message, final Integer flag, final String userId) throws InvalidParameterException, InternalProcessingException {
+    public RESTCSTranslatedNodeCollectionV1 createJSONContentSpecTranslatedNodes(final String expand,
+            final RESTCSTranslatedNodeCollectionV1 dataObjects, final String message, final Integer flag,
+            final String userId) throws InvalidParameterException, InternalProcessingException {
         if (dataObjects == null) throw new InvalidParameterException("The dataObjects parameter can not be null");
 
         if (dataObjects.getItems() == null) throw new InvalidParameterException("The dataObjects.getItems() parameter can not be null");
 
-        final CSMetaDataV1Factory factory = new CSMetaDataV1Factory();
+        final CSTranslatedNodeV1Factory factory = new CSTranslatedNodeV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return createJSONEntities(RESTCSMetaDataCollectionV1.class, CSMetaData.class, dataObjects, factory,
-                RESTv1Constants.CONTENT_SPEC_META_DATA_EXPANSION_NAME, expand, logDetails);
+        return createJSONEntities(RESTCSTranslatedNodeCollectionV1.class, CSTranslatedNode.class, dataObjects, factory,
+                RESTv1Constants.CONTENT_SPEC_TRANSLATED_NODE_EXPANSION_NAME, expand, logDetails);
     }
 
     @Override
-    public RESTCSMetaDataV1 deleteJSONContentSpecMetaData(final Integer id, final String message, final Integer flag, final String userId,
-            final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTCSTranslatedNodeV1 deleteJSONContentSpecTranslatedNode(final Integer id, final String message, final Integer flag,
+            final String userId, final String expand) throws InvalidParameterException, InternalProcessingException {
         if (id == null) throw new InvalidParameterException("The dataObject parameter can not be null");
 
-        final CSMetaDataV1Factory factory = new CSMetaDataV1Factory();
+        final CSTranslatedNodeV1Factory factory = new CSTranslatedNodeV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteJSONEntity(CSMetaData.class, factory, id, expand, logDetails);
+        return deleteJSONEntity(CSTranslatedNode.class, factory, id, expand, logDetails);
     }
 
     @Override
-    public RESTCSMetaDataCollectionV1 deleteJSONContentSpecMetaDatas(final PathSegment ids, final String message, final Integer flag,
-            final String userId, final String expand) throws InvalidParameterException, InternalProcessingException {
+    public RESTCSTranslatedNodeCollectionV1 deleteJSONContentSpecTranslatedNodes(final PathSegment ids, final String message,
+            final Integer flag, final String userId, final String expand) throws InvalidParameterException, InternalProcessingException {
         if (ids == null) throw new InvalidParameterException("The dataObjects parameter can not be null");
 
         final Set<String> dbEntityIds = ids.getMatrixParameters().keySet();
 
-        final CSMetaDataV1Factory factory = new CSMetaDataV1Factory();
+        final CSTranslatedNodeV1Factory factory = new CSTranslatedNodeV1Factory();
         final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
 
-        return deleteJSONEntities(RESTCSMetaDataCollectionV1.class, CSMetaData.class, factory, dbEntityIds,
-                RESTv1Constants.CONTENT_SPEC_META_DATA_EXPANSION_NAME, expand, logDetails);
+        return deleteJSONEntities(RESTCSTranslatedNodeCollectionV1.class, CSTranslatedNode.class, factory, dbEntityIds,
+                RESTv1Constants.CONTENT_SPEC_TRANSLATED_NODE_EXPANSION_NAME, expand, logDetails);
     }
 }

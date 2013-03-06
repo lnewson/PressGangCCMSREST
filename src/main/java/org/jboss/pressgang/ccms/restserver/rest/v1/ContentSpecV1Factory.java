@@ -6,10 +6,8 @@ import java.util.List;
 
 import org.jboss.pressgang.ccms.model.PropertyTag;
 import org.jboss.pressgang.ccms.model.Tag;
-import org.jboss.pressgang.ccms.model.contentspec.CSMetaData;
 import org.jboss.pressgang.ccms.model.contentspec.CSNode;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
-import org.jboss.pressgang.ccms.model.contentspec.ContentSpecToCSMetaData;
 import org.jboss.pressgang.ccms.model.contentspec.ContentSpecToPropertyTag;
 import org.jboss.pressgang.ccms.model.exceptions.CustomConstraintViolationException;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
@@ -17,8 +15,6 @@ import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTCSNodeCollec
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTContentSpecCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTCSNodeCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTContentSpecCollectionItemV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.join.RESTAssignedCSMetaDataCollectionItemV1;
-import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.join.RESTAssignedCSMetaDataCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.join.RESTAssignedPropertyTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.join.RESTAssignedPropertyTagCollectionV1;
@@ -28,7 +24,6 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTCSNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTContentSpecV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.enums.RESTContentSpecTypeV1;
-import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.join.RESTAssignedCSMetaDataV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
@@ -54,7 +49,6 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
 
         final List<String> expandOptions = new ArrayList<String>();
         expandOptions.add(RESTBaseEntityV1.LOG_DETAILS_NAME);
-        expandOptions.add(RESTContentSpecV1.META_DATA_NAME);
         expandOptions.add(RESTContentSpecV1.NODES_NAME);
         expandOptions.add(RESTContentSpecV1.PROPERTIES_NAME);
         expandOptions.add(RESTContentSpecV1.TAGS_NAME);
@@ -62,9 +56,6 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
         retValue.setExpand(expandOptions);
 
         retValue.setId(entity.getId());
-        retValue.setTitle(entity.getContentSpecTitle());
-        retValue.setProduct(entity.getContentSpecProduct());
-        retValue.setVersion(entity.getContentSpecVersion());
         retValue.setLocale(entity.getLocale());
         retValue.setType(RESTContentSpecTypeV1.getContentSpecType(entity.getContentSpecType()));
         retValue.setLastPublished(entity.getLastPublished());
@@ -86,16 +77,6 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
                     new RESTDataObjectCollectionFactory<RESTCSNodeV1, CSNode, RESTCSNodeCollectionV1, RESTCSNodeCollectionItemV1>().create(
                             RESTCSNodeCollectionV1.class, new CSNodeV1Factory(), entity.getTopCSNodes(), RESTContentSpecV1.NODES_NAME,
                             dataType, expand, baseUrl, expandParentReferences, entityManager));
-        }
-
-        // META DATA
-        if (expand != null && expand.contains(RESTContentSpecV1.META_DATA_NAME)) {
-            retValue.setMetaData(
-                    new RESTDataObjectCollectionFactory<RESTAssignedCSMetaDataV1, ContentSpecToCSMetaData,
-                            RESTAssignedCSMetaDataCollectionV1, RESTAssignedCSMetaDataCollectionItemV1>().create(
-                            RESTAssignedCSMetaDataCollectionV1.class, new ContentSpecMetaDataV1Factory(),
-                            entity.getContentSpecMetaDataList(), RESTContentSpecV1.META_DATA_NAME, dataType, expand, baseUrl,
-                            expandParentReferences, entityManager));
         }
 
         // PROPERTY TAGS
@@ -123,8 +104,6 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
     @Override
     public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final ContentSpec entity,
             final RESTContentSpecV1 dataObject) throws InvalidParameterException {
-        if (dataObject.hasParameterSet(RESTContentSpecV1.TITLE_NAME)) entity.setContentSpecTitle(dataObject.getTitle());
-
         if (dataObject.hasParameterSet(RESTContentSpecV1.LOCALE_NAME)) entity.setLocale(dataObject.getLocale());
 
         if (dataObject.hasParameterSet(RESTContentSpecV1.LAST_PUBLISHED_NAME)) entity.setLastPublished(dataObject.getLastPublished());
@@ -200,37 +179,6 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
             }
         }
 
-        if (dataObject.hasParameterSet(
-                RESTContentSpecV1.META_DATA_NAME) && dataObject.getMetaData() != null && dataObject.getMetaData().getItems() != null) {
-            dataObject.getMetaData().removeInvalidChangeItemRequests();
-
-            /* remove children first */
-            for (final RESTAssignedCSMetaDataCollectionItemV1 restEntityItem : dataObject.getMetaData().getItems()) {
-                final RESTAssignedCSMetaDataV1 restEntity = restEntityItem.getItem();
-
-                if (restEntityItem.returnIsRemoveItem()) {
-                    final CSMetaData dbEntity = entityManager.find(CSMetaData.class, restEntity.getId());
-                    if (dbEntity == null)
-                        throw new InvalidParameterException("No CSMetaData entity was found with the primary key " + restEntity.getId());
-
-                    entity.removeMetaData(dbEntity, restEntity.getValue());
-                } else if (restEntityItem.returnIsAddItem()) {
-                    final CSMetaData dbEntity = entityManager.find(CSMetaData.class, restEntity.getId());
-                    if (dbEntity == null)
-                        throw new InvalidParameterException("No CSMetaData entity was found with the primary key " + restEntity.getId());
-
-                    entity.addMetaData(dbEntity, restEntity.getValue());
-                } else if (restEntityItem.returnIsUpdateItem()) {
-                    final ContentSpecToCSMetaData dbEntity = entityManager.find(ContentSpecToCSMetaData.class,
-                            restEntity.getRelationshipId());
-                    if (dbEntity == null) throw new InvalidParameterException(
-                            "No ContentSpecToCSMetaData entity was found with the primary key " + restEntity.getRelationshipId());
-
-                    new ContentSpecMetaDataV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
-                }
-            }
-        }
-
         /* One To Many - Add will create a new mapping */
         if (dataObject.hasParameterSet(
                 RESTContentSpecV1.NODES_NAME) && dataObject.getChildren_OTM() != null && dataObject.getChildren_OTM().getItems() != null) {
@@ -245,6 +193,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
                         throw new InvalidParameterException("No CSNode entity was found with the primary key " + restEntity.getId());
 
                     entity.removeChild(dbEntity);
+                    entityManager.remove(dbEntity);
                 } else if (restEntityItem.returnIsAddItem()) {
                     final CSNode dbEntity = new CSNodeV1Factory().createDBEntityFromRESTEntity(entityManager, restEntity);
                     entityManager.persist(dbEntity);

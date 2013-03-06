@@ -47,6 +47,7 @@ public class PropertyTagV1Factory extends RESTDataObjectFactory<RESTPropertyTagV
         retValue.setDescription(entity.getPropertyTagDescription());
         retValue.setRegex(entity.getPropertyTagRegex());
         retValue.setIsUnique(entity.getPropertyTagIsUnique());
+        retValue.setCanBeNull(entity.isPropertyTagCanBeNull());
 
         // REVISIONS
         if (revision == null && expand != null && expand.contains(RESTBaseEntityV1.REVISIONS_NAME)) {

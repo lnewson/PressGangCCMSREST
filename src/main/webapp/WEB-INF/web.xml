@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
-    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
-    id="WebApp_ID" version="3.0">
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         id="WebApp_ID" version="3.0">
     <display-name>TopicIndex</display-name>
     <context-param>
         <param-name>facelets.DEVELOPMENT</param-name>
@@ -28,7 +28,7 @@
         <param-name>facelets.RECREATE_VALUE_EXPRESSION_ON_BUILD_BEFORE_RESTORE</param-name>
         <param-value>false</param-value>
     </context-param>
-    
+
     <filter>
         <filter-name>monitoring</filter-name>
         <filter-class>org.jboss.pressgang.ccms.seam.interceptor.MonitoringInterceptor</filter-class>
@@ -41,7 +41,7 @@
     <listener>
         <listener-class>net.bull.javamelody.SessionListener</listener-class>
     </listener>
-    
+
     <filter>
         <filter-name>compression</filter-name>
         <filter-class>org.jboss.pressgang.ccms.restserver.servlet.filter.GZIPCompressionFilter</filter-class>
@@ -50,7 +50,7 @@
         <filter-name>compression</filter-name>
         <url-pattern>/seam/resource/rest/*</url-pattern>
     </filter-mapping>
-    
+
     <filter>
         <filter-name>Seam Filter</filter-name>
         <filter-class>org.jboss.seam.servlet.SeamFilter</filter-class>
@@ -96,7 +96,7 @@
             <web-resource-name>XHTML</web-resource-name>
             <url-pattern>*.xhtml</url-pattern>
         </web-resource-collection>
-        <auth-constraint />
+        <auth-constraint/>
     </security-constraint>
 
     <context-param>
