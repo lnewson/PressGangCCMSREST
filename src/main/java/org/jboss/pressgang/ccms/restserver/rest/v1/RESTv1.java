@@ -6,6 +6,7 @@ import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -126,6 +127,7 @@ import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.resteasy.annotations.interception.ServerInterceptor;
 import org.jboss.resteasy.plugins.providers.atom.Feed;
 import org.jboss.resteasy.spi.BadRequestException;
+import org.jboss.resteasy.spi.HttpResponse;
 import org.jboss.resteasy.spi.interception.MessageBodyWriterContext;
 import org.jboss.resteasy.spi.interception.MessageBodyWriterInterceptor;
 import org.slf4j.Logger;
@@ -139,6 +141,8 @@ import org.slf4j.LoggerFactory;
 @Path("/1")
 public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInterfaceAdvancedV1, MessageBodyWriterInterceptor {
     private static final Logger log = LoggerFactory.getLogger(RESTv1.class);
+
+    @Context HttpResponse response;
 
     /**
      * This method is used to allow all remote clients to access the REST interface via CORS.
@@ -3071,6 +3075,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         final EntityManager entityManager = getEntityManager();
         final List<Topic> topicList = getEntities(entityManager, Topic.class);
 
+        response.getOutputHeaders().putSingle("Content-Disposition", "filename=Topics.csv");
+
         return TopicUtilities.getCSVForTopics(entityManager, topicList);
     }
 
@@ -3081,6 +3087,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         final List<Topic> topicList = getEntitiesFromQuery(entityManager, query.getMatrixParameters(),
                 new TopicFilterQueryBuilder(entityManager), new TopicFieldFilter());
 
+        response.getOutputHeaders().putSingle("Content-Disposition", "filename=Topics.csv");
+
         return TopicUtilities.getCSVForTopics(entityManager, topicList);
     }
 
@@ -3088,6 +3096,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     public byte[] getZIPTopics() throws InvalidParameterException, InternalProcessingException {
         final EntityManager entityManager = getEntityManager();
         final List<Topic> topicList = getEntities(entityManager, Topic.class);
+
+        response.getOutputHeaders().putSingle("Content-Disposition", "filename=XML.zip");
 
         return TopicUtilities.getZIPTopicXMLDump(topicList);
     }
@@ -3098,6 +3108,8 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         final EntityManager entityManager = getEntityManager();
         final List<Topic> topicList = getEntitiesFromQuery(entityManager, query.getMatrixParameters(),
                 new TopicFilterQueryBuilder(entityManager), new TopicFieldFilter());
+
+        response.getOutputHeaders().putSingle("Content-Disposition", "filename=XML.zip");
 
         return TopicUtilities.getZIPTopicXMLDump(topicList);
     }

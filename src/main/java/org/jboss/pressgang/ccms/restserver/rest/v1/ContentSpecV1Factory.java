@@ -57,6 +57,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
 
         retValue.setId(entity.getId());
         retValue.setLocale(entity.getLocale());
+        retValue.setCondition(entity.getCondition());
         retValue.setType(RESTContentSpecTypeV1.getContentSpecType(entity.getContentSpecType()));
         retValue.setLastPublished(entity.getLastPublished());
         retValue.setLastModified(EnversUtilities.getFixedLastModifiedDate(entityManager, entity));
@@ -105,6 +106,8 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
     public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final ContentSpec entity,
             final RESTContentSpecV1 dataObject) throws InvalidParameterException {
         if (dataObject.hasParameterSet(RESTContentSpecV1.LOCALE_NAME)) entity.setLocale(dataObject.getLocale());
+
+        if (dataObject.hasParameterSet(RESTContentSpecV1.CONDITION_NAME)) entity.setCondition(dataObject.getCondition());
 
         if (dataObject.hasParameterSet(RESTContentSpecV1.LAST_PUBLISHED_NAME)) entity.setLastPublished(dataObject.getLastPublished());
 
