@@ -1,10 +1,13 @@
 package org.jboss.pressgang.ccms.seam.utils;
 
+import org.jboss.pressgang.ccms.utils.common.VersionUtilities;
+
 public class Constants extends org.jboss.pressgang.ccms.restserver.utils.Constants {
+
     /**
-     * The Skynet build number, displayed on the top bar of all Skynet pages. Is in the format yyyymmdd-hhmm
+     * The build number, displayed on the top bar of all PressGang pages. Is in the format yyyymmdd-hhmm
      */
-    public static final String BUILD = "20130204-1324";
+    public static final String BUILD = VersionUtilities.getAPIBuildTimestamp(Constants.class);
 
     /**
      * The initial name for a translated topic revision
@@ -14,8 +17,8 @@ public class Constants extends org.jboss.pressgang.ccms.restserver.utils.Constan
     /**
      * The HTML returned when a Topic's XML could not be transformed
      */
-    public static final String XSL_ERROR_TEMPLATE = "<html><head><title>ERROR</title></head><body>The topic could not be transformed into" +
-            " HTML</body></html>";
+    public static final String XSL_ERROR_TEMPLATE = "<html><head><title>ERROR</title></head><body>The topic could not be transformed " +
+            "into" + " HTML</body></html>";
 
     /**
      * The base URL from which the REST interface can be accessed
