@@ -177,6 +177,60 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
             }
         }
 
+        /* Set the Parent for the Node */
+        if (dataObject.hasParameterSet(RESTCSNodeV1.PARENT_NAME)) {
+            final RESTCSNodeV1 restEntity = dataObject.getParent();
+
+            if (restEntity != null) {
+                final CSNode dbEntity = entityManager.find(CSNode.class, restEntity.getId());
+                if (dbEntity == null)
+                    throw new InvalidParameterException("No CSNode entity was found with the primary key " + restEntity.getId());
+
+                dbEntity.addChild(entity);
+            } else if (entity.getParent() != null) {
+                entity.getParent().removeChild(entity);
+            } else {
+                entity.setParent(null);
+            }
+        }
+
+        /* Set the Next Node */
+        if (dataObject.hasParameterSet(RESTCSNodeV1.NEXT_NODE_NAME)) {
+            final Integer nextNodeId = dataObject.getNextNodeId();
+
+            if (nextNodeId != null) {
+                final CSNode dbEntity = entityManager.find(CSNode.class, nextNodeId);
+                if (dbEntity == null) throw new InvalidParameterException("No CSNode entity was found with the primary key " + nextNodeId);
+
+                dbEntity.setPrevious(entity);
+                entity.setNext(dbEntity);
+            } else if (entity.getNext() != null) {
+                entity.getNext().setPrevious(null);
+                entity.setNext(null);
+            } else {
+                entity.setNext(null);
+            }
+        }
+
+         /* Set the Previous Node */
+        if (dataObject.hasParameterSet(RESTCSNodeV1.PREVIOUS_NODE_NAME)) {
+            final Integer previousNodeId = dataObject.getPreviousNodeId();
+
+            if (previousNodeId != null) {
+                final CSNode dbEntity = entityManager.find(CSNode.class, previousNodeId);
+                if (dbEntity == null)
+                    throw new InvalidParameterException("No CSNode entity was found with the primary key " + previousNodeId);
+
+                dbEntity.setNext(entity);
+                entity.setPrevious(dbEntity);
+            } else if (entity.getPrevious() != null) {
+                entity.getPrevious().setNext(null);
+                entity.setPrevious(null);
+            } else {
+                entity.setPrevious(null);
+            }
+        }
+
         entityManager.persist(entity);
 
         if (dataObject.hasParameterSet(
