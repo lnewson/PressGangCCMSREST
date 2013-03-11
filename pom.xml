@@ -2,12 +2,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.jboss.pressgang.ccms</groupId>
-        <artifactId>pressgang-ccms-parent</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <groupId>org.jboss.pressgang</groupId>
+        <artifactId>pressgang-parent</artifactId>
+        <version>1.5</version>
     </parent>
     <groupId>org.jboss.pressgang.ccms</groupId>
     <artifactId>pressgang-ccms-restserver</artifactId>
+    <version>1.1-SNAPSHOT</version>
     <name>PressGang CCMS REST Server + SEAM GUI</name>
     <packaging>war</packaging>
 
@@ -27,6 +28,8 @@
         <xerces.version>2.9.1</xerces.version>
         <resteasy.version>2.3.2.Final</resteasy.version>
         <hibernate.version>3.6.10.Final</hibernate.version>
+        <log4j.version>1.2.16</log4j.version>
+        <slf4j.version>1.6.4</slf4j.version>
         <seam.version>2.2.2.Final</seam.version>
         <jsf-facelets.version>1.1.15</jsf-facelets.version>
         <drools.version>5.0.1</drools.version>
@@ -194,12 +197,12 @@
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-model-hibernate3</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-query</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.jboss.pressgang.ccms</groupId>
@@ -210,27 +213,27 @@
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-utils</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-contentspec</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-zanata</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-rest</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
             <artifactId>pressgang-ccms-restv1</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms.contentspec</groupId>
