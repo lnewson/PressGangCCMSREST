@@ -108,6 +108,9 @@ public class CSRelatedNodeV1Factory extends RESTDataObjectFactory<RESTCSRelatedN
         if (dataObject.hasParameterSet(RESTCSRelatedNodeV1.RELATIONSHIP_TYPE_NAME))
             entity.setRelationshipType(RESTCSNodeRelationshipTypeV1.getRelationshipTypeId(dataObject.getRelationshipType()));
 
+        if (dataObject.hasParameterSet(RESTCSRelatedNodeV1.RELATIONSHIP_SORT_NAME))
+            entity.setRelationshipSort(dataObject.getRelationshipSort());
+
         entityManager.persist(entity);
     }
 }
