@@ -178,7 +178,7 @@ public class RESTDataObjectCollectionFactory<T extends RESTBaseEntityV1<T, V, W>
                         if (startIndex < 0) {
                             start = Math.max(0, size + startIndex);
                         } else {
-                            start = Math.min(startIndex, size - 1);
+                            start = Math.min(startIndex, size == 0 ? 0 : size - 1);
                         }
                     }
 
