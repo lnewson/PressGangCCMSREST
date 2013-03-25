@@ -4,6 +4,7 @@
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
          id="WebApp_ID" version="3.0">
     <display-name>TopicIndex</display-name>
+    <!-- SEAM Parameters -->
     <context-param>
         <param-name>facelets.DEVELOPMENT</param-name>
         <param-value>true</param-value>
@@ -29,6 +30,27 @@
         <param-value>false</param-value>
     </context-param>
 
+    <!-- Java Melody Parameters -->
+    <context-param>
+        <param-name>javamelody.datasources</param-name>
+        <param-value>java:/PressGangCCMSDatasource</param-value>
+    </context-param>
+
+    <!-- Liquibase Parameters -->
+    <context-param>
+        <param-name>liquibase.changelog</param-name>
+        <param-value>db/db.changelog.xml</param-value>
+    </context-param>
+    <context-param>
+        <param-name>liquibase.datasource</param-name>
+        <param-value>java:/PressGangCCMSDatasource</param-value>
+    </context-param>
+    <context-param>
+        <param-name>liquibase.onerror.fail</param-name>
+        <param-value>true</param-value>
+    </context-param>
+
+    <!-- Java Melody Filter -->
     <filter>
         <filter-name>monitoring</filter-name>
         <filter-class>org.jboss.pressgang.ccms.seam.interceptor.MonitoringInterceptor</filter-class>
@@ -38,10 +60,8 @@
         <filter-name>monitoring</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-    <listener>
-        <listener-class>net.bull.javamelody.SessionListener</listener-class>
-    </listener>
 
+    <!-- GZIP Compression Filter -->
     <filter>
         <filter-name>compression</filter-name>
         <filter-class>org.jboss.pressgang.ccms.restserver.servlet.filter.GZIPCompressionFilter</filter-class>
@@ -51,6 +71,7 @@
         <url-pattern>/seam/resource/rest/*</url-pattern>
     </filter-mapping>
 
+    <!-- SEAM Filter -->
     <filter>
         <filter-name>Seam Filter</filter-name>
         <filter-class>org.jboss.seam.servlet.SeamFilter</filter-class>
@@ -59,9 +80,8 @@
         <filter-name>Seam Filter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-    <listener>
-        <listener-class>org.jboss.seam.servlet.SeamListener</listener-class>
-    </listener>
+
+    <!-- SEAM Servlets -->
     <servlet>
         <servlet-name>Faces Servlet</servlet-name>
         <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
@@ -99,8 +119,14 @@
         <auth-constraint/>
     </security-constraint>
 
-    <context-param>
-        <param-name>javamelody.datasources</param-name>
-        <param-value>java:/PressGangCCMSDatasource</param-value>
-    </context-param>
+    <!-- Listeners -->
+    <listener>
+        <listener-class>liquibase.integration.servlet.LiquibaseServletListener</listener-class>
+    </listener>
+    <listener>
+        <listener-class>org.jboss.seam.servlet.SeamListener</listener-class>
+    </listener>
+    <listener>
+        <listener-class>net.bull.javamelody.SessionListener</listener-class>
+    </listener>
 </web-app>

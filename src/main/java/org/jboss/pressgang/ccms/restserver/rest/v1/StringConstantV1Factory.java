@@ -1,9 +1,8 @@
 package org.jboss.pressgang.ccms.restserver.rest.v1;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.persistence.EntityManager;
 
 import org.jboss.pressgang.ccms.model.StringConstants;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTStringConstantCollectionV1;
@@ -28,7 +27,7 @@ public class StringConstantV1Factory
     public RESTStringConstantV1 createRESTEntityFromDBEntityInternal(final StringConstants entity, final String baseUrl,
             final String dataType, final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
-        assert entity != null : "Parameter topic can not be null";
+        assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
         final RESTStringConstantV1 retValue = new RESTStringConstantV1();

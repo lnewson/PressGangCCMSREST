@@ -58,8 +58,8 @@ public class TopicQueueRenderer extends BaseRenderingThread implements Runnable 
     public static TopicQueueRenderer createNewInstance(final Integer topicId, final int topicType,
             final boolean rerenderIncoming, final Transaction transaction) {
         try {
-            final EntityManagerFactory entityManagerFactory = JNDIUtilities.lookupEntityManagerFactory();
-            final TransactionManager transactionManager = JNDIUtilities.lookupTransactionManager();
+            final EntityManagerFactory entityManagerFactory = JNDIUtilities.lookupJBossEntityManagerFactory();
+            final TransactionManager transactionManager = JNDIUtilities.lookupJBossTransactionManager();
             return new TopicQueueRenderer(topicId, topicType, rerenderIncoming, entityManagerFactory, transactionManager,
                     transaction);
         } catch (final Exception ex) {

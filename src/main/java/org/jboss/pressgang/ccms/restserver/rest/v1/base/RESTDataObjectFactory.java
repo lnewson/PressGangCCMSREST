@@ -7,7 +7,6 @@ import org.jboss.pressgang.ccms.model.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
-import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.rest.v1.LogDetailsV1Factory;
 import org.jboss.pressgang.ccms.utils.common.ExceptionUtilities;
@@ -39,7 +38,7 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
      * @return A new REST entity populated with the values in a database entity
      */
     public T createRESTEntityFromDBPK(final Object primaryKey, final String baseUrl, final String dataType, final ExpandDataTrunk expand,
-            final Number revision, final EntityManager entityManager) throws InvalidParameterException {
+            final Number revision, final EntityManager entityManager) {
         final U entity = entityManager.find(databaseClass, primaryKey);
 
         if (entity == null) throw new BadRequestException("No entity was found with the id " + primaryKey);
@@ -131,7 +130,7 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
      * @param dataObject    The REST entity object.
      */
     public abstract void syncDBEntityWithRESTEntity(final EntityManager entityManager, final U entity,
-            final T dataObject) throws InvalidParameterException;
+            final T dataObject);
 
     /**
      * Creates, populates and returns a new database entity from a REST entity
@@ -140,7 +139,7 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
      * @param dataObject    The REST entity used to populate the database entity's values
      * @return A new database entity with the values supplied from the dataObject
      */
-    public U createDBEntityFromRESTEntity(final EntityManager entityManager, final T dataObject) throws InvalidParameterException {
+    public U createDBEntityFromRESTEntity(final EntityManager entityManager, final T dataObject) {
         try {
             final U entity = databaseClass.newInstance();
             this.syncDBEntityWithRESTEntity(entityManager, entity, dataObject);

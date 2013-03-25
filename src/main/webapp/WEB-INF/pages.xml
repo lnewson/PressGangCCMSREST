@@ -58,18 +58,6 @@
         log-level="trace">
         <http-error error-code="503" />
     </exception>
-    <exception
-        class="org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException">
-        <http-error error-code="400">
-            <message>#{org.jboss.seam.handledException.message}</message>
-        </http-error>
-    </exception>
-    <exception
-        class="org.jboss.pressgang.ccms.rest.v1.exceptions.InternalProcessingException">
-        <http-error error-code="500">
-            <message>#{org.jboss.seam.handledException.message}</message>
-        </http-error>
-    </exception>
     <exception>
         <end-conversation />
         <redirect view-id="/error.xhtml">

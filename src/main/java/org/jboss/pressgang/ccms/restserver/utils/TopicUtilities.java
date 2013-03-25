@@ -144,7 +144,7 @@ public class TopicUtilities {
          * use the TopicQueueRenderer to send the topic id once the transaction has finished.
          */
         try {
-            final TransactionManager transactionManager = JNDIUtilities.lookupTransactionManager();
+            final TransactionManager transactionManager = JNDIUtilities.lookupJBossTransactionManager();
             final Transaction transaction = transactionManager.getTransaction();
             WorkQueue.getInstance().execute(TopicQueueRenderer.createNewInstance(topic.getTopicId(), TopicRendererType.TOPIC, transaction));
         } catch (final Exception ex) {

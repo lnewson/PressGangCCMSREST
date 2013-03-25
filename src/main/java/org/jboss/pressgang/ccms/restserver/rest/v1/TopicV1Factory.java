@@ -38,7 +38,6 @@ import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTContentSpecV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLDoctype;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
-import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
@@ -54,9 +53,8 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
     @Override
     public RESTTopicV1 createRESTEntityFromDBEntityInternal(final Topic entity, final String baseUrl, final String dataType,
             final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences, final EntityManager entityManager) {
-        assert entity != null : "Parameter topic can not be null";
+        assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
-        assert expand != null : "Parameter expand can not be null";
 
         final RESTTopicV1 retValue = new RESTTopicV1();
 
@@ -169,7 +167,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
 
     @Override
     public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final Topic entity,
-            final RESTTopicV1 dataObject) throws InvalidParameterException {
+            final RESTTopicV1 dataObject) {
 
         final String tempXML = entity.getTopicXML();
         final String tempTitle = entity.getTopicTitle();
@@ -198,7 +196,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                 if (restEntityItem.returnIsRemoveItem()) {
                     final Tag tagEntity = entityManager.find(Tag.class, restEntity.getId());
                     if (tagEntity == null)
-                        throw new InvalidParameterException("No Tag entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
 
                     entity.removeTag(restEntity.getId());
                 }
@@ -210,12 +208,12 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                 if (restEntityItem.returnIsAddItem()) {
                     final Tag tagEntity = entityManager.find(Tag.class, restEntity.getId());
                     if (tagEntity == null)
-                        throw new InvalidParameterException("No Tag entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
 
                     try {
                         entity.addTag(entityManager, restEntity.getId());
                     } catch (CustomConstraintViolationException e) {
-                        throw new BadRequestException(e.getMessage());
+                        throw new BadRequestException(e);
                     }
                 }
             }
@@ -232,18 +230,18 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                 if (restEntityItem.returnIsRemoveItem()) {
                     final PropertyTag dbEntity = entityManager.find(PropertyTag.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new InvalidParameterException("No PropertyTag entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No PropertyTag entity was found with the primary key " + restEntity.getId());
 
                     entity.removePropertyTag(dbEntity, restEntity.getValue());
                 } else if (restEntityItem.returnIsAddItem()) {
                     final PropertyTag dbEntity = entityManager.find(PropertyTag.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new InvalidParameterException("No PropertyTag entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No PropertyTag entity was found with the primary key " + restEntity.getId());
 
                     entity.addPropertyTag(dbEntity, restEntity.getValue());
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final TopicToPropertyTag dbEntity = entityManager.find(TopicToPropertyTag.class, restEntity.getRelationshipId());
-                    if (dbEntity == null) throw new InvalidParameterException(
+                    if (dbEntity == null) throw new BadRequestException(
                             "No TopicToPropertyTag entity was found with the primary key " + restEntity.getRelationshipId());
 
                     new TopicPropertyTagV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
@@ -271,13 +269,13 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                 if (restEntityItem.returnIsRemoveItem()) {
                     final Topic otherTopic = entityManager.find(Topic.class, restEntity.getId());
                     if (otherTopic == null)
-                        throw new InvalidParameterException("No Topic entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No Topic entity was found with the primary key " + restEntity.getId());
 
                     entity.removeRelationshipTo(restEntity.getId(), 1);
                 } else if (restEntityItem.returnIsAddItem()) {
                     final Topic otherTopic = entityManager.find(Topic.class, restEntity.getId());
                     if (otherTopic == null)
-                        throw new InvalidParameterException("No Topic entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No Topic entity was found with the primary key " + restEntity.getId());
 
                     entity.addRelationshipTo(entityManager, restEntity.getId(), 1);
 
@@ -296,14 +294,14 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                 if (restEntityItem.returnIsRemoveItem()) {
                     final Topic dbEntity = entityManager.find(Topic.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new InvalidParameterException("No Topic entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No Topic entity was found with the primary key " + restEntity.getId());
 
                     dbEntity.removeRelationshipTo(entity.getTopicId(), 1);
 
                 } else if (restEntityItem.returnIsAddItem()) {
                     final Topic otherTopic = entityManager.find(Topic.class, restEntity.getId());
                     if (otherTopic == null)
-                        throw new InvalidParameterException("No Topic entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No Topic entity was found with the primary key " + restEntity.getId());
 
                     entity.addRelationshipFrom(entityManager, otherTopic.getTopicId(), 1);
 
@@ -322,7 +320,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
 
                 if (restEntityItem.returnIsRemoveItem()) {
                     final TopicSourceUrl dbEntity = entityManager.find(TopicSourceUrl.class, restEntity.getId());
-                    if (dbEntity == null) throw new InvalidParameterException(
+                    if (dbEntity == null) throw new BadRequestException(
                             "No TopicSourceUrl entity was found with the primary key " + restEntity.getId());
 
                     entity.removeTopicSourceUrl(restEntity.getId());
@@ -332,7 +330,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                     entity.addTopicSourceUrl(dbEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final TopicSourceUrl dbEntity = entityManager.find(TopicSourceUrl.class, restEntity.getId());
-                    if (dbEntity == null) throw new InvalidParameterException(
+                    if (dbEntity == null) throw new BadRequestException(
                             "No TopicSourceUrl entity was found with the primary key " + restEntity.getId());
 
                     new TopicSourceUrlV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
@@ -352,7 +350,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                 if (restEntityItem.returnIsRemoveItem()) {
                     final BugzillaBug dbEntity = entityManager.find(BugzillaBug.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new InvalidParameterException("No BugzillaBug entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No BugzillaBug entity was found with the primary key " + restEntity.getId());
 
                     entity.removeBugzillaBug(restEntity.getId());
                 } else if (restEntityItem.returnIsAddItem()) {
@@ -362,7 +360,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final BugzillaBug dbEntity = entityManager.find(BugzillaBug.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new InvalidParameterException("No BugzillaBug entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No BugzillaBug entity was found with the primary key " + restEntity.getId());
 
                     new BugzillaBugV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 }

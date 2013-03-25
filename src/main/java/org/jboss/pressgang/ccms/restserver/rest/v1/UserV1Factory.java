@@ -1,9 +1,8 @@
 package org.jboss.pressgang.ccms.restserver.rest.v1;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.persistence.EntityManager;
 
 import org.jboss.pressgang.ccms.model.Role;
 import org.jboss.pressgang.ccms.model.User;
@@ -16,11 +15,11 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTRoleV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTUserV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
-import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
+import org.jboss.resteasy.spi.BadRequestException;
 
 public class UserV1Factory extends RESTDataObjectFactory<RESTUserV1, User, RESTUserCollectionV1, RESTUserCollectionItemV1> {
     public UserV1Factory() {
@@ -31,7 +30,7 @@ public class UserV1Factory extends RESTDataObjectFactory<RESTUserV1, User, RESTU
     public RESTUserV1 createRESTEntityFromDBEntityInternal(final User entity, final String baseUrl, final String dataType,
             final ExpandDataTrunk expand, final Number revision, final boolean expandParentReferences,
             final EntityManager entityManager) {
-        assert entity != null : "Parameter topic can not be null";
+        assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
         final RESTUserV1 retValue = new RESTUserV1();
@@ -68,8 +67,7 @@ public class UserV1Factory extends RESTDataObjectFactory<RESTUserV1, User, RESTU
     }
 
     @Override
-    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final User entity, final RESTUserV1 dataObject)
-            throws InvalidParameterException {
+    public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final User entity, final RESTUserV1 dataObject) {
         if (dataObject.hasParameterSet(RESTUserV1.DESCRIPTION_NAME))
             entity.setDescription(dataObject.getDescription());
         if (dataObject.hasParameterSet(RESTUserV1.NAME_NAME))
@@ -87,7 +85,7 @@ public class UserV1Factory extends RESTDataObjectFactory<RESTUserV1, User, RESTU
                 if (restEntityItem.returnIsAddItem() || restEntityItem.returnIsRemoveItem()) {
                     final Role dbEntity = entityManager.find(Role.class, restEntity.getId());
                     if (dbEntity == null)
-                        throw new InvalidParameterException("No entity was found with the primary key " + restEntity.getId());
+                        throw new BadRequestException("No entity was found with the primary key " + restEntity.getId());
 
                     if (restEntityItem.returnIsAddItem()) {
                         entity.addRole(dbEntity);

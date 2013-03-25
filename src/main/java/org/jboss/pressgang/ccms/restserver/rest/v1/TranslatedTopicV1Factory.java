@@ -29,12 +29,12 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslatedTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLDoctype;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
-import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
+import org.jboss.resteasy.spi.BadRequestException;
 
 public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslatedTopicV1, TranslatedTopicData,
         RESTTranslatedTopicCollectionV1, RESTTranslatedTopicCollectionItemV1> {
@@ -198,7 +198,7 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
 
     @Override
     public void syncDBEntityWithRESTEntity(EntityManager entityManager, TranslatedTopicData entity,
-            RESTTranslatedTopicV1 dataObject) throws InvalidParameterException {
+            RESTTranslatedTopicV1 dataObject) {
         /*
          * Since this factory is the rare case where two entities are combined into one. Check if it has a parent, if not then
          * check if one exists that matches otherwise create one. If one exists then update it.
@@ -250,19 +250,18 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
 
                 if (restEntityItem.returnIsRemoveItem()) {
                     final TranslatedTopicString dbEntity = entityManager.find(TranslatedTopicString.class, restEntity.getId());
-                    if (dbEntity == null) throw new InvalidParameterException(
+                    if (dbEntity == null) throw new BadRequestException(
                             "No TranslatedTopicString entity was found with the primary key " + restEntity.getId());
 
-                    entity.getTranslatedTopicStrings().remove(dbEntity);
+                    entity.removeTranslatedTopicString(dbEntity);
                     entityManager.remove(dbEntity);
                 } else if (restEntityItem.returnIsAddItem()) {
                     final TranslatedTopicString dbEntity = new TranslatedTopicString();
-                    dbEntity.setTranslatedTopicData(entity);
                     new TranslatedTopicStringV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
-                    entity.getTranslatedTopicStrings().add(dbEntity);
+                    entity.addTranslatedTopicString(dbEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final TranslatedTopicString dbEntity = entityManager.find(TranslatedTopicString.class, restEntity.getId());
-                    if (dbEntity == null) throw new InvalidParameterException(
+                    if (dbEntity == null) throw new BadRequestException(
                             "No TranslatedTopicString entity was found with the primary key " + restEntity.getId());
 
                     new TranslatedTopicStringV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);

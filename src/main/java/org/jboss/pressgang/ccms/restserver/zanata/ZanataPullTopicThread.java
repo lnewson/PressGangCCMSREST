@@ -63,10 +63,10 @@ public class ZanataPullTopicThread implements Runnable {
             EntityManager entityManager = null;
 
             try {
-                final EntityManagerFactory entityManagerFactory = JNDIUtilities.lookupEntityManagerFactory();
+                final EntityManagerFactory entityManagerFactory = JNDIUtilities.lookupJBossEntityManagerFactory();
 
                 // Get the TransactionManager and start a transaction.
-                transactionManager = JNDIUtilities.lookupTransactionManager();
+                transactionManager = JNDIUtilities.lookupJBossTransactionManager();
                 transactionManager.begin();
 
                 // Get an EntityManager instance
