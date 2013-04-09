@@ -160,7 +160,7 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
 
         if (dataObject.hasParameterSet(RESTCSNodeV1.ENTITY_REVISION_NAME)) entity.setEntityRevision(dataObject.getEntityRevision());
 
-        /* Set the ContentSpec for the Node */
+        // Set the ContentSpec for the Node
         if (dataObject.hasParameterSet(RESTCSNodeV1.CONTENT_SPEC_NAME)) {
             final RESTContentSpecV1 restEntity = dataObject.getContentSpec();
 
@@ -177,7 +177,7 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
             }
         }
 
-        /* Set the Parent for the Node */
+        // Set the Parent for the Node
         if (dataObject.hasParameterSet(RESTCSNodeV1.PARENT_NAME)) {
             final RESTCSNodeV1 restEntity = dataObject.getParent();
 
@@ -194,7 +194,7 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
             }
         }
 
-        /* Set the Next Node */
+        // Set the Next Node
         if (dataObject.hasParameterSet(RESTCSNodeV1.NEXT_NODE_NAME)) {
             final Integer nextNodeId = dataObject.getNextNodeId();
 
@@ -212,7 +212,7 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
             }
         }
 
-         /* Set the Previous Node */
+         // Set the Previous Node
         if (dataObject.hasParameterSet(RESTCSNodeV1.PREVIOUS_NODE_NAME)) {
             final Integer previousNodeId = dataObject.getPreviousNodeId();
 
@@ -237,7 +237,7 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
                 RESTCSNodeV1.PROPERTIES_NAME) && dataObject.getProperties() != null && dataObject.getProperties().getItems() != null) {
             dataObject.getProperties().removeInvalidChangeItemRequests();
 
-            /* remove children first */
+            // Remove children first
             for (final RESTAssignedPropertyTagCollectionItemV1 restEntityItem : dataObject.getProperties().getItems()) {
                 final RESTAssignedPropertyTagV1 restEntity = restEntityItem.getItem();
 
@@ -263,7 +263,7 @@ public class CSNodeV1Factory extends RESTDataObjectFactory<RESTCSNodeV1, CSNode,
             }
         }
 
-        /* One To Many - Add will create a new mapping */
+        // One To Many - Add will create a new mapping
         if (dataObject.hasParameterSet(
                 RESTCSNodeV1.CHILDREN_NAME) && dataObject.getChildren_OTM() != null && dataObject.getChildren_OTM().getItems() != null) {
             dataObject.getChildren_OTM().removeInvalidChangeItemRequests();

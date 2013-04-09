@@ -9,8 +9,8 @@ import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.rest.v1.LogDetailsV1Factory;
-import org.jboss.pressgang.ccms.utils.common.ExceptionUtilities;
 import org.jboss.resteasy.spi.BadRequestException;
+import org.jboss.resteasy.spi.InternalServerErrorException;
 
 /**
  * Defines a factory that can create REST entity objects from JPA entities, and update JPA entities from REST entities
@@ -144,10 +144,10 @@ public abstract class RESTDataObjectFactory<T extends RESTBaseEntityV1<T, V, W>,
             final U entity = databaseClass.newInstance();
             this.syncDBEntityWithRESTEntity(entityManager, entity, dataObject);
             return entity;
-        } catch (final Exception ex) {
-            ExceptionUtilities.handleException(ex);
+        } catch (InstantiationException e) {
+            throw new InternalServerErrorException(e);
+        } catch (IllegalAccessException e) {
+            throw new InternalServerErrorException(e);
         }
-
-        return null;
     }
 }

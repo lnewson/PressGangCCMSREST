@@ -164,7 +164,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
                 RESTContentSpecV1.TAGS_NAME) && dataObject.getTags() != null && dataObject.getTags().getItems() != null) {
             dataObject.getTags().removeInvalidChangeItemRequests();
 
-            /* Remove Tags first to ensure mutual exclusion is done correctly */
+            // Remove Tags first to ensure mutual exclusion is done correctly
             for (final RESTTagCollectionItemV1 restEntityItem : dataObject.getTags().getItems()) {
                 final RESTTagV1 restEntity = restEntityItem.getItem();
 
@@ -190,7 +190,7 @@ public class ContentSpecV1Factory extends RESTDataObjectFactory<RESTContentSpecV
             }
         }
 
-        /* One To Many - Add will create a new mapping */
+        // One To Many - Add will create a new mapping
         if (dataObject.hasParameterSet(
                 RESTContentSpecV1.NODES_NAME) && dataObject.getChildren_OTM() != null && dataObject.getChildren_OTM().getItems() != null) {
             dataObject.getChildren_OTM().removeInvalidChangeItemRequests();

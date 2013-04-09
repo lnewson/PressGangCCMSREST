@@ -1165,6 +1165,18 @@ public class BaseRESTv1 {
     }
 
     public Failure processError(final TransactionManager transactionManager, final Throwable ex) {
+        // Rollback if a transaction is active
+        try {
+            if (transactionManager != null) {
+                final int status = transactionManager.getStatus();
+                if (status != Status.STATUS_ROLLING_BACK && status != Status.STATUS_ROLLEDBACK && status != Status.STATUS_NO_TRANSACTION) {
+                    transactionManager.rollback();
+                }
+            }
+        } catch (Throwable e) {
+            return new InternalServerErrorException(e);
+        }
+
         // We need to do some unwrapping of exception first
         Throwable cause = ex;
         while (cause != null) {
@@ -1181,15 +1193,6 @@ public class BaseRESTv1 {
             } else {
                 cause = cause.getCause();
             }
-        }
-
-        // Rollback if a transaction is active
-        try {
-            if (transactionManager != null && transactionManager.getStatus() == Status.STATUS_ACTIVE) {
-                transactionManager.getTransaction().rollback();
-            }
-        } catch (Throwable e) {
-            return new InternalServerErrorException(e);
         }
 
         // This is a Persistence exception with information

@@ -185,11 +185,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
     /* SYSTEM FUNCTIONS */
     @Override
-    public void setRerenderTopic(final Boolean enabled) {
-        System.setProperty(Constants.ENABLE_RENDERING_PROPERTY, enabled == null ? null : enabled.toString());
-    }
-
-    @Override
     public void reIndexLuceneDatabase() {
         try {
             final EntityManager entityManager = getEntityManager();
@@ -2970,12 +2965,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
     }
 
     @Override
-    public RESTTopicCollectionV1 getXMLTopics(final String expand) {
-        return getXMLResources(RESTTopicCollectionV1.class, Topic.class, new TopicV1Factory(), RESTv1Constants.TOPICS_EXPANSION_NAME,
-                expand);
-    }
-
-    @Override
     public RESTTopicV1 getJSONTopic(final Integer id, final String expand) {
         assert id != null : "The id parameter can not be null";
 
@@ -2989,133 +2978,6 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
         assert revision != null : "The revision parameter can not be null";
 
         return getJSONResource(Topic.class, new TopicV1Factory(), id, revision, expand);
-    }
-
-    @Override
-    public RESTTopicV1 getXMLTopic(final Integer id) {
-        assert id != null : "The id parameter can not be null";
-
-        return getXMLResource(Topic.class, new TopicV1Factory(), id, null);
-    }
-
-    @Override
-    public RESTTopicV1 getXMLTopicRevision(final Integer id,
-            final Integer revision) {
-        assert id != null : "The id parameter can not be null";
-
-        return getXMLResource(Topic.class, new TopicV1Factory(), id, revision, null);
-    }
-
-    @Override
-    public String getXMLTopicXML(final Integer id) {
-        assert id != null : "The id parameter can not be null";
-
-        final RESTTopicV1 entity = getXMLResource(Topic.class, new TopicV1Factory(), id, null);
-        if (entity.getXmlDoctype() != null) {
-            if (entity.getXmlDoctype() == RESTXMLDoctype.DOCBOOK_45) {
-                return DocBookUtilities.addDocbook45XMLDoctype(entity.getXml(), null, "section");
-            } else if (entity.getXmlDoctype() == RESTXMLDoctype.DOCBOOK_50) {
-                return DocBookUtilities.addDocbook50XMLDoctype(entity.getXml(), null, "section");
-            }
-        }
-
-        return entity.getXml();
-    }
-
-    @Override
-    public String getXMLTopicRevisionXML(final Integer id,
-            final Integer revision) {
-        assert id != null : "The id parameter can not be null";
-        assert revision != null : "The revision parameter can not be null";
-
-        final RESTTopicV1 entity = getXMLResource(Topic.class, new TopicV1Factory(), id, revision, null);
-        if (entity.getXmlDoctype() != null) {
-            if (entity.getXmlDoctype() == RESTXMLDoctype.DOCBOOK_45) {
-                return DocBookUtilities.addDocbook45XMLDoctype(entity.getXml(), null, "section");
-            } else if (entity.getXmlDoctype() == RESTXMLDoctype.DOCBOOK_50) {
-                return DocBookUtilities.addDocbook50XMLDoctype(entity.getXml(), null, "section");
-            }
-        }
-
-        return entity.getXml();
-    }
-
-    @Override
-    public String getXMLTopicXMLContained(final Integer id,
-            final String containerName) {
-        assert id != null : "The id parameter can not be null";
-        assert containerName != null : "The containerName parameter can not be null";
-
-        return ComponentTopicV1.returnXMLWithNewContainer(getXMLResource(Topic.class, new TopicV1Factory(), id, null), containerName);
-    }
-
-    @Override
-    public String getXMLTopicXMLNoContainer(final Integer id,
-            final Boolean includeTitle) {
-        assert id != null : "The id parameter can not be null";
-
-        final String retValue = ComponentTopicV1.returnXMLWithNoContainer(getXMLResource(Topic.class, new TopicV1Factory(), id, null),
-                includeTitle);
-        return retValue;
-    }
-
-    @Override
-    public String getHTMLTopicHTML(final Integer id) {
-        assert id != null : "The id parameter can not be null";
-
-        return getXMLResource(Topic.class, new TopicV1Factory(), id, null).getHtml();
-    }
-
-    @Override
-    public String getHTMLTopicRevisionHTML(final Integer id,
-            final Integer revision) {
-        assert id != null : "The id parameter can not be null";
-
-        return getXMLResource(Topic.class, new TopicV1Factory(), id, revision, null).getHtml();
-    }
-
-    @Override
-    public String getCSVTopics() {
-        final EntityManager entityManager = getEntityManager();
-        final List<Topic> topicList = getEntities(entityManager, Topic.class);
-
-        response.getOutputHeaders().putSingle("Content-Disposition", "filename=Topics.csv");
-
-        return TopicUtilities.getCSVForTopics(entityManager, topicList);
-    }
-
-    @Override
-    public String getCSVTopicsWithQuery(
-            @PathParam("query") PathSegment query) {
-        final EntityManager entityManager = getEntityManager();
-        final List<Topic> topicList = getEntitiesFromQuery(entityManager, query.getMatrixParameters(),
-                new TopicFilterQueryBuilder(entityManager), new TopicFieldFilter());
-
-        response.getOutputHeaders().putSingle("Content-Disposition", "filename=Topics.csv");
-
-        return TopicUtilities.getCSVForTopics(entityManager, topicList);
-    }
-
-    @Override
-    public byte[] getZIPTopics() {
-        final EntityManager entityManager = getEntityManager();
-        final List<Topic> topicList = getEntities(entityManager, Topic.class);
-
-        response.getOutputHeaders().putSingle("Content-Disposition", "filename=XML.zip");
-
-        return TopicUtilities.getZIPTopicXMLDump(topicList);
-    }
-
-    @Override
-    public byte[] getZIPTopicsWithQuery(
-            @PathParam("query") PathSegment query) {
-        final EntityManager entityManager = getEntityManager();
-        final List<Topic> topicList = getEntitiesFromQuery(entityManager, query.getMatrixParameters(),
-                new TopicFilterQueryBuilder(entityManager), new TopicFieldFilter());
-
-        response.getOutputHeaders().putSingle("Content-Disposition", "filename=XML.zip");
-
-        return TopicUtilities.getZIPTopicXMLDump(topicList);
     }
 
     @Override
@@ -3193,6 +3055,164 @@ public class RESTv1 extends BaseRESTv1 implements RESTBaseInterfaceV1, RESTInter
 
         return deleteJSONEntities(RESTTopicCollectionV1.class, Topic.class, factory, dbEntityIds, RESTv1Constants.TOPICS_EXPANSION_NAME,
                 expand, logDetails);
+    }
+
+    // XML TOPIC FUNCTIONS
+
+    @Override
+    public RESTTopicCollectionV1 getXMLTopics(final String expand) {
+        return getXMLResources(RESTTopicCollectionV1.class, Topic.class, new TopicV1Factory(), RESTv1Constants.TOPICS_EXPANSION_NAME,
+                expand);
+    }
+
+    @Override
+    public RESTTopicV1 getXMLTopic(final Integer id) {
+        assert id != null : "The id parameter can not be null";
+
+        return getXMLResource(Topic.class, new TopicV1Factory(), id, null);
+    }
+
+    @Override
+    public RESTTopicV1 getXMLTopicRevision(final Integer id,
+            final Integer revision) {
+        assert id != null : "The id parameter can not be null";
+
+        return getXMLResource(Topic.class, new TopicV1Factory(), id, revision, null);
+    }
+
+    @Override
+    public String getXMLTopicXML(final Integer id) {
+        assert id != null : "The id parameter can not be null";
+
+        final RESTTopicV1 entity = getXMLResource(Topic.class, new TopicV1Factory(), id, null);
+        if (entity.getXmlDoctype() != null) {
+            if (entity.getXmlDoctype() == RESTXMLDoctype.DOCBOOK_45) {
+                return DocBookUtilities.addDocbook45XMLDoctype(entity.getXml(), null, "section");
+            } else if (entity.getXmlDoctype() == RESTXMLDoctype.DOCBOOK_50) {
+                return DocBookUtilities.addDocbook50XMLDoctype(entity.getXml(), null, "section");
+            }
+        }
+
+        return entity.getXml();
+    }
+
+    @Override
+    public String updateXMLTopicXML(Integer id, String xml, String message, Integer flag, String userId) {
+        if (xml == null) throw new InvalidParameterException("The xml parameter can not be null");
+        if (id == null) throw new InvalidParameterException("The id parameter can not be null");
+
+        final TopicV1Factory factory = new TopicV1Factory();
+        final RESTLogDetailsV1 logDetails = generateLogDetails(message, flag, userId);
+
+        // Create the topic data object that will be saved
+        final RESTTopicV1 topic = new RESTTopicV1();
+        topic.setId(id);
+        topic.explicitSetXml(xml);
+
+        RESTTopicV1 updatedTopic = updateJSONEntity(Topic.class, topic, factory, "", logDetails);
+        return updatedTopic == null ? null : updatedTopic.getXml();
+    }
+
+    @Override
+    public String getXMLTopicRevisionXML(final Integer id,
+            final Integer revision) {
+        assert id != null : "The id parameter can not be null";
+        assert revision != null : "The revision parameter can not be null";
+
+        final RESTTopicV1 entity = getXMLResource(Topic.class, new TopicV1Factory(), id, revision, null);
+        if (entity.getXmlDoctype() != null) {
+            if (entity.getXmlDoctype() == RESTXMLDoctype.DOCBOOK_45) {
+                return DocBookUtilities.addDocbook45XMLDoctype(entity.getXml(), null, "section");
+            } else if (entity.getXmlDoctype() == RESTXMLDoctype.DOCBOOK_50) {
+                return DocBookUtilities.addDocbook50XMLDoctype(entity.getXml(), null, "section");
+            }
+        }
+
+        return entity.getXml();
+    }
+
+    @Override
+    public String getXMLTopicXMLContained(final Integer id,
+            final String containerName) {
+        assert id != null : "The id parameter can not be null";
+        assert containerName != null : "The containerName parameter can not be null";
+
+        return ComponentTopicV1.returnXMLWithNewContainer(getXMLResource(Topic.class, new TopicV1Factory(), id, null), containerName);
+    }
+
+    @Override
+    public String getXMLTopicXMLNoContainer(final Integer id,
+            final Boolean includeTitle) {
+        assert id != null : "The id parameter can not be null";
+
+        final String retValue = ComponentTopicV1.returnXMLWithNoContainer(getXMLResource(Topic.class, new TopicV1Factory(), id, null),
+                includeTitle);
+        return retValue;
+    }
+
+    // HTML TOPIC FUNCTIONS
+
+    @Override
+    public String getHTMLTopicHTML(final Integer id) {
+        assert id != null : "The id parameter can not be null";
+
+        return getXMLResource(Topic.class, new TopicV1Factory(), id, null).getHtml();
+    }
+
+    @Override
+    public String getHTMLTopicRevisionHTML(final Integer id,
+            final Integer revision) {
+        assert id != null : "The id parameter can not be null";
+
+        return getXMLResource(Topic.class, new TopicV1Factory(), id, revision, null).getHtml();
+    }
+
+    // CSV TOPIC FUNCTIONS
+
+    @Override
+    public String getCSVTopics() {
+        final EntityManager entityManager = getEntityManager();
+        final List<Topic> topicList = getEntities(entityManager, Topic.class);
+
+        response.getOutputHeaders().putSingle("Content-Disposition", "filename=Topics.csv");
+
+        return TopicUtilities.getCSVForTopics(entityManager, topicList);
+    }
+
+    @Override
+    public String getCSVTopicsWithQuery(
+            @PathParam("query") PathSegment query) {
+        final EntityManager entityManager = getEntityManager();
+        final List<Topic> topicList = getEntitiesFromQuery(entityManager, query.getMatrixParameters(),
+                new TopicFilterQueryBuilder(entityManager), new TopicFieldFilter());
+
+        response.getOutputHeaders().putSingle("Content-Disposition", "filename=Topics.csv");
+
+        return TopicUtilities.getCSVForTopics(entityManager, topicList);
+    }
+
+    // ZIP TOPIC FUNCTIONS
+
+    @Override
+    public byte[] getZIPTopics() {
+        final EntityManager entityManager = getEntityManager();
+        final List<Topic> topicList = getEntities(entityManager, Topic.class);
+
+        response.getOutputHeaders().putSingle("Content-Disposition", "filename=XML.zip");
+
+        return TopicUtilities.getZIPTopicXMLDump(topicList);
+    }
+
+    @Override
+    public byte[] getZIPTopicsWithQuery(
+            @PathParam("query") PathSegment query) {
+        final EntityManager entityManager = getEntityManager();
+        final List<Topic> topicList = getEntitiesFromQuery(entityManager, query.getMatrixParameters(),
+                new TopicFilterQueryBuilder(entityManager), new TopicFieldFilter());
+
+        response.getOutputHeaders().putSingle("Content-Disposition", "filename=XML.zip");
+
+        return TopicUtilities.getZIPTopicXMLDump(topicList);
     }
 
     /* FILTERS FUNCTIONS */
