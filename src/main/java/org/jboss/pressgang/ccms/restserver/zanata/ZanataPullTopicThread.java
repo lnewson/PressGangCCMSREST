@@ -10,18 +10,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.redhat.contentspec.processor.ContentSpecParser;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
-import org.jboss.pressgang.ccms.docbook.messaging.TopicRendererType;
+import org.jboss.pressgang.ccms.contentspec.ContentSpec;
+import org.jboss.pressgang.ccms.contentspec.structures.StringToCSNodeCollection;
+import org.jboss.pressgang.ccms.contentspec.utils.ContentSpecUtilities;
 import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.model.TranslatedTopic;
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.model.TranslatedTopicString;
 import org.jboss.pressgang.ccms.restserver.utils.EntityUtilities;
 import org.jboss.pressgang.ccms.restserver.utils.JNDIUtilities;
-import org.jboss.pressgang.ccms.restserver.utils.topicrenderer.TopicQueueRenderer;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
-import org.jboss.pressgang.ccms.utils.concurrency.WorkQueue;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.pressgang.ccms.utils.structures.StringToNodeCollection;
 import org.jboss.pressgang.ccms.zanata.ZanataInterface;
@@ -103,11 +104,6 @@ public class ZanataPullTopicThread implements Runnable {
 
                 // Commit all the changes
                 transactionManager.commit();
-
-                // Render all the updated translated topics
-                for (final Integer id : processedIds) {
-                    WorkQueue.getInstance().execute(TopicQueueRenderer.createNewInstance(id, TopicRendererType.TRANSLATEDTOPIC));
-                }
             } catch (final Exception ex) {
                 log.error("Probably an error looking up the EntityManagerFactory or the TransactionManager", ex);
 
@@ -206,8 +202,7 @@ public class ZanataPullTopicThread implements Runnable {
 
                 try {
                     if (historicalTopic.isTaggedWith(CommonConstants.CONTENT_SPEC_TAG_ID)) {
-                        // TODO Fix Me
-                        // processContentSpec(entityManager, historicalTopic, translatedTopicData, translationDetails, translations);
+                        processContentSpec(entityManager, historicalTopic, translatedTopicData, translationDetails, translations);
                     } else {
                         processTopic(entityManager, historicalTopic, translatedTopicData, translationDetails, translations);
                     }
@@ -356,92 +351,94 @@ public class ZanataPullTopicThread implements Runnable {
      * @return True if anything in the translated topic changed, otherwise false.
      * @throws Exception Thrown if there is an error in the Content Specification syntax.
      */
-    /*protected boolean processContentSpec(final EntityManager entityManager, final Integer contentSpecId,
-            final Integer contentSpecRevision,
+    protected boolean processContentSpec(final EntityManager entityManager, final Topic historicalTopic,
             final TranslatedTopicData translatedTopic, final Map<String, ZanataTranslation> translationDetails,
             final Map<String, String> translations) throws Exception {
         boolean changed = false;
 
         // Parse the Content Spec stored in the XML Field
-        final DBProviderFactory providerFactory = DBProviderFactory.create(entityManager);
-        final ContentSpecWrapper contentSpecWrapper = providerFactory.getProvider(ContentSpecProvider.class).getContentSpec
-                (contentSpecId, contentSpecRevision);
+        // TODO The URL shouldn't be hardcoded
+        final ContentSpecParser parser = new ContentSpecParser("http://localhost:8080/TopicIndex/");
 
         // Replace the translated strings, and save the result into the TranslatedTopicData entity
-        if (contentSpecWrapper != null) {
-            final List<StringToCSNodeCollection> stringToNodeCollections = ContentSpecUtilities.getTranslatableStrings
-            (contentSpecWrapper, false);
+        if (parser.parse(historicalTopic.getTopicXML())) {
+            final ContentSpec spec = parser.getContentSpec();
 
-            // Create a temporary collection that we can freely remove items from
-            final List<StringToCSNodeCollection> tempStringToNodeCollection = new ArrayList<StringToCSNodeCollection>();
-            for (final StringToCSNodeCollection stringToNodeCollection : stringToNodeCollections) {
-                tempStringToNodeCollection.add(stringToNodeCollection);
-            }
+            if (spec != null) {
+                final List<StringToCSNodeCollection> stringToNodeCollections = ContentSpecUtilities.getTranslatableStrings(spec, false);
 
-            // Remove or update any existing translation strings
-            if (translatedTopic.getTranslatedTopicStrings() != null) {
-                final List<TranslatedTopicString> removeTranslationStringList = new ArrayList<TranslatedTopicString>();
+                // Create a temporary collection that we can freely remove items from
+                final List<StringToCSNodeCollection> tempStringToNodeCollection = new ArrayList<StringToCSNodeCollection>();
+                for (final StringToCSNodeCollection stringToNodeCollection : stringToNodeCollections) {
+                    tempStringToNodeCollection.add(stringToNodeCollection);
+                }
 
-                for (final TranslatedTopicString existingString : translatedTopic.getTranslatedTopicStrings()) {
-                    boolean found = false;
+                // Remove or update any existing translation strings
+                if (translatedTopic.getTranslatedTopicStrings() != null) {
+                    final List<TranslatedTopicString> removeTranslationStringList = new ArrayList<TranslatedTopicString>();
 
-                    for (final StringToCSNodeCollection original : tempStringToNodeCollection) {
-                        final String originalText = original.getTranslationString();
+                    for (final TranslatedTopicString existingString : translatedTopic.getTranslatedTopicStrings()) {
+                        boolean found = false;
 
-                        if (existingString.getOriginalString().equals(originalText)) {
-                            found = true;
-                            tempStringToNodeCollection.remove(original);
+                        for (final StringToCSNodeCollection original : tempStringToNodeCollection) {
+                            final String originalText = original.getTranslationString();
 
-                            final ZanataTranslation translation = translationDetails.get(originalText);
+                            if (existingString.getOriginalString().equals(originalText)) {
+                                found = true;
+                                tempStringToNodeCollection.remove(original);
 
-                            // Check the translations still match
-                            if (!translation.getTranslation().equals(existingString.getTranslatedString())) {
-                                changed = true;
+                                final ZanataTranslation translation = translationDetails.get(originalText);
 
-                                existingString.setTranslatedString(translation.getTranslation());
+                                // Check the translations still match
+                                if (!translation.getTranslation().equals(existingString.getTranslatedString())) {
+                                    changed = true;
+
+                                    existingString.setTranslatedString(translation.getTranslation());
+                                }
+
+                                // Check if the string is still fuzzy
+                                if (translation.isFuzzy() != existingString.getFuzzyTranslation()) {
+                                    changed = true;
+
+                                    existingString.setFuzzyTranslation(translation.isFuzzy());
+                                }
                             }
+                        }
 
-                            // Check if the string is still fuzzy
-                            if (translation.isFuzzy() != existingString.getFuzzyTranslation()) {
-                                changed = true;
-
-                                existingString.setFuzzyTranslation(translation.isFuzzy());
-                            }
+                        // If the original String no longer exists then remove it (this shouldn't happen)
+                        if (!found) {
+                            removeTranslationStringList.add(existingString);
                         }
                     }
 
-                    // If the original String no longer exists then remove it (this shouldn't happen)
-                    if (!found) {
-                        removeTranslationStringList.add(existingString);
+                    // Remove any translation strings that no longer exist
+                    for (final TranslatedTopicString translatedTopicString : removeTranslationStringList) {
+                        translatedTopic.getTranslatedTopicStrings().remove(translatedTopicString);
+                        entityManager.remove(translatedTopicString);
                     }
                 }
 
-                // Remove any translation strings that no longer exist
-                for (final TranslatedTopicString translatedTopicString : removeTranslationStringList) {
-                    translatedTopic.getTranslatedTopicStrings().remove(translatedTopicString);
-                    entityManager.remove(translatedTopicString);
+                // save the strings to TranslatedTopicString entities
+                for (final StringToCSNodeCollection original : tempStringToNodeCollection) {
+                    final String originalText = original.getTranslationString();
+                    final ZanataTranslation translation = translationDetails.get(originalText);
+
+                    if (translation != null) {
+                        final TranslatedTopicString translatedTopicString = new TranslatedTopicString();
+                        translatedTopicString.setOriginalString(originalText);
+                        translatedTopicString.setTranslatedString(translation.getTranslation());
+                        translatedTopicString.setFuzzyTranslation(translation.isFuzzy());
+                        translatedTopicString.setTranslatedTopicData(translatedTopic);
+
+                        translatedTopic.getTranslatedTopicStrings().add(translatedTopicString);
+                    }
                 }
+
+                ContentSpecUtilities.replaceTranslatedStrings(spec, translations);
+                translatedTopic.setTranslatedXml(spec.toString());
             }
-
-            // save the strings to TranslatedTopicString entities
-            for (final StringToCSNodeCollection original : tempStringToNodeCollection) {
-                final String originalText = original.getTranslationString();
-                final ZanataTranslation translation = translationDetails.get(originalText);
-
-                if (translation != null) {
-                    final TranslatedTopicString translatedTopicString = new TranslatedTopicString();
-                    translatedTopicString.setOriginalString(originalText);
-                    translatedTopicString.setTranslatedString(translation.getTranslation());
-                    translatedTopicString.setFuzzyTranslation(translation.isFuzzy());
-                    translatedTopicString.setTranslatedTopicData(translatedTopic);
-
-                    translatedTopic.getTranslatedTopicStrings().add(translatedTopicString);
-                }
-            }
-
-            ContentSpecUtilities.replaceTranslatedStrings(contentSpecWrapper, translations);
         }
 
         return changed;
-    }*/
+    }
 }

@@ -32,10 +32,6 @@ import org.hibernate.envers.query.AuditEntity;
 import org.hibernate.envers.query.AuditQuery;
 import org.hibernate.validator.InvalidStateException;
 import org.hibernate.validator.InvalidValue;
-import org.jboss.pressgang.ccms.contentspec.processor.ContentSpecParser;
-import org.jboss.pressgang.ccms.contentspec.processor.ContentSpecProcessor;
-import org.jboss.pressgang.ccms.contentspec.processor.structures.ProcessingOptions;
-import org.jboss.pressgang.ccms.contentspec.utils.logging.ErrorLoggerManager;
 import org.jboss.pressgang.ccms.filter.base.IFieldFilter;
 import org.jboss.pressgang.ccms.filter.base.IFilterQueryBuilder;
 import org.jboss.pressgang.ccms.filter.base.ITagFilterQueryBuilder;
@@ -44,7 +40,6 @@ import org.jboss.pressgang.ccms.model.Filter;
 import org.jboss.pressgang.ccms.model.User;
 import org.jboss.pressgang.ccms.model.base.AuditedEntity;
 import org.jboss.pressgang.ccms.model.exceptions.CustomConstraintViolationException;
-import org.jboss.pressgang.ccms.provider.DBProviderFactory;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.base.RESTBaseCollectionV1;
@@ -966,66 +961,6 @@ public class BaseRESTv1 {
          */
         // Retrieve the results using the generated query.
         return entityManager.createQuery(query).getResultList();
-    }
-
-    /**
-     * Creates or Updates a content spec from a String representation of a content specification.
-     *
-     * @param contentSpec The content spec string representation.
-     * @param operation   The Database Operation type (CREATE or UPDATE).
-     * @param logDetails  The details about the changes that need to be logged.
-     * @return The post processed representation of the Content Specification.
-     */
-    protected String createOrUpdateContentSpecFromString(final String contentSpec, final DatabaseOperation operation,
-            final RESTLogDetailsV1 logDetails) {
-        assert contentSpec != null;
-
-        TransactionManager transactionManager = null;
-        EntityManager entityManager = null;
-
-        try {
-            // Get the TransactionManager and start a Transaction
-            transactionManager = JNDIUtilities.lookupJBossTransactionManager();
-            transactionManager.begin();
-
-            // Get an EntityManager instance
-            entityManager = getEntityManager();
-            entityManager.setFlushMode(FlushModeType.AUTO);
-
-            // Store the log details into the Logging Java Bean
-            setLogDetails(entityManager, logDetails);
-
-            final DBProviderFactory providerFactory = DBProviderFactory.create(entityManager);
-            final ErrorLoggerManager loggerManager = new ErrorLoggerManager();
-            final ProcessingOptions processingOptions = new ProcessingOptions();
-
-            final ContentSpecParser parser = new ContentSpecParser(providerFactory, loggerManager);
-            final ContentSpecProcessor processor = new ContentSpecProcessor(providerFactory, loggerManager, processingOptions);
-            boolean success = false;
-            final ContentSpecParser.ParsingMode mode;
-            if (operation == DatabaseOperation.CREATE) {
-                mode = ContentSpecParser.ParsingMode.NEW;
-            } else {
-                mode = ContentSpecParser.ParsingMode.EDITED;
-            }
-
-            // Parse the spec and then process it
-            parser.parse(contentSpec, mode, true);
-            success = processor.processContentSpec(parser.getContentSpec(), null, mode);
-
-            // If the content spec processed correctly then commit the changes, otherwise roll them back.
-            if (success) {
-                transactionManager.commit();
-            } else {
-                transactionManager.rollback();
-            }
-
-            return loggerManager.generateLogs();
-        } catch (final Throwable e) {
-            throw processError(transactionManager, e);
-        } finally {
-            if (entityManager != null) entityManager.close();
-        }
     }
 
     /**

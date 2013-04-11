@@ -7,9 +7,12 @@ import java.security.MessageDigest;
 import java.util.Collections;
 import java.util.List;
 
+import com.redhat.contentspec.processor.ContentSpecParser;
 import org.apache.commons.codec.binary.Hex;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;
+import org.jboss.pressgang.ccms.contentspec.structures.StringToCSNodeCollection;
+import org.jboss.pressgang.ccms.contentspec.utils.ContentSpecUtilities;
 import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.model.TranslatedTopic;
 import org.jboss.pressgang.ccms.restserver.utils.Constants;
@@ -99,8 +102,8 @@ public class ZanataPushTopicThread implements Runnable {
 
                         /* Content Specs are parsed differently then XML */
                         if (topic.isTaggedWith(Constants.CONTENT_SPEC_TAG_ID)) {
-                            // TODO Fix Me
-                            /*final ContentSpecParser parser = new ContentSpecParser("http://localhost:8080/TopicIndex/");
+                            // TODO the URL shouldn't be statically coded
+                            final ContentSpecParser parser = new ContentSpecParser("http://localhost:8080/TopicIndex/");
 
                             try {
                                 if (parser.parse(topic.getTopicXML())) {
@@ -138,7 +141,7 @@ public class ZanataPushTopicThread implements Runnable {
                                         final TranslatedTopic translatedTopic = TopicUtilities.createTranslatedTopic(entityManager,
                                                 topic.getTopicId(), topicDetails.getSecond());
                                         if (translatedTopic != null) {
-                                            // Persist the new Translated Topic
+                                            /* Persist the new Translated Topic */
                                             entityManager.persist(translatedTopic);
                                         }
                                     } else {
@@ -151,7 +154,7 @@ public class ZanataPushTopicThread implements Runnable {
 
                             } catch (Exception ex) {
                                 log.error("Probably an error parsing the Content Specification", ex);
-                            }*/
+                            }
                         } else {
                             try {
                                 final Document doc = XMLUtilities.convertStringToDocument(topic.getTopicXML());
@@ -212,7 +215,7 @@ public class ZanataPushTopicThread implements Runnable {
                 // Save the changes.
                 transactionManager.commit();
             } catch (final Exception ex) {
-                log.error("Probably an error retrieveing the Topic entity", ex);
+                log.error("Probably an error retrieving the Topic entity", ex);
 
                 if (transactionManager != null) {
                     try {

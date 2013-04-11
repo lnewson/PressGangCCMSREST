@@ -1,0 +1,186 @@
+.docbookGuiButton, .docbookEmphasis {
+    font-weight: bold;
+}
+
+.docbookTable {
+    border-collapse: collapse;
+    table-layout: fixed;
+    word-wrap: break-word;
+    border: 1px #444;
+}
+
+.docbookTable th {
+    text-align: left;
+    background-color: #69C;
+    padding: .3em .5em;
+    color: white;
+}
+
+.docbookTable td {
+    padding: .15em .5em;
+}
+
+.docbookFootnote {
+    font-size: 10px;
+    margin: 0px;
+    color: #222;
+}
+
+.docbookFootnote sup {
+    color: #e3dcc0;
+    left: .4em;
+}
+
+.docbookFootnotes hr {
+    border-collapse: collapse;
+    border-style: none;
+    border-top: 1px dotted #ccc;
+    width: 100%;
+}
+
+.docbookTable tr:nth-child(even), .docbookSimpleList tr:nth-child(even) {
+    background-color: #EEE;
+}
+
+.docbookFigureTitle, .formalParaTitle, .docbookTableTitle, .docbookItemizedListTitle, .docbookProcedureTitle, .docbookExampleTitle, .docbookSectionTitle {
+    color: #369;
+    margin-bottom: 0px;
+    background-color: transparent;
+    margin-bottom: 0px;
+    margin-top: 20px;
+    page-break-inside: avoid;
+    page-break-after: avoid;
+    word-wrap: break-word;
+}
+
+.docbookFigureTitle, .formalParaTitle, .docbookTableTitle, .docbookItemizedListTitle, .docbookProcedureTitle, .docbookExampleTitle {
+    font-size: 14px;
+}
+
+.docbookSectionTitle {
+    font-size: 20px;
+    margin-top: 30px;
+}
+
+.docbookGuiLabel {
+    font-family: "liberation mono", "bitstream vera mono", "dejavu mono", monospace;
+    font-weight: bold;
+}
+
+.docbookExample {
+    padding-left: 1em;
+    border-left: 3px solid #aaaaaa;
+}
+
+.docbookNote::before {
+    content: url(../img/note.png);
+    padding-left: 5px;
+}
+
+.docbookWarning::before {
+    content: url(../img/warning.png);
+    padding-left: 5px;
+}
+
+.docbookImportant::before {
+    content: url(../img/important.png);
+    padding-left: 5px;
+}
+
+.docbookNote, .docbookWarning, .docbookImportant {
+    color: black;
+    margin: 0px;
+    padding: 0px;
+    background: none;
+    background-color: white;
+    margin-bottom: 1em;
+    border-bottom: 1px solid #AAA;
+    page-break-inside: avoid;
+}
+
+.docbookNoteTitle, .docbookWarningTitle, .docbookImportantTitle {
+    clear: both;
+    margin: 0px;
+    padding: 0px;
+    margin-top: -40px;
+    padding-left: 58px;
+    height: 1.4em;
+    line-height: 1.4em;
+    font-size: 17px;
+    color: white;
+}
+
+.docbookNoteTitle {
+    background: url(../img/green.png) top right repeat-x;
+    background-color: #597800;
+}
+
+.docbookImportantTitle {
+    background: url(../img/yellow.png) top right repeat-x;
+    background-color: #A6710F;
+}
+
+.docbookWarningTitle {
+    background: url(../img/red.png) top right repeat-x;
+    background-color: #590000;
+}
+
+.docbookNoteContents, .docbookWarningContents, .docbookImportantContents {
+    order: none;
+    border-left: 1px solid #AAA;
+    border-right: 1px solid #AAA;
+    padding: 0px;
+    margin: 0px;
+    padding-top: 1.5em;
+    padding-bottom: 1em;
+    padding-left: 2em;
+    padding-right: 1em;
+    background-color: #EEEEEC;
+    -moz-border-radius: 0px;
+    -webkit-border-radius: 0px;
+    border-radius: 0px;
+}
+
+.docbookProgramListing {
+    font-family: "liberation mono", "bitstream vera mono", "dejavu mono", monospace;
+    display: block;
+    background-color: whiteSmoke;
+    color: black;
+    margin-bottom: 1em;
+    padding: .5em 1em;
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap !important;
+    white-space: -pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: break-word;
+    font-size: 0.9em;
+    border-style: none;
+    box-shadow: 0 2px 5px #AAA inset;
+    -moz-box-shadow: 0 2px 5px #AAAAAA inset;
+    -webkit-box-shadow: 0 2px 5px #AAA inset;
+    -o-box-shadow: 0 2px 5px #AAAAAA inset;
+}
+
+.docbookCiteTitle {
+    font-style: italic;
+}
+
+.docbookGuiMenu, .docbookGuiSubMenu, .docbookGuiMenuItem {
+    font-weight: bold;
+}
+
+ol ol {
+    list-style-type: lower-alpha;
+}
+
+.docbookLiteral, .docbookFileName {
+    font-family: "liberation mono", "bitstream vera mono", "dejavu mono", monospace;
+    font-weight: bold;
+}
+
+.docbookInterfaceName {
+    font-family: "liberation mono", "bitstream vera mono", "dejavu mono", monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-weight: bold;
+}
