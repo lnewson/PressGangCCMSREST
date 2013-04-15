@@ -237,12 +237,12 @@
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms.contentspec</groupId>
-            <artifactId>csprocessor</artifactId>
+            <artifactId>processor</artifactId>
             <version>${csprocessor.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.pressgang.ccms</groupId>
-            <artifactId>j2bugzilla-extended</artifactId>
+            <artifactId>j2bugzilla-pressgang</artifactId>
             <version>${j2bugzilla.version}</version>
         </dependency>
 

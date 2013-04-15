@@ -19,6 +19,9 @@ import org.jboss.resteasy.spi.interception.PreProcessInterceptor;
 public class RESTVersionInterceptor implements PreProcessInterceptor {
     private static final int UPGRADE_STATUS_CODE = 426;
     private static final String REST_VERSION = VersionUtilities.getAPIVersion(RESTInterfaceV1.class);
+    private static final Integer MAJOR_REST_VERSION = getMajorVersion(REST_VERSION);
+    private static final Integer MINOR_REST_VERSION = getMinorVersion(REST_VERSION);
+    private static final boolean IS_REST_SNAPSHOT = isSnapshotVersion(REST_VERSION);
 
     private static final String REST_VERSION_ERROR_MSG = "The REST Client Implementation is out of date, " +
             "" + "and no longer supported. Please update the REST Client library.";
@@ -65,15 +68,29 @@ public class RESTVersionInterceptor implements PreProcessInterceptor {
      */
     protected boolean isValidVersion(final String version) {
         if (isUnknownVersion(version)) return true;
-        if (!isSnapshotVersion(REST_VERSION) && isSnapshotVersion(version)) return false;
 
         final Integer majorVersion = getMajorVersion(version);
         final Integer minorVersion = getMinorVersion(version);
+        final boolean isSnapshot = isSnapshotVersion(version);
 
         switch (majorVersion) {
             case 1:
-                // Check that the minor version is 0 or higher
-                return (minorVersion == null || minorVersion >= 0);
+                if (minorVersion == null) {
+                    return true;
+                } else {
+                    // Check that the minor version is 0 or higher
+                    if (minorVersion < MINOR_REST_VERSION) {
+                        return false;
+                    } else if (minorVersion.equals(MINOR_REST_VERSION)) {
+                        if (!IS_REST_SNAPSHOT && isSnapshot) {
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    } else {
+                        return minorVersion > MINOR_REST_VERSION;
+                    }
+                }
             default:
                 return false;
         }
@@ -90,25 +107,25 @@ public class RESTVersionInterceptor implements PreProcessInterceptor {
         return (majorVersion != null && majorVersion >= 0) && (minorVersion == null || minorVersion >= 28);
     }
 
-    protected Integer getMajorVersion(final String version) {
+    protected static Integer getMajorVersion(final String version) {
         // Remove any extra information, ie -SNAPSHOT
         final String cleanedVersion = version.replaceAll("-.*", "");
         String[] tmp = cleanedVersion.split("\\.");
         return Integer.parseInt(tmp[0]);
     }
 
-    protected Integer getMinorVersion(final String version) {
+    protected static Integer getMinorVersion(final String version) {
         // Remove any extra information, ie -SNAPSHOT
         final String cleanedVersion = version.replaceAll("-.*", "");
         String[] tmp = cleanedVersion.split("\\.");
         return tmp.length >= 2 ? Integer.parseInt(tmp[1]) : null;
     }
 
-    protected boolean isSnapshotVersion(final String version) {
+    protected static boolean isSnapshotVersion(final String version) {
         return version.contains("-SNAPSHOT");
     }
 
-    protected boolean isUnknownVersion(final String version) {
+    protected static boolean isUnknownVersion(final String version) {
         return version.toLowerCase().equals("unknown");
     }
 }
