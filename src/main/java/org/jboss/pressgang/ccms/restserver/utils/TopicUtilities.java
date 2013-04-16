@@ -13,12 +13,12 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -29,7 +29,6 @@ import com.j2bugzilla.base.ECSBug;
 import com.j2bugzilla.rpc.BugSearch;
 import com.j2bugzilla.rpc.GetBug;
 import com.j2bugzilla.rpc.LogIn;
-import org.jboss.pressgang.ccms.docbook.messaging.TopicRendererType;
 import org.jboss.pressgang.ccms.model.BlobConstants;
 import org.jboss.pressgang.ccms.model.BugzillaBug;
 import org.jboss.pressgang.ccms.model.Category;
@@ -46,13 +45,12 @@ import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.model.sort.CategoryNameComparator;
 import org.jboss.pressgang.ccms.model.sort.TagNameComparator;
 import org.jboss.pressgang.ccms.model.sort.TagToCategorySortingComparator;
-import org.jboss.pressgang.ccms.restserver.utils.topicrenderer.TopicQueueRenderer;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
 import org.jboss.pressgang.ccms.utils.common.DocBookUtilities;
 import org.jboss.pressgang.ccms.utils.common.StringUtilities;
 import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
 import org.jboss.pressgang.ccms.utils.common.XMLValidator;
-import org.jboss.pressgang.ccms.utils.concurrency.WorkQueue;
+import org.jboss.pressgang.ccms.utils.common.ZipUtilities;
 import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
 import org.jboss.pressgang.ccms.utils.structures.NameIDSortMap;
 import org.slf4j.Logger;
@@ -62,6 +60,48 @@ import org.xml.sax.SAXException;
 
 public class TopicUtilities {
     private static final Logger log = LoggerFactory.getLogger(TopicUtilities.class);
+
+    /**
+     * Creates a CSV string representation of all the topics in the provided list.
+     *
+     * @param entityManager
+     * @param topicList     The topics to create a CSV representation for.
+     * @return The CSV string representation of the topics.
+     */
+    public static String getCSVForTopics(final EntityManager entityManager, final List<Topic> topicList) {
+        // Build the csv
+        final StringBuilder csv = new StringBuilder(TopicUtilities.getCSVHeaderRow(entityManager));
+
+        // loop through each topic
+        for (final Topic topic : topicList)
+            csv.append("\n").append(TopicUtilities.getCSVRow(entityManager, topic));
+
+        return csv.toString();
+    }
+
+    public static byte[] getZIPTopicXMLDump(final List<Topic> topicList) {
+        // build up the files that will make up the zip file
+        final HashMap<String, byte[]> files = new HashMap<String, byte[]>();
+
+        for (final Topic topic : topicList) {
+            try {
+                files.put(topic.getTopicId() + ".xml",
+                        topic.getTopicXML() == null ? "".getBytes("UTF-8") : topic.getTopicXML().getBytes("UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                /* UTF-8 is a valid format so this should exception should never get thrown */
+            }
+        }
+
+        byte[] zipFile = null;
+        try {
+            zipFile = ZipUtilities.createZip(files);
+        } catch (final Exception ex) {
+            log.error("Probably a stream error", ex);
+            zipFile = null;
+        }
+
+        return zipFile;
+    }
 
     /**
      * Returns the headers for the CSV columns
@@ -81,31 +121,6 @@ public class TopicUtilities {
             topicColumns.append("," + category.getCategoryName());
 
         return topicColumns.toString();
-    }
-
-    /**
-     * Request that a Topic's XML be rendered into HTML. This will be preformed by an external service.
-     *
-     * @param topic The topic to be rendered.
-     */
-    public static void render(final Topic topic) {
-        final String renderTopics = System.getProperty(Constants.ENABLE_RENDERING_PROPERTY);
-        if (renderTopics != null && !Boolean.parseBoolean(renderTopics)) return;
-
-        if (topic.isTaggedWith(Constants.CONTENT_SPEC_TAG_ID)) return;
-
-        /*
-         * Send a message to the queue that this topic, and all those that have inbound relationships, need to be rerendered. We
-         * use the TopicQueueRenderer to send the topic id once the transaction has finished.
-         */
-        try {
-            final TransactionManager transactionManager = JNDIUtilities.lookupTransactionManager();
-            final Transaction transaction = transactionManager.getTransaction();
-            WorkQueue.getInstance().execute(TopicQueueRenderer.createNewInstance(topic.getTopicId(), TopicRendererType.TOPIC, transaction));
-        } catch (final Exception ex) {
-            log.error("An error occurred trying to render a topic, probably a STOMP messaging problem", ex);
-        }
-
     }
 
     /**
@@ -168,7 +183,6 @@ public class TopicUtilities {
              * because of the way we have ordered the tagDB collections, and the ArrayLists it contains, this process will
              * remove those tags that belong to lower priority categories, and lower priority tags in those categories
              */
-
             final ArrayList<TagToCategory> tagToCategories = tagDB.get(category);
 
             // remove tags in the same mutually exclusive categories

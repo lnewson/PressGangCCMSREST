@@ -1,27 +1,22 @@
 package org.jboss.pressgang.ccms.seam.session;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
-
-import org.jboss.pressgang.ccms.docbook.messaging.TopicRendererType;
-import org.jboss.pressgang.ccms.utils.concurrency.WorkQueue;
-import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
-import org.jboss.pressgang.ccms.zanata.ZanataConstants;
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Name;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jboss.pressgang.ccms.model.TranslatedTopic;
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
 import org.jboss.pressgang.ccms.restserver.utils.TopicUtilities;
 import org.jboss.pressgang.ccms.restserver.utils.TranslatedTopicUtilities;
-import org.jboss.pressgang.ccms.restserver.utils.topicrenderer.TopicQueueRenderer;
+import org.jboss.pressgang.ccms.utils.constants.CommonConstants;
+import org.jboss.pressgang.ccms.zanata.ZanataConstants;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
 
 @Name("translatedTopicHome")
 public class TranslatedTopicHome extends VersionedEntityHome<TranslatedTopic> implements DisplayMessageInterface {
@@ -123,15 +118,6 @@ public class TranslatedTopicHome extends VersionedEntityHome<TranslatedTopic> im
 
         /* the locale is the only extra requirement to be able to populate the fields */
         populate();
-    }
-
-    public void reRender() {
-        if (translatedTopicDataHome.getInstance() == null)
-            populate();
-
-        WorkQueue.getInstance().execute(
-                TopicQueueRenderer.createNewInstance(translatedTopicDataHome.getInstance().getTranslatedTopicDataId(),
-                        TopicRendererType.TRANSLATEDTOPIC, false));
     }
 
     @Override

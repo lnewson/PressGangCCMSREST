@@ -1,8 +1,15 @@
 package org.jboss.pressgang.ccms.seam.session;
 
-import static ch.lambdaj.Lambda.*;
-import static org.hamcrest.Matchers.*;
+import static ch.lambdaj.Lambda.filter;
+import static ch.lambdaj.Lambda.having;
+import static ch.lambdaj.Lambda.on;
+import static org.hamcrest.Matchers.equalTo;
 
+import javax.faces.context.FacesContext;
+import javax.faces.model.SelectItem;
+import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
+import javax.persistence.PersistenceException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -11,14 +18,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.faces.context.FacesContext;
-import javax.faces.model.SelectItem;
-import javax.persistence.EntityManager;
-import javax.persistence.FlushModeType;
-import javax.persistence.PersistenceException;
-
 import org.drools.WorkingMemory;
 import org.hibernate.exception.ConstraintViolationException;
+import org.jboss.pressgang.ccms.docbook.constants.DocbookBuilderConstants;
 import org.jboss.pressgang.ccms.model.ImageFile;
 import org.jboss.pressgang.ccms.model.PropertyTag;
 import org.jboss.pressgang.ccms.model.PropertyTagCategory;
@@ -31,25 +33,21 @@ import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
 import org.jboss.pressgang.ccms.model.TopicToTag;
 import org.jboss.pressgang.ccms.model.TopicToTopicSourceUrl;
 import org.jboss.pressgang.ccms.model.exceptions.CustomConstraintViolationException;
+import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.restserver.envers.EnversLoggingBean;
 import org.jboss.pressgang.ccms.restserver.envers.LoggingRevisionEntity;
+import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
+import org.jboss.pressgang.ccms.restserver.zanata.ZanataPushTopicThread;
 import org.jboss.pressgang.ccms.seam.utils.Constants;
 import org.jboss.pressgang.ccms.seam.utils.EntityUtilities;
+import org.jboss.pressgang.ccms.seam.utils.TopicUtilities;
 import org.jboss.pressgang.ccms.seam.utils.structures.DroolsEvent;
 import org.jboss.pressgang.ccms.seam.utils.structures.PropertyTagUISelection;
 import org.jboss.pressgang.ccms.seam.utils.structures.tags.UICategoryData;
+import org.jboss.pressgang.ccms.seam.utils.structures.tags.UIProjectData;
 import org.jboss.pressgang.ccms.seam.utils.structures.tags.UIProjectsData;
 import org.jboss.pressgang.ccms.seam.utils.structures.tags.UITagData;
-import org.jboss.pressgang.ccms.seam.utils.structures.tags.UIProjectData;
-import org.jboss.pressgang.ccms.seam.utils.TopicUtilities;
-import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
-import org.jboss.pressgang.ccms.restserver.utils.topicrenderer.TopicQueueRenderer;
-import org.jboss.pressgang.ccms.restserver.zanata.ZanataPushTopicThread;
-import org.jboss.pressgang.ccms.docbook.constants.DocbookBuilderConstants;
-import org.jboss.pressgang.ccms.docbook.messaging.TopicRendererType;
 import org.jboss.pressgang.ccms.utils.common.CollectionUtilities;
-import org.jboss.pressgang.ccms.utils.concurrency.WorkQueue;
-import org.jboss.pressgang.ccms.rest.v1.constants.CommonFilterConstants;
 import org.jboss.pressgang.ccms.utils.structures.Pair;
 import org.jboss.seam.Component;
 import org.jboss.seam.annotations.In;
@@ -64,7 +62,9 @@ import org.slf4j.LoggerFactory;
 @Name("topicHome")
 public class TopicHome extends VersionedEntityHome<Topic> {
     private static final Logger log = LoggerFactory.getLogger(TopicHome.class);
-    /** Serializable version identifier */
+    /**
+     * Serializable version identifier
+     */
     private static final long serialVersionUID = 1701692331956663275L;
 
     @In
@@ -82,11 +82,17 @@ public class TopicHome extends VersionedEntityHome<Topic> {
      * The name of the tab that is to be selected when the tab panel is displayed
      */
     private String selectedTab;
-    /** The selected PropertyTag ID */
+    /**
+     * The selected PropertyTag ID
+     */
     private String newPropertyTagId;
-    /** The value for the new TagToPropertyTag */
+    /**
+     * The value for the new TagToPropertyTag
+     */
     private String newPropertyTagValue;
-    /** A list of the available PropertyTags */
+    /**
+     * A list of the available PropertyTags
+     */
     private PropertyTagUISelection properties;
 
     public List<SelectItem> getProperties() {
@@ -113,8 +119,7 @@ public class TopicHome extends VersionedEntityHome<Topic> {
         String values = "";
         if (tagExclusions.containsKey(id)) {
             for (final Integer exclusion : tagExclusions.get(id)) {
-                if (values.length() != 0)
-                    values += ", ";
+                if (values.length() != 0) values += ", ";
 
                 values += exclusion.toString();
             }
@@ -153,8 +158,7 @@ public class TopicHome extends VersionedEntityHome<Topic> {
     protected String getTopicList() {
         String retValue = "";
         for (final Integer topicId : processedTopics) {
-            if (retValue.length() != 0)
-                retValue += ",";
+            if (retValue.length() != 0) retValue += ",";
             retValue += topicId;
         }
         return retValue;
@@ -214,9 +218,7 @@ public class TopicHome extends VersionedEntityHome<Topic> {
 
             Contexts.getConversationContext().set("lasttopic", this.getInstance());
             final String retValue = super.persist();
-            
-            TopicUtilities.render(getInstance());
-            
+
             return retValue;
         } else {
             return "false";
@@ -231,8 +233,7 @@ public class TopicHome extends VersionedEntityHome<Topic> {
 
                 this.clearInstance();
 
-                if (addMore)
-                    return EntityUtilities.buildEditNewTopicUrl(selectedTags);
+                if (addMore) return EntityUtilities.buildEditNewTopicUrl(selectedTags);
 
                 return "backToList";
             } else {
@@ -342,8 +343,8 @@ public class TopicHome extends VersionedEntityHome<Topic> {
 
             for (final String key : paramMap.keySet()) {
                 try {
-                    if (key.startsWith(CommonFilterConstants.MATCH_TAG)
-                            && Integer.parseInt(paramMap.get(key)) == CommonFilterConstants.MATCH_TAG_STATE) {
+                    if (key.startsWith(CommonFilterConstants.MATCH_TAG) && Integer.parseInt(
+                            paramMap.get(key)) == CommonFilterConstants.MATCH_TAG_STATE) {
                         final Integer tagID = Integer.parseInt(key.replace(CommonFilterConstants.MATCH_TAG, ""));
                         topic.addTag(entityManager, tagID);
                     }
@@ -365,10 +366,8 @@ public class TopicHome extends VersionedEntityHome<Topic> {
         businessRulesWorkingMemory.setGlobal("topic", topic);
         EntityUtilities.injectSecurity(businessRulesWorkingMemory, identity);
 
-        if (this.isManaged())
-            businessRulesWorkingMemory.insert(new DroolsEvent("LoadTopicHome"));
-        else
-            businessRulesWorkingMemory.insert(new DroolsEvent("NewTopicHome"));
+        if (this.isManaged()) businessRulesWorkingMemory.insert(new DroolsEvent("LoadTopicHome"));
+        else businessRulesWorkingMemory.insert(new DroolsEvent("NewTopicHome"));
 
         businessRulesWorkingMemory.fireAllRules();
     }
@@ -383,9 +382,7 @@ public class TopicHome extends VersionedEntityHome<Topic> {
                 // See https://hibernate.onjira.com/browse/HHH-7329?focusedCommentId=46833#comment-46833
                 this.getEntityManager().setFlushMode(FlushModeType.AUTO);
                 final String result = super.update();
-                
-                TopicUtilities.render(getInstance());
-                
+
                 return result;
             }
         } catch (CustomConstraintViolationException ex) {
@@ -414,8 +411,7 @@ public class TopicHome extends VersionedEntityHome<Topic> {
                          * if so, the selected tag is stored in the selectedID field of the category GuiInputData this has the
                          * effect of removing any other tags that might be already selected in this category
                          */
-                        if (cat.getSelectedTag() != null)
-                            selectedTagObjects.add(getTagFromId(cat.getSelectedTag()));
+                        if (cat.getSelectedTag() != null) selectedTagObjects.add(getTagFromId(cat.getSelectedTag()));
 
                     } else {
                         /*
@@ -423,8 +419,7 @@ public class TopicHome extends VersionedEntityHome<Topic> {
                          */
                         for (final UITagData tagId : cat.getTags()) {
                             // if tag is selected
-                            if (tagId.isSelected())
-                                selectedTagObjects.add(getTagFromId(tagId.getId()));
+                            if (tagId.isSelected()) selectedTagObjects.add(getTagFromId(tagId.getId()));
                         }
                     }
                 }
@@ -460,8 +455,7 @@ public class TopicHome extends VersionedEntityHome<Topic> {
                     // otherwise see if we had permission on the tag itself
                     if (!hasPermission) {
                         try {
-                            Identity.instance().checkRestriction(
-                                    "#{s:hasPermission('" + existingTag.getTagName() + "', 'Enabled', null)}");
+                            Identity.instance().checkRestriction("#{s:hasPermission('" + existingTag.getTagName() + "', 'Enabled', null)}");
                             hasPermission = true;
                             break;
                         } catch (final NotLoggedInException ex) {
@@ -506,7 +500,8 @@ public class TopicHome extends VersionedEntityHome<Topic> {
     }
 
     private void setMessages() {
-        this.setCreatedMessage(createValueExpression("Successfully Created Topic With ID: #{lasttopic.topicId} Title: #{lasttopic.topicTitle}"));
+        this.setCreatedMessage(
+                createValueExpression("Successfully Created Topic With ID: #{lasttopic.topicId} Title: #{lasttopic.topicTitle}"));
         this.setDeletedMessage(createValueExpression("Successfully Created Topic With ID: #{topic.topicId} Title: #{topic.topicTitle}"));
         this.setUpdatedMessage(createValueExpression("Successfully Created Topic With ID: #{topic.topicId} Title: #{topic.topicTitle}"));
     }
@@ -517,11 +512,6 @@ public class TopicHome extends VersionedEntityHome<Topic> {
 
     public void setSelectedTab(final String selectedTab) {
         this.selectedTab = selectedTab;
-    }
-
-    public void reRender() {
-        WorkQueue.getInstance().execute(
-                TopicQueueRenderer.createNewInstance(this.getTopicTopicId(), TopicRendererType.TOPIC, false));
     }
 
     public void generateXMLFromTemplate() {
@@ -557,11 +547,10 @@ public class TopicHome extends VersionedEntityHome<Topic> {
     public void saveNewProperty() {
         try {
             if (this.newPropertyTagId.startsWith(Constants.PROPERTY_TAG_CATEGORY_SELECT_ITEM_VALUE_PREFIX)) {
-                final String fixedNewPropertyTagId = this.newPropertyTagId.replace(
-                        Constants.PROPERTY_TAG_CATEGORY_SELECT_ITEM_VALUE_PREFIX, "");
+                final String fixedNewPropertyTagId = this.newPropertyTagId.replace(Constants.PROPERTY_TAG_CATEGORY_SELECT_ITEM_VALUE_PREFIX,
+                        "");
                 final Integer fixedNewPropertyTagIdInt = Integer.parseInt(fixedNewPropertyTagId);
-                final PropertyTagCategory propertyTagCategory = entityManager.find(PropertyTagCategory.class,
-                        fixedNewPropertyTagIdInt);
+                final PropertyTagCategory propertyTagCategory = entityManager.find(PropertyTagCategory.class, fixedNewPropertyTagIdInt);
                 for (final PropertyTagToPropertyTagCategory propertyTagToPropertyTagCategory : propertyTagCategory
                         .getPropertyTagToPropertyTagCategories()) {
                     final PropertyTag propertyTag = propertyTagToPropertyTagCategory.getPropertyTag();
@@ -580,8 +569,7 @@ public class TopicHome extends VersionedEntityHome<Topic> {
                     }
                 }
             } else if (this.newPropertyTagId.startsWith(Constants.PROPERTY_TAG_SELECT_ITEM_VALUE_PREFIX)) {
-                final String fixedNewPropertyTagId = this.newPropertyTagId.replace(
-                        Constants.PROPERTY_TAG_SELECT_ITEM_VALUE_PREFIX, "");
+                final String fixedNewPropertyTagId = this.newPropertyTagId.replace(Constants.PROPERTY_TAG_SELECT_ITEM_VALUE_PREFIX, "");
                 final Integer fixedNewPropertyTagIdInt = Integer.parseInt(fixedNewPropertyTagId);
                 final PropertyTag propertyTag = entityManager.find(PropertyTag.class, fixedNewPropertyTagIdInt);
                 final TopicToPropertyTag topicToPropertyTag = new TopicToPropertyTag();
@@ -592,9 +580,7 @@ public class TopicHome extends VersionedEntityHome<Topic> {
             }
 
         } catch (final Exception ex) {
-            log.error(
-                    "Probably an issue getting an PropertyTag or PropertyTagCategory entity, or maybe a Integer.parse() issue",
-                    ex);
+            log.error("Probably an issue getting an PropertyTag or PropertyTagCategory entity, or maybe a Integer.parse() issue", ex);
             this.displayMessage = "There was an error saving the Property Tag.";
         }
     }
@@ -605,8 +591,8 @@ public class TopicHome extends VersionedEntityHome<Topic> {
 
     public void pushToZanataConfirm() {
         final List<Pair<Integer, Integer>> topics = new ArrayList<Pair<Integer, Integer>>();
-        topics.add(new Pair<Integer, Integer>(this.getInstance().getTopicId(), EnversUtilities
-                .getLatestRevision(entityManager, this.getInstance()).intValue()));
+        topics.add(new Pair<Integer, Integer>(this.getInstance().getTopicId(),
+                EnversUtilities.getLatestRevision(entityManager, this.getInstance()).intValue()));
 
         final ZanataPushTopicThread zanataPushTopicThread = new ZanataPushTopicThread(topics, false);
         final Thread thread = new Thread(zanataPushTopicThread);
@@ -618,8 +604,7 @@ public class TopicHome extends VersionedEntityHome<Topic> {
     }
 
     public void refreshEntity() {
-        if (this.isManaged())
-            this.getEntityManager().refresh(this.getInstance());
+        if (this.isManaged()) this.getEntityManager().refresh(this.getInstance());
     }
 
     protected boolean validateEntity() {
@@ -701,23 +686,25 @@ public class TopicHome extends VersionedEntityHome<Topic> {
 
         return flagStrings;
     }
-    
+
     public String getLogTimestamp() {
         return getLogMessage(null);
     }
 
     public Date getLogTimestamp(final Integer revision) {
         if (this.getRevision() == null || this.getRevision().isEmpty()) {
-            return this.instance == null ? null : new Date(EnversUtilities.getRevisionEntity(entityManager, this.getInstance(), revision).getTimestamp());
+            return this.instance == null ? null : new Date(
+                    EnversUtilities.getRevisionEntity(entityManager, this.getInstance(), revision).getTimestamp());
         } else {
             final Number rev = revision == null ? Integer.parseInt(this.getRevision()) : revision;
-            return this.revisionInstance == null ? null : new Date(EnversUtilities.getRevisionEntity(entityManager, this.getRevisionInstance(), rev).getTimestamp());
+            return this.revisionInstance == null ? null : new Date(
+                    EnversUtilities.getRevisionEntity(entityManager, this.getRevisionInstance(), rev).getTimestamp());
         }
     }
 
     public void init() {
     }
-    
+
     public List<Number> getRevisions() {
         return EnversUtilities.getRevisions(entityManager, getInstance());
     }

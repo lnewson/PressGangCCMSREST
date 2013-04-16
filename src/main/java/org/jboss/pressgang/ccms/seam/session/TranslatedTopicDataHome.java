@@ -1,14 +1,13 @@
 package org.jboss.pressgang.ccms.seam.session;
 
-import java.util.List;
-
 import javax.persistence.EntityManager;
-
-import org.jboss.seam.annotations.In;
-import org.jboss.seam.annotations.Name;
+import java.util.List;
 
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
+import org.jboss.pressgang.ccms.utils.common.XMLUtilities;
+import org.jboss.seam.annotations.In;
+import org.jboss.seam.annotations.Name;
 
 @Name("translatedTopicDataHome")
 public class TranslatedTopicDataHome extends VersionedEntityHome<TranslatedTopicData> {
@@ -56,5 +55,17 @@ public class TranslatedTopicDataHome extends VersionedEntityHome<TranslatedTopic
     
     public List<Number> getRevisions() {
         return EnversUtilities.getRevisions(entityManager, getInstance());
+    }
+
+    public String getCleanTranslationXml() {
+        String xml;
+        if (getRevision() == null || getRevision().isEmpty()) {
+            xml = getInstance().getTranslatedXml();
+        } else {
+            xml = getRevisionInstance().getTranslatedXml();
+        }
+
+        String preamble = XMLUtilities.findPreamble(xml);
+        return xml.replace(preamble, "");
     }
 }

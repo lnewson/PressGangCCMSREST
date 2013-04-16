@@ -32,12 +32,12 @@ public class ExtendedTopicList extends TopicList {
         this(limit, null, null);
     }
 
-    public ExtendedTopicList(final Integer limit, final CriteriaQuery<Topic> crtieriaQuery) {
-        this(limit, crtieriaQuery, null);
+    public ExtendedTopicList(final Integer limit, final CriteriaQuery<Topic> criteriaQuery) {
+        this(limit, criteriaQuery, null);
     }
 
-    public ExtendedTopicList(final Integer limit, final CriteriaQuery<Topic> crtieriaQuery, final TopicFieldFilter topic) {
-        super(limit, crtieriaQuery == null ? constructCriteriaQuery() : crtieriaQuery, topic);
+    public ExtendedTopicList(final Integer limit, final CriteriaQuery<Topic> criteriaQuery, final TopicFieldFilter topic) {
+        super(limit, criteriaQuery == null ? constructCriteriaQuery() : criteriaQuery, topic);
     }
 
     private static CriteriaQuery<Topic> constructCriteriaQuery() {

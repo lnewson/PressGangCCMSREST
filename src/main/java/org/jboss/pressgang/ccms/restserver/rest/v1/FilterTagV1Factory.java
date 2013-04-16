@@ -1,9 +1,8 @@
 package org.jboss.pressgang.ccms.restserver.rest.v1;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.persistence.EntityManager;
 
 import org.jboss.pressgang.ccms.model.FilterTag;
 import org.jboss.pressgang.ccms.model.Tag;
@@ -12,11 +11,11 @@ import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTFilterTagCollectio
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTFilterTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTagV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
-import org.jboss.pressgang.ccms.rest.v1.exceptions.InvalidParameterException;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectCollectionFactory;
 import org.jboss.pressgang.ccms.restserver.rest.v1.base.RESTDataObjectFactory;
 import org.jboss.pressgang.ccms.restserver.utils.EnversUtilities;
+import org.jboss.resteasy.spi.BadRequestException;
 
 public class FilterTagV1Factory extends
         RESTDataObjectFactory<RESTFilterTagV1, FilterTag, RESTFilterTagCollectionV1, RESTFilterTagCollectionItemV1> {
@@ -28,7 +27,7 @@ public class FilterTagV1Factory extends
     public RESTFilterTagV1 createRESTEntityFromDBEntityInternal(final FilterTag entity, final String baseUrl,
             final String dataType, final ExpandDataTrunk expand, final Number revision, boolean expandParentReferences,
             final EntityManager entityManager) {
-        assert entity != null : "Parameter filterTag can not be null";
+        assert entity != null : "Parameter entity can not be null";
         assert baseUrl != null : "Parameter baseUrl can not be null";
 
         final RESTFilterTagV1 retValue = new RESTFilterTagV1();
@@ -70,7 +69,7 @@ public class FilterTagV1Factory extends
 
     @Override
     public void syncDBEntityWithRESTEntity(final EntityManager entityManager, final FilterTag entity,
-            final RESTFilterTagV1 dataObject) throws InvalidParameterException {
+            final RESTFilterTagV1 dataObject) {
         if (dataObject.hasParameterSet(RESTFilterTagV1.STATE_NAME))
             entity.setTagState(dataObject.getState());
 
@@ -81,7 +80,7 @@ public class FilterTagV1Factory extends
             if (restEntity != null) {
                 final Tag dbEntity = entityManager.find(Tag.class, restEntity.getId());
                 if (dbEntity == null)
-                    throw new InvalidParameterException("No Tag entity was found with the primary key " + restEntity.getId());
+                    throw new BadRequestException("No Tag entity was found with the primary key " + restEntity.getId());
 
                 entity.setTag(dbEntity);
             } else {

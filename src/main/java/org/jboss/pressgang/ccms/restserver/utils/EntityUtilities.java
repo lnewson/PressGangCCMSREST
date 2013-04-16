@@ -5,6 +5,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.ws.rs.core.MultivaluedMap;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -96,14 +97,26 @@ public class EntityUtilities extends org.jboss.pressgang.ccms.filter.utils.Entit
         final Map<String, String> newParamMap = new HashMap<String, String>();
         for (final String key : paramMap.keySet()) {
             try {
-                newParamMap.put(key, URLDecoder.decode(paramMap.getFirst(key).replace("%25", "%"), "UTF-8"));
+                newParamMap.put(key, paramMap.getFirst(key).replace("%25", "%"));
             } catch (final Exception ex) {
                 log.warn("The URL query parameter " + key + " with value " + paramMap.getFirst(key) + " could not be URLDecoded", ex);
             }
         }
         return populateFilter(entityManager, newParamMap, filterName, tagPrefix, groupTagPrefix, categoryInternalPrefix,
                 categoryExternalPrefix, localePrefix, fieldFilter);
+    }
 
+    protected static Map<String, String> decodeUrlParameters(final Map<String, String> params) {
+        final Map<String, String> newParamMap = new HashMap<String, String>();
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            try {
+                newParamMap.put(entry.getKey(), URLDecoder.decode(entry.getValue(), "UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                log.warn("The URL query parameter " + entry.getKey() + " with value " + entry.getValue() + " could not be URLDecoded", e);
+            }
+        }
+
+        return newParamMap;
     }
 
     /**
@@ -112,10 +125,13 @@ public class EntityUtilities extends org.jboss.pressgang.ccms.filter.utils.Entit
     public static Filter populateFilter(final EntityManager entityManager, final Map<String, String> paramMap, final String filterName,
             final String tagPrefix, final String groupTagPrefix, final String categoryInternalPrefix, final String categoryExternalPrefix,
             final String localePrefix, final IFieldFilter fieldFilter) {
+        // decode the url parameters
+        final Map<String, String> fixedParamMap = decodeUrlParameters(paramMap);
+
         // attempt to get the filter id from the url
         Integer filterId = null;
-        if (paramMap.containsKey(filterName)) {
-            final String filterQueryParam = paramMap.get(filterName);
+        if (fixedParamMap.containsKey(filterName)) {
+            final String filterQueryParam = fixedParamMap.get(filterName);
 
             try {
                 filterId = Integer.parseInt(filterQueryParam);
@@ -139,13 +155,13 @@ public class EntityUtilities extends org.jboss.pressgang.ccms.filter.utils.Entit
         if (filter == null) {
             filter = new Filter();
 
-            for (final String key : paramMap.keySet()) {
+            for (final String key : fixedParamMap.keySet()) {
                 final boolean tagVar = tagPrefix != null && key.startsWith(tagPrefix);
                 final boolean groupTagVar = groupTagPrefix != null && key.startsWith(groupTagPrefix);
                 final boolean catIntVar = categoryInternalPrefix != null && key.startsWith(categoryInternalPrefix);
                 final boolean catExtVar = categoryExternalPrefix != null && key.startsWith(categoryExternalPrefix);
                 final boolean localeVar = localePrefix != null && key.matches("^" + localePrefix + "\\d*$");
-                final String state = paramMap.get(key);
+                final String state = fixedParamMap.get(key);
 
                 // add the filter category states
                 if (catIntVar || catExtVar) {

@@ -60,10 +60,10 @@ public class ZanataPushTopicThread implements Runnable {
             EntityManager entityManager = null;
 
             try {
-                final EntityManagerFactory entityManagerFactory = JNDIUtilities.lookupEntityManagerFactory();
+                final EntityManagerFactory entityManagerFactory = JNDIUtilities.lookupJBossEntityManagerFactory();
 
                 // Get the TransactionManager and start a transaction.
-                transactionManager = JNDIUtilities.lookupTransactionManager();
+                transactionManager = JNDIUtilities.lookupJBossTransactionManager();
                 transactionManager.begin();
 
                 // Get an EntityManager instance and Envers audit reader.
@@ -103,7 +103,7 @@ public class ZanataPushTopicThread implements Runnable {
                         /* Content Specs are parsed differently then XML */
                         if (topic.isTaggedWith(Constants.CONTENT_SPEC_TAG_ID)) {
                             // TODO the URL shouldn't be statically coded
-                            final ContentSpecParser parser = new ContentSpecParser("http://localhost:8080/TopicIndex/", loggerManager);
+                            final ContentSpecParser parser = new ContentSpecParser("http://localhost:8080/TopicIndex/");
 
                             try {
                                 if (parser.parse(topic.getTopicXML())) {
@@ -215,7 +215,7 @@ public class ZanataPushTopicThread implements Runnable {
                 // Save the changes.
                 transactionManager.commit();
             } catch (final Exception ex) {
-                log.error("Probably an error retrieveing the Topic entity", ex);
+                log.error("Probably an error retrieving the Topic entity", ex);
 
                 if (transactionManager != null) {
                     try {
