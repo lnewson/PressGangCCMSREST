@@ -12,12 +12,15 @@ import org.jboss.pressgang.ccms.model.Topic;
 import org.jboss.pressgang.ccms.model.TopicSourceUrl;
 import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
+import org.jboss.pressgang.ccms.model.contentspec.ContentSpec;
 import org.jboss.pressgang.ccms.model.exceptions.CustomConstraintViolationException;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTBugzillaBugCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicSourceUrlCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTranslatedTopicCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.RESTContentSpecCollectionV1;
+import org.jboss.pressgang.ccms.rest.v1.collections.contentspec.items.RESTContentSpecCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTBugzillaBugCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTagCollectionItemV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.items.RESTTopicCollectionItemV1;
@@ -32,6 +35,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicSourceUrlV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslatedTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTContentSpecV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLDoctype;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
@@ -62,6 +66,7 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
         expandOptions.add(RESTTopicV1.BUGZILLABUGS_NAME);
         expandOptions.add(RESTTopicV1.PROPERTIES_NAME);
         expandOptions.add(RESTTopicV1.LOG_DETAILS_NAME);
+        expandOptions.add(RESTTopicV1.CONTENTSPECS_NAME);
         if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
 
         retValue.setExpand(expandOptions);
@@ -145,6 +150,15 @@ public class TopicV1Factory extends RESTDataObjectFactory<RESTTopicV1, Topic, RE
                             RESTTranslatedTopicCollectionV1.class, new TranslatedTopicV1Factory(),
                             entity.getTranslatedTopics(entityManager, revision), RESTTopicV1.TRANSLATEDTOPICS_NAME, dataType, expand,
                             baseUrl, revision, false, entityManager));
+        }
+
+        // CONTENT SPECS
+        if (expand != null && expand.contains(RESTTopicV1.CONTENTSPECS_NAME)) {
+            retValue.setContentSpecs_OTM(
+                    new RESTDataObjectCollectionFactory<RESTContentSpecV1, ContentSpec, RESTContentSpecCollectionV1,
+                            RESTContentSpecCollectionItemV1>().create(
+                            RESTContentSpecCollectionV1.class, new ContentSpecV1Factory(), entity.getContentSpecs(entityManager),
+                            RESTTopicV1.CONTENTSPECS_NAME, dataType, expand, baseUrl, revision, false, entityManager));
         }
 
         retValue.setLinks(baseUrl, RESTv1Constants.TOPIC_URL_NAME, dataType, retValue.getId());

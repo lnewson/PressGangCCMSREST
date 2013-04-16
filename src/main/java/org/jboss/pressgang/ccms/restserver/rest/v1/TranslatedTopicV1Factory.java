@@ -11,6 +11,7 @@ import org.jboss.pressgang.ccms.model.TopicToPropertyTag;
 import org.jboss.pressgang.ccms.model.TranslatedTopic;
 import org.jboss.pressgang.ccms.model.TranslatedTopicData;
 import org.jboss.pressgang.ccms.model.TranslatedTopicString;
+import org.jboss.pressgang.ccms.model.contentspec.TranslatedCSNode;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTagCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTopicSourceUrlCollectionV1;
 import org.jboss.pressgang.ccms.rest.v1.collections.RESTTranslatedTopicCollectionV1;
@@ -27,6 +28,7 @@ import org.jboss.pressgang.ccms.rest.v1.entities.RESTTopicSourceUrlV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslatedTopicStringV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.RESTTranslatedTopicV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.base.RESTBaseEntityV1;
+import org.jboss.pressgang.ccms.rest.v1.entities.contentspec.RESTTranslatedCSNodeV1;
 import org.jboss.pressgang.ccms.rest.v1.entities.enums.RESTXMLDoctype;
 import org.jboss.pressgang.ccms.rest.v1.entities.join.RESTAssignedPropertyTagV1;
 import org.jboss.pressgang.ccms.rest.v1.expansion.ExpandDataTrunk;
@@ -63,6 +65,7 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
         expandOptions.add(RESTTranslatedTopicV1.SOURCE_URLS_NAME);
         expandOptions.add(RESTTranslatedTopicV1.PROPERTIES_NAME);
         expandOptions.add(RESTTranslatedTopicV1.LOG_DETAILS_NAME);
+        expandOptions.add(RESTTranslatedTopicV1.TRANSLATED_CSNODE_NAME);
 
         if (revision == null) expandOptions.add(RESTBaseEntityV1.REVISIONS_NAME);
 
@@ -75,6 +78,7 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
         retValue.setTopicRevision(entity.getTranslatedTopic().getTopicRevision());
         retValue.setContainsFuzzyTranslation(entity.containsFuzzyTranslation());
         retValue.setXmlDoctype(RESTXMLDoctype.getXMLDoctype(entity.getTranslatedTopic().getEnversTopic(entityManager).getXmlDoctype()));
+        retValue.setTranslatedXMLCondition(entity.getTranslatedXMLCondition());
 
         // Get the title from the XML or if the XML is null then use the original topics title.
         String title = DocBookUtilities.findTitle(entity.getTranslatedXml());
@@ -188,6 +192,13 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
                             RESTTranslatedTopicV1.PROPERTIES_NAME, dataType, expand, baseUrl, entityManager));
         }
 
+        // TRANSLATED CS NODE
+        if (expand != null && expand.contains(RESTTranslatedTopicV1.TRANSLATED_CSNODE_NAME) && entity.getTranslatedCSNode() != null) {
+            retValue.setTranslatedCSNode(
+                    new TranslatedCSNodeV1Factory().createRESTEntityFromDBEntity(entity.getTranslatedCSNode(), baseUrl, dataType,
+                            expand.get(RESTTranslatedTopicV1.TRANSLATED_CSNODE_NAME), revision, true, entityManager));
+        }
+
         retValue.setLinks(baseUrl, RESTv1Constants.TRANSLATEDTOPIC_URL_NAME, dataType, retValue.getId());
 
         return retValue;
@@ -226,8 +237,18 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
         if (dataObject.hasParameterSet(RESTTranslatedTopicV1.LOCALE_NAME)) entity.setTranslationLocale(dataObject.getLocale());
         if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TRANSLATIONPERCENTAGE_NAME))
             entity.setTranslationPercentage(dataObject.getTranslationPercentage());
+        if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TRANSLATED_XML_CONDITION))
+            entity.setTranslatedXMLCondition(dataObject.getTranslatedXMLCondition());
 
         translatedTopic.getTranslatedTopicDatas().add(entity);
+
+        if (dataObject.hasParameterSet(RESTTranslatedTopicV1.TRANSLATED_CSNODE_NAME)) {
+            final RESTTranslatedCSNodeV1 restEntity = dataObject.getTranslatedCSNode();
+            final TranslatedCSNode dbEntity = entityManager.find(TranslatedCSNode.class, restEntity.getId());
+            if (dbEntity == null)
+                throw new BadRequestException("No TranslatedCSNode entity was found with the primary key " + restEntity.getId());
+            dbEntity.setTranslatedTopicData(entity);
+        }
 
         // Save the changes done to the translated topic
         entityManager.persist(translatedTopic);
