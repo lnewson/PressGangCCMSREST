@@ -252,8 +252,8 @@ public class TranslatedTopicV1Factory extends RESTDataObjectFactory<RESTTranslat
                     entityManager.remove(dbEntity);
                 } else if (restEntityItem.returnIsAddItem()) {
                     final TranslatedTopicString dbEntity = new TranslatedTopicString();
-                    new TranslatedTopicStringV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                     entity.addTranslatedTopicString(dbEntity);
+                    new TranslatedTopicStringV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final TranslatedTopicString dbEntity = entityManager.find(TranslatedTopicString.class, restEntity.getId());
                     if (dbEntity == null) throw new BadRequestException(

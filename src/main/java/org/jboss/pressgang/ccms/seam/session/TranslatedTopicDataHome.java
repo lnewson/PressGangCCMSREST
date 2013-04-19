@@ -66,6 +66,6 @@ public class TranslatedTopicDataHome extends VersionedEntityHome<TranslatedTopic
         }
 
         String preamble = XMLUtilities.findPreamble(xml);
-        return xml.replace(preamble, "");
+        return preamble == null ? xml : xml.replace(preamble, "");
     }
 }

@@ -133,8 +133,8 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                     entityManager.remove(dbEntity);
                 } else if (restEntityItem.returnIsAddItem()) {
                     final FilterTag dbEntity = new FilterTag();
-                    new FilterTagV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                     entity.addFilterTag(dbEntity);
+                    new FilterTagV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final FilterTag dbEntity = entityManager.find(FilterTag.class, restEntity.getId());
                     if (dbEntity == null)
@@ -163,8 +163,8 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                     entityManager.remove(dbEntity);
                 } else if (restEntityItem.returnIsAddItem()) {
                     final FilterLocale dbEntity = new FilterLocale();
-                    new FilterLocaleV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                     entity.addFilterLocale(dbEntity);
+                    new FilterLocaleV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final FilterLocale dbEntity = entityManager.find(FilterLocale.class, restEntity.getId());
                     if (dbEntity == null)
@@ -193,8 +193,8 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                     entityManager.remove(dbEntity);
                 } else if (restEntityItem.returnIsAddItem()) {
                     final FilterCategory dbEntity = new FilterCategory();
-                    new FilterCategoryV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                     entity.addFilterCategory(dbEntity);
+                    new FilterCategoryV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final FilterCategory dbEntity = entityManager.find(FilterCategory.class, restEntity.getId());
                     if (dbEntity == null) throw new BadRequestException(
@@ -223,8 +223,8 @@ public class FilterV1Factory extends RESTDataObjectFactory<RESTFilterV1, Filter,
                     entityManager.remove(dbEntity);
                 } else if (restEntityItem.returnIsAddItem()) {
                     final FilterField dbEntity = new FilterField();
-                    new FilterFieldV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                     entity.addFilterField(dbEntity);
+                    new FilterFieldV1Factory().syncDBEntityWithRESTEntity(entityManager, dbEntity, restEntity);
                 } else if (restEntityItem.returnIsUpdateItem()) {
                     final FilterField dbEntity = entityManager.find(FilterField.class, restEntity.getId());
                     if (dbEntity == null)
